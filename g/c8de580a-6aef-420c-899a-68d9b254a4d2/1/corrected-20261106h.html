@@ -182,7 +182,7 @@ canvas{display:block;margin:0 auto;}
 }
 </style>
 <link rel="stylesheet" href="v9-ui.css">
-<link rel="preload" as="image" href="https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-8e8e82d884bb7d2d910fc40b.webp" fetchpriority="high"><style id="gc-fullscreen-only">
+<link rel="preload" as="image" href="https://game-center-play.beefly1136.workers.dev/github/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-8e8e82d884bb7d2d910fc40b.webp" fetchpriority="high"><style id="gc-fullscreen-only">
 html.gc-fullscreen,html.gc-fullscreen body{width:100%;min-height:100%;min-height:100dvh;margin:0!important;padding:0!important;box-sizing:border-box}
 html.gc-fullscreen #app,html.gc-fullscreen #root{width:100%;min-height:100dvh}
 html.gc-fullscreen .wrapper,html.gc-fullscreen .dashboard,html.gc-fullscreen main{max-width:none}
@@ -196,7 +196,7 @@ html.gc-fullscreen #interaction-panel{max-height:55dvh;overflow-y:auto}
 @media(max-width:900px){html.gc-fullscreen #game-frame{height:100dvh}html.gc-fullscreen #interaction-panel{bottom:8px;width:calc(100% - 16px);padding:12px}html.gc-fullscreen #top-nav{padding:8px;gap:8px;flex-wrap:wrap}}
 </style></head>
 <body>
-<img id="bgimg" src="https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-8e8e82d884bb7d2d910fc40b.webp" alt="">
+<img id="bgimg" src="https://game-center-play.beefly1136.workers.dev/github/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-8e8e82d884bb7d2d910fc40b.webp" alt="">
 <div id="wrap">
   <div id="hud">
     <div class="toprow"><span class="round" id="hud-round"></span><span style="display:flex;align-items:center;gap:8px;"><span class="badges" id="hud-badges"></span><button class="infobtn" type="button" onclick="toggleInfo()">❓ 지표 설명 <span id="info-arrow">▾</span></button></span></div>
@@ -230,7 +230,7 @@ const GATE_AFTER = [4, 8];          // 관문 퀴즈: 챕터 경계
 const BONUS_ALT = [2, 6, 10];       // 보너스 퀴즈(격 라운드 기본값)
 const BONUS_EVERY = [1, 2, 3, 5, 6, 7, 9, 10, 11];
 
-const MASCOT = "https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-15c33fc4e6c2ad06d8fc7bd5.webp";
+const MASCOT = "https://game-center-play.beefly1136.workers.dev/github/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-15c33fc4e6c2ad06d8fc7bd5.webp";
 
 /* ----- 챕터 (스토리 진행) ----- */
 const CHAPTERS = [
@@ -886,13 +886,13 @@ function drawRadar(){
 }
 /* ---------- 유명 인물 매칭 ---------- */
 const FIGS = {
-  money:{ img:"https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-bb90ef6ceb379bc9d3c4cd6e.webp",  name:"헨리 포드",   tag:"💼 효율 혁신가", desc:"컨베이어 벨트 대량 생산으로 자동차 값을 확 낮춰 '모두의 자동차' 시대를 연 경영자.", link:"당신도 비용과 효율을 지키는 데 탁월했다.", caution:"단, 포드의 시대는 CO₂의 대가를 몰랐다 — 당신은 이미 알고 있다." },
-  cust:{ img:"https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-c50c2959103986bd7903abb1.webp", name:"라이트 형제", tag:"⚡ 속도의 개척자", desc:"세계 최초의 동력 비행에 성공해 '더 빠른 세상'의 문을 연 발명가 형제.", link:"당신도 고객과의 약속과 속도를 최우선으로 지켰다.", caution:"단, 빠름의 대가가 누구에게 청구되는지도 늘 살펴야 한다." },
-  env:{  img:"https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-8ac0bcc1f4a3702e1cd09787.webp", name:"레이철 카슨", tag:"🌍 환경의 파수꾼", desc:"『침묵의 봄』으로 환경 오염의 위험을 세상에 알려 환경 운동의 문을 연 과학자.", link:"당신도 지구를 위한 선택을 멈추지 않았다.", caution:"단, 지키는 일에는 늘 비용과 저항이 따른다 — 카슨처럼 버텨야 한다." },
-  soc:{  img:"https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-811ef10de68ccc0bd0a8bdee.webp",  name:"유일한 박사", tag:"👥 상생의 경영자", desc:"회사의 이익을 사회에 돌려준 유한양행 창업자 — '기업은 사회의 것'이라 믿었다.", link:"당신도 일자리와 지역 사회를 끝까지 챙겼다.", caution:"단, 나눔도 회사가 살아 있어야 계속할 수 있다." },
-  bal:{  img:"https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-5a030c7daa263d05446dd7c2.webp", name:"세종대왕",   tag:"⚖️ 균형의 지도자", desc:"과학·문화·민생을 두루 살피며 나라 전체의 균형을 지킨 지도자.", link:"당신도 네 지표의 균형을 끝까지 지켜냈다.", caution:"단, 균형은 회피가 아니라 전략일 때 빛난다." },
-  mix:{ img:"https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-b09c468c4541d8c6fcde159d.webp", emoji:"📦", name:"말콤 맥린", tag:"🧩 물류 시스템 혁신가", desc:"트럭 기사 출신으로 컨테이너를 발명해 배·기차·트럭을 하나로 연결한 물류 혁명가.", link:"당신도 상황마다 최적의 수단을 조합하는 시스템 사고를 보여줬다.", caution:"단, 시스템의 힘은 그것을 움직이는 사람들에게서 나온다." },
-  pioneer:{ img:"https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-f63c57ecf80ef8ebab942ac4.webp", emoji:"🚀", name:"정주영", tag:"🛫 도전의 개척자", desc:"“이봐, 해봤어?” — 맨손으로 조선소와 자동차 공장을 세워 한국 수송 산업을 일으킨 기업가.", link:"당신도 남들이 주저하는 새 기술에 과감히 도전했다.", caution:"단, 도전의 대가가 누구에게 청구되는지도 함께 살펴야 한다." },
+  money:{ img:"https://game-center-play.beefly1136.workers.dev/github/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-bb90ef6ceb379bc9d3c4cd6e.webp",  name:"헨리 포드",   tag:"💼 효율 혁신가", desc:"컨베이어 벨트 대량 생산으로 자동차 값을 확 낮춰 '모두의 자동차' 시대를 연 경영자.", link:"당신도 비용과 효율을 지키는 데 탁월했다.", caution:"단, 포드의 시대는 CO₂의 대가를 몰랐다 — 당신은 이미 알고 있다." },
+  cust:{ img:"https://game-center-play.beefly1136.workers.dev/github/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-c50c2959103986bd7903abb1.webp", name:"라이트 형제", tag:"⚡ 속도의 개척자", desc:"세계 최초의 동력 비행에 성공해 '더 빠른 세상'의 문을 연 발명가 형제.", link:"당신도 고객과의 약속과 속도를 최우선으로 지켰다.", caution:"단, 빠름의 대가가 누구에게 청구되는지도 늘 살펴야 한다." },
+  env:{  img:"https://game-center-play.beefly1136.workers.dev/github/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-8ac0bcc1f4a3702e1cd09787.webp", name:"레이철 카슨", tag:"🌍 환경의 파수꾼", desc:"『침묵의 봄』으로 환경 오염의 위험을 세상에 알려 환경 운동의 문을 연 과학자.", link:"당신도 지구를 위한 선택을 멈추지 않았다.", caution:"단, 지키는 일에는 늘 비용과 저항이 따른다 — 카슨처럼 버텨야 한다." },
+  soc:{  img:"https://game-center-play.beefly1136.workers.dev/github/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-811ef10de68ccc0bd0a8bdee.webp",  name:"유일한 박사", tag:"👥 상생의 경영자", desc:"회사의 이익을 사회에 돌려준 유한양행 창업자 — '기업은 사회의 것'이라 믿었다.", link:"당신도 일자리와 지역 사회를 끝까지 챙겼다.", caution:"단, 나눔도 회사가 살아 있어야 계속할 수 있다." },
+  bal:{  img:"https://game-center-play.beefly1136.workers.dev/github/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-5a030c7daa263d05446dd7c2.webp", name:"세종대왕",   tag:"⚖️ 균형의 지도자", desc:"과학·문화·민생을 두루 살피며 나라 전체의 균형을 지킨 지도자.", link:"당신도 네 지표의 균형을 끝까지 지켜냈다.", caution:"단, 균형은 회피가 아니라 전략일 때 빛난다." },
+  mix:{ img:"https://game-center-play.beefly1136.workers.dev/github/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-b09c468c4541d8c6fcde159d.webp", emoji:"📦", name:"말콤 맥린", tag:"🧩 물류 시스템 혁신가", desc:"트럭 기사 출신으로 컨테이너를 발명해 배·기차·트럭을 하나로 연결한 물류 혁명가.", link:"당신도 상황마다 최적의 수단을 조합하는 시스템 사고를 보여줬다.", caution:"단, 시스템의 힘은 그것을 움직이는 사람들에게서 나온다." },
+  pioneer:{ img:"https://game-center-play.beefly1136.workers.dev/github/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-f63c57ecf80ef8ebab942ac4.webp", emoji:"🚀", name:"정주영", tag:"🛫 도전의 개척자", desc:"“이봐, 해봤어?” — 맨손으로 조선소와 자동차 공장을 세워 한국 수송 산업을 일으킨 기업가.", link:"당신도 남들이 주저하는 새 기술에 과감히 도전했다.", caution:"단, 도전의 대가가 누구에게 청구되는지도 함께 살펴야 한다." },
 };
 function matchFigure(){
   const keys = ["money","cust","env","soc"];

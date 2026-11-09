@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 650 360" width="100%" height="100%">
+  <defs>
+    <pattern id="cadGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1e293b" stroke-width="0.8" />
+    </pattern>
+    <filter id="cyanGlow">
+      <feGaussianBlur stdDeviation="2" result="glow"/>
+      <feMerge>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="650" height="360" rx="16" fill="#070e1c" stroke="#00f0ff" stroke-width="1.5" />
+  <rect width="650" height="360" rx="16" fill="url(#cadGrid)" />
+
+  <!-- Title Badge -->
+  <rect x="180" y="14" width="290" height="30" rx="15" fill="rgba(15, 23, 42, 0.9)" stroke="#00f0ff" stroke-width="1.5" />
+  <text x="325" y="34" fill="#00f0ff" font-family="'Orbitron', monospace, sans-serif" font-size="12" font-weight="bold" text-anchor="middle">
+    BLUEPRINT: LINES &amp; SCALES GUIDE
+  </text>
+
+  <!-- Left Column: 선의 종류 (Types of Lines) -->
+  <g transform="translate(30, 60)">
+    <rect width="280" height="230" rx="12" fill="rgba(15, 23, 42, 0.85)" stroke="#38bdf8" stroke-width="1" />
+    <text x="140" y="28" fill="#38bdf8" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">
+      [1] 제도 선의 종류와 용도
+    </text>
+
+    <!-- 1. 외형선 -->
+    <text x="20" y="60" fill="#f8fafc" font-family="sans-serif" font-size="11.5" font-weight="bold">① 외형선 (보이는 부분)</text>
+    <line x1="20" y1="75" x2="260" y2="75" stroke="#00f0ff" stroke-width="4" filter="url(#cyanGlow)" />
+    <text x="260" y="60" fill="#38bdf8" font-family="monospace" font-size="10" text-anchor="end">굵은 실선</text>
+
+    <!-- 2. 숨은선 -->
+    <text x="20" y="105" fill="#f8fafc" font-family="sans-serif" font-size="11.5" font-weight="bold">② 숨은선 (안 보이는 부분)</text>
+    <line x1="20" y1="120" x2="260" y2="120" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="8 6" />
+    <text x="260" y="105" fill="#f59e0b" font-family="monospace" font-size="10" text-anchor="end">가는 파선 (---)</text>
+
+    <!-- 3. 중심선 -->
+    <text x="20" y="150" fill="#f8fafc" font-family="sans-serif" font-size="11.5" font-weight="bold">③ 중심선 (원/대칭 중심)</text>
+    <line x1="20" y1="165" x2="260" y2="165" stroke="#ef4444" stroke-width="1.8" stroke-dasharray="16 4 3 4" />
+    <text x="260" y="150" fill="#ef4444" font-family="monospace" font-size="10" text-anchor="end">가는 1점 쇄선 (─ · ─)</text>
+
+    <!-- 4. 가상선 -->
+    <text x="20" y="195" fill="#f8fafc" font-family="sans-serif" font-size="11.5" font-weight="bold">④ 가상선 (움직임/가상 위치)</text>
+    <line x1="20" y1="210" x2="260" y2="210" stroke="#a855f7" stroke-width="1.8" stroke-dasharray="16 4 3 4 3 4" />
+    <text x="260" y="195" fill="#c084fc" font-family="monospace" font-size="10" text-anchor="end">가는 2점 쇄선 (─ ·· ─)</text>
+  </g>
+
+  <!-- Right Column: 척도의 종류 (Drawing Scales) -->
+  <g transform="translate(340, 60)">
+    <rect width="280" height="230" rx="12" fill="rgba(15, 23, 42, 0.85)" stroke="#38bdf8" stroke-width="1" />
+    <text x="140" y="28" fill="#38bdf8" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">
+      [2] 척도 (도면 크기 : 실물 크기)
+    </text>
+
+    <!-- 1. 현척 -->
+    <g transform="translate(20, 48)">
+      <rect width="240" height="46" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1" />
+      <text x="12" y="20" fill="#34d399" font-family="sans-serif" font-size="12" font-weight="bold">• 현척 (Full Size 1:1)</text>
+      <text x="12" y="36" fill="#cbd5e1" font-family="sans-serif" font-size="11">실물과 똑같은 크기로 그린 도면</text>
+    </g>
+
+    <!-- 2. 축척 -->
+    <g transform="translate(20, 104)">
+      <rect width="240" height="46" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="1" />
+      <text x="12" y="20" fill="#38bdf8" font-family="sans-serif" font-size="12" font-weight="bold">• 축척 (Reduced Scale 1:2, 1:5)</text>
+      <text x="12" y="36" fill="#cbd5e1" font-family="sans-serif" font-size="11">거대한 타워/건물을 줄여서 그린 도면</text>
+    </g>
+
+    <!-- 3. 배척 -->
+    <g transform="translate(20, 160)">
+      <rect width="240" height="46" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1" />
+      <text x="12" y="20" fill="#fbbf24" font-family="sans-serif" font-size="12" font-weight="bold">• 배척 (Enlarged Scale 2:1, 5:1)</text>
+      <text x="12" y="36" fill="#cbd5e1" font-family="sans-serif" font-size="11">아주 작은 정밀 칩/나사를 확대해 그린 도면</text>
+    </g>
+  </g>
+
+  <!-- Bottom Helper Note -->
+  <rect x="30" y="306" width="590" height="38" rx="8" fill="rgba(15, 23, 42, 0.9)" stroke="#00f0ff" stroke-width="1" />
+  <text x="325" y="330" fill="#e2e8f0" font-family="sans-serif" font-size="12" text-anchor="middle">
+    💡 암기 팁: <tspan fill="#00f0ff" font-weight="bold">외형-굵은실선</tspan> | <tspan fill="#f59e0b" font-weight="bold">숨은-파선</tspan> | <tspan fill="#ef4444" font-weight="bold">중심-1점쇄선</tspan> | <tspan fill="#a855f7" font-weight="bold">가상-2점쇄선</tspan>
+  </text>
+</svg>

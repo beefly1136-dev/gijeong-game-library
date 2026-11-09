@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="glowCyber" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="25%" stop-color="#38bdf8" stop-opacity="0.85"/>
+      <stop offset="55%" stop-color="#8b5cf6" stop-opacity="0.5"/>
+      <stop offset="85%" stop-color="#3b82f6" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="none"/>
+  <circle cx="256" cy="256" r="240" fill="url(#glowCyber)"/>
+
+  <!-- High-Power Horizontal Railgun Beam Core -->
+  <rect x="20" y="240" width="472" height="32" rx="16" fill="#38bdf8" stroke="#ffffff" stroke-width="4"/>
+  <rect x="40" y="248" width="432" height="16" rx="8" fill="#ffffff"/>
+
+  <!-- Electric Discharge Lightnings -->
+  <path d="M 60,256 L 120,180 L 160,230 L 220,150 L 256,256 L 310,170 L 370,240 L 440,160" fill="none" stroke="#67e8f9" stroke-width="5" stroke-linecap="round"/>
+  <path d="M 70,256 L 130,320 L 180,270 L 230,350 L 280,260 L 340,340 L 400,280 L 450,330" fill="none" stroke="#c084fc" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- Dual Magnetic Induction Rings -->
+  <ellipse cx="140" cy="256" rx="30" ry="85" fill="none" stroke="#a855f7" stroke-width="6"/>
+  <ellipse cx="256" cy="256" rx="36" ry="105" fill="none" stroke="#38bdf8" stroke-width="8"/>
+  <ellipse cx="372" cy="256" rx="30" ry="85" fill="none" stroke="#a855f7" stroke-width="6"/>
+
+  <!-- Binary Data Bits / Quantum Sparks -->
+  <rect x="180" y="110" width="8" height="8" fill="#ffffff"/>
+  <rect x="220" y="90" width="8" height="8" fill="#38bdf8"/>
+  <rect x="300" y="100" width="8" height="8" fill="#c084fc"/>
+  <rect x="190" y="390" width="8" height="8" fill="#38bdf8"/>
+  <rect x="260" y="410" width="8" height="8" fill="#ffffff"/>
+  <rect x="330" y="390" width="8" height="8" fill="#c084fc"/>
+</svg>

@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="goggleGlass" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0.6" />
+    </linearGradient>
+    <linearGradient id="gloveMat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+    <linearGradient id="carbonTexture" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="50%" stop-color="#334155" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <filter id="gearGlow">
+      <feGaussianBlur stdDeviation="5" result="glow" />
+      <feMerge>
+        <feMergeNode in="glow" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Dark Tech Background -->
+  <rect width="500" height="500" rx="28" fill="#0b1329" stroke="#38bdf8" stroke-width="2" />
+  
+  <!-- Grid Lines -->
+  <line x1="50" y1="250" x2="450" y2="250" stroke="#1e293b" stroke-dasharray="4 4" />
+  <line x1="250" y1="50" x2="250" y2="450" stroke="#1e293b" stroke-dasharray="4 4" />
+
+  <!-- Top Title Area -->
+  <rect x="110" y="25" width="280" height="34" rx="17" fill="rgba(15, 23, 42, 0.9)" stroke="#00f0ff" stroke-width="1.5" />
+  <text x="250" y="47" fill="#00f0ff" font-family="'Orbitron', sans-serif" font-size="13" font-weight="bold" text-anchor="middle" letter-spacing="1.5">
+    SAFETY PROTOCOL : GEAR CHECK
+  </text>
+
+  <!-- ITEM 1: SMART SAFETY GOGGLES (보안경) -->
+  <g transform="translate(70, 80)">
+    <!-- Frame -->
+    <rect x="30" y="30" width="300" height="90" rx="25" fill="url(#carbonTexture)" stroke="#64748b" stroke-width="3" />
+    <!-- Center Bridge -->
+    <rect x="160" y="45" width="40" height="25" rx="5" fill="#0f172a" />
+    <!-- Left Lens -->
+    <rect x="45" y="40" width="105" height="70" rx="18" fill="url(#goggleGlass)" stroke="#00f0ff" stroke-width="2" filter="url(#gearGlow)" />
+    <!-- Left HUD reticle -->
+    <circle cx="97" cy="75" r="16" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.7" />
+    <line x1="85" y1="75" x2="110" y2="75" stroke="#fff" opacity="0.7" />
+    <line x1="97" y1="63" x2="97" y2="87" stroke="#fff" opacity="0.7" />
+    
+    <!-- Right Lens -->
+    <rect x="210" y="40" width="105" height="70" rx="18" fill="url(#goggleGlass)" stroke="#00f0ff" stroke-width="2" filter="url(#gearGlow)" />
+    <!-- Right HUD Text -->
+    <text x="230" y="70" fill="#ffffff" font-family="monospace" font-size="10" font-weight="bold" opacity="0.9">UV 100%</text>
+    <text x="230" y="86" fill="#00f0ff" font-family="monospace" font-size="10" font-weight="bold">IMPACT OK</text>
+
+    <!-- Side Straps -->
+    <path d="M30,65 L0,70 L0,80 L30,85 Z" fill="#475569" />
+    <path d="M330,65 L360,70 L360,80 L330,85 Z" fill="#475569" />
+
+    <!-- Label -->
+    <text x="180" y="142" fill="#38bdf8" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">
+      ① 스마트 보안경 (파편·비산 방지 필수)
+    </text>
+  </g>
+
+  <!-- ITEM 2: THERMAL / CUT-RESISTANT SAFETY GLOVES (안전 장갑) -->
+  <g transform="translate(100, 245)">
+    <!-- Left Glove -->
+    <g transform="translate(30, 10)">
+      <!-- Palm & Fingers -->
+      <path d="M40,110 L40,70 Q40,50 50,50 Q60,50 60,70 L60,35 Q60,15 70,15 Q80,15 80,35 L80,25 Q80,5 90,5 Q100,5 100,25 L100,40 Q100,20 110,20 Q120,20 120,40 L120,80 Q130,85 130,95 L110,140 L40,130 Z" fill="url(#gloveMat)" stroke="#78350f" stroke-width="2" />
+      <!-- Nano Grip Reinforcement Pad -->
+      <ellipse cx="80" cy="85" rx="24" ry="20" fill="#1e293b" opacity="0.8" />
+      <line x1="65" y1="85" x2="95" y2="85" stroke="#f59e0b" stroke-width="2" />
+      <line x1="80" y1="70" x2="80" y2="100" stroke="#f59e0b" stroke-width="2" />
+      <!-- Wrist Cuff -->
+      <rect x="40" y="130" width="75" height="30" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="2" />
+      <text x="77" y="150" fill="#f59e0b" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">LV.5 GRIP</text>
+    </g>
+
+    <!-- Right Glove (Mirrored) -->
+    <g transform="translate(230, 10) scale(-1, 1) translate(-100, 0)">
+      <path d="M40,110 L40,70 Q40,50 50,50 Q60,50 60,70 L60,35 Q60,15 70,15 Q80,15 80,35 L80,25 Q80,5 90,5 Q100,5 100,25 L100,40 Q100,20 110,20 Q120,20 120,40 L120,80 Q130,85 130,95 L110,140 L40,130 Z" fill="url(#gloveMat)" stroke="#78350f" stroke-width="2" />
+      <ellipse cx="80" cy="85" rx="24" ry="20" fill="#1e293b" opacity="0.8" />
+      <line x1="65" y1="85" x2="95" y2="85" stroke="#f59e0b" stroke-width="2" />
+      <line x1="80" y1="70" x2="80" y2="100" stroke="#f59e0b" stroke-width="2" />
+      <rect x="40" y="130" width="75" height="30" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="2" />
+      <text x="77" y="150" fill="#f59e0b" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">LV.5 GRIP</text>
+    </g>
+
+    <!-- Label -->
+    <text x="150" y="198" fill="#f59e0b" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">
+      ② 절연·내절삭 안전 장갑 (화상 및 베임 방지)
+    </text>
+  </g>
+
+  <!-- Bottom Caution Box -->
+  <rect x="40" y="455" width="420" height="32" rx="8" fill="rgba(244, 63, 94, 0.15)" stroke="#f43f5e" stroke-width="1.5" />
+  <text x="250" y="476" fill="#fda4af" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">
+    ⚠️ 주의: 회전 기계(드릴 등) 작업 시 장갑 착용 금지! 수공구 작업 시엔 착용 필수!
+  </text>
+</svg>

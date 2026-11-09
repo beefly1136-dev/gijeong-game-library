@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수송 기술의 발달 타이쿤</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            overflow: hidden;
+            user-select: none;
+            background: #f8fafc;
+            margin: 0; padding: 0;
+        }
+
+        #game-container {
+            width: 100vw; height: 100vh;
+            position: relative;
+            background: #e2e8f0;
+            transition: background 0.5s ease;
+        }
+
+        .sprite {
+            position: absolute;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+        }
+        .sprite:active { cursor: grabbing; }
+
+        .item-box {
+            width: 45px; height: 45px;
+            background: #b45309;
+            border: 2px solid #78350f;
+            border-radius: 6px;
+            color: white; font-weight: bold; font-size: 12px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        #instruction-text {
+            position: absolute;
+            top: 50px; left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #334155;
+            z-index: 100;
+            pointer-events: none;
+            width: 100%;
+            text-align: center;
+        }
+
+        .goal-post {
+            position: absolute;
+            right: 40px; bottom: 120px;
+            width: 140px; height: 200px;
+            border: 5px dashed #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.2);
+            z-index: 5;
+        }
+        .goal-label {
+            position: absolute;
+            top: -35px;
+            font-weight: 900;
+            color: #64748b;
+            font-size: 1.2rem;
+        }
+
+        .icon-part { transition: transform 0.2s; }
+        .spin { animation: spin 2s linear infinite; }
+
+        #overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 5000;
+            transition: opacity 0.5s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            background: white;
+        }
+
+        .night-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.85);
+            z-index: 4000;
+            display: none;
+            pointer-events: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            font-weight: 900;
+        }
+
+        .speech-bubble {
+            position: absolute;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 15px;
+            border: 2px solid #3b82f6;
+            font-weight: bold;
+            color: #1e40af;
+            white-space: nowrap;
+            z-index: 100;
+        }
+
+        .co2-segment {
+            width: 10px; height: 24px;
+            background: #e2e8f0;
+            margin: 0 1px;
+            border-radius: 2px;
+            border: 1px solid #94a3b8;
+            transition: background 0.3s ease;
+        }
+        .co2-on { background: #ef4444; border-color: #b91c1c; box-shadow: 0 0 5px rgba(239, 68, 68, 0.5); }
+
+        .piston-move { animation: piston 0.5s infinite ease-in-out; }
+        @keyframes piston {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(30px); }
+        }
+        .crank-rotate { animation: rotate 0.5s infinite linear; }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes rainFall {
+            to { transform: translateY(100vh); }
+        }
+    </style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" media="print" onload="this.media='all'"><style id="gc-fullscreen-only">
+html.gc-fullscreen,html.gc-fullscreen body{width:100%;min-height:100%;min-height:100dvh;margin:0!important;padding:0!important;box-sizing:border-box}
+html.gc-fullscreen #app,html.gc-fullscreen #root{width:100%;min-height:100dvh}
+html.gc-fullscreen .wrapper,html.gc-fullscreen .dashboard,html.gc-fullscreen main{max-width:none}
+html.gc-fullscreen .room-container{max-width:none;max-height:none}
+html.gc-fullscreen .console-container{max-width:none;width:100%;min-height:100dvh;border-radius:0}
+html.gc-fullscreen #game-app-viewport{height:100dvh}
+html.gc-fullscreen #game-frame{width:100%;max-width:none;height:100dvh;min-height:0;border:0;border-radius:0}
+html.gc-fullscreen #stage-viewport{min-height:0;padding-bottom:var(--gc-panel-space,240px)}
+html.gc-fullscreen #avatar-img{max-height:min(410px,44dvh)}
+html.gc-fullscreen #interaction-panel{max-height:55dvh;overflow-y:auto}
+@media(max-width:900px){html.gc-fullscreen #game-frame{height:100dvh}html.gc-fullscreen #interaction-panel{bottom:8px;width:calc(100% - 16px);padding:12px}html.gc-fullscreen #top-nav{padding:8px;gap:8px;flex-wrap:wrap}}
+</style></head>
+<body>
+
+<!-- 인트로 화면 -->
+<div id="intro-screen" class="absolute inset-0 bg-white z-[9000] flex flex-col items-center justify-center p-8 text-center">
+    <h1 class="text-5xl font-black text-slate-800 mb-8">수송 기술의 발달 타이쿤</h1>
+    <p class="text-2xl font-bold text-slate-600 mb-4">다양한 동력을 이용하며 짐을 수송하고 기술 포인트를 쌓아봅시다.</p>
+    <p class="text-3xl font-black text-blue-600 mb-8">목표: 1000P</p>
+    <p class="text-xl font-bold text-red-500 mb-12">주의: CO2 배출량이 많으면 기후위기가 발생합니다.</p>
+    <button onclick="startGame()" class="bg-blue-600 text-white px-8 py-4 rounded-xl font-black text-2xl shadow-lg border-2 border-blue-800 hover:bg-blue-500">게임 시작하기</button>
+    <div class="absolute bottom-6 right-8 text-sm font-bold text-slate-400"></div>
+</div>
+
+<!-- 게임 클리어 화면 -->
+<div id="clear-screen" class="absolute inset-0 bg-white z-[9000] hidden flex-col items-center justify-center px-4 overflow-y-auto text-center">
+    <div class="my-auto py-16 flex flex-col items-center justify-center w-full max-w-2xl min-h-max">
+        <h1 class="text-4xl font-black text-slate-800 mb-6 mt-8 break-keep">축하합니다. 기술포인트를 모두 쌓았습니다.</h1>
+        <h2 class="text-2xl font-bold text-slate-600 mb-8 break-keep">미래에는 어떤 동력기관이 주로 사용될까요?</h2>
+        
+        <div class="bg-slate-100 p-8 rounded-2xl border-4 border-slate-300 mb-8 w-full">
+            <p id="clear-title" class="text-3xl font-black text-indigo-600 break-keep"></p>
+        </div>
+
+        <!-- 칭호 부여 기준 안내 -->
+        <div class="text-left bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm w-full mb-8">
+            <h3 class="font-bold text-slate-700 mb-3 text-lg">칭호 부여 기준 (CO2 배출량)</h3>
+            <ul class="text-base text-slate-600 space-y-2 font-medium">
+                <li>• <span class="font-bold text-slate-800">12칸 미만:</span> 지구를 수호하는 기술 이용자</li>
+                <li>• <span class="font-bold text-slate-800">12칸 이상 13칸 미만:</span> 노력하는 기술 이용자</li>
+                <li>• <span class="font-bold text-slate-800">13칸 이상 14칸 미만:</span> 보통의 기술 이용자</li>
+                <li>• <span class="font-bold text-slate-800">14칸 이상 15칸 미만:</span> 아슬아슬한 기술 이용자</li>
+                <li>• <span class="font-bold text-slate-800">15칸 이상:</span> 기후 난민이 된 기술 이용자</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div id="game-container">
+    <div id="instruction-text">드래그하여 짐을 싣고 옮기세요.</div>
+    <div id="error-msg" class="absolute top-[120px] left-1/2 -translate-x-1/2 text-red-600 font-black text-lg bg-white/95 px-4 py-2 rounded-lg shadow-md border-2 border-red-500 z-[1000] hidden">출발지 근처에서만 짐을 실을 수 있습니다.</div>
+    
+    <div class="goal-post">
+        <span class="goal-label">도착지점</span>
+    </div>
+
+    <div id="night-filter" class="night-overlay">잠이 들었습니다.</div>
+    <div id="overlay"></div>
+
+    <div class="absolute top-6 left-6 z-[500]">
+        <div class="bg-white/95 p-3 px-5 rounded-lg shadow-md border border-slate-200">
+            <h1 id="stage-title" class="font-black text-slate-800 text-lg">1단계: 사람의 힘</h1>
+        </div>
+    </div>
+
+    <div class="absolute top-6 right-6 z-[6500] bg-white/95 p-3 px-5 rounded-lg shadow-md border border-slate-200 text-right">
+        <div class="text-xs text-slate-500 font-bold mb-1">기술포인트</div>
+        <div class="font-black text-blue-600 text-2xl"><span id="tp-amount">0</span>P</div>
+    </div>
+
+    <div id="co2-container-ui" class="absolute bottom-6 right-6 z-[6500] bg-white/90 p-3 rounded-lg shadow-lg border-2 border-slate-300">
+        <div class="text-xs font-black mb-2 text-slate-700">CO2 배출량</div>
+        <div id="co2-meter" class="flex"></div>
+    </div>
+
+    <div id="btn-to-lab" class="absolute bottom-6 left-6 z-[500] hidden">
+        <button onclick="openLab()" class="bg-indigo-600 text-white px-5 py-3 rounded-xl font-black shadow-lg border-2 border-indigo-800 hover:bg-indigo-500">
+            🔧 연구소
+        </button>
+    </div>
+
+    <div id="scene" class="w-full h-full relative">
+        <div id="ground" class="absolute bottom-0 w-full h-40 bg-slate-300 border-t-4 border-slate-400"></div>
+        <div id="objects-layer" class="w-full h-full relative"></div>
+    </div>
+
+    <div id="lab-screen" class="absolute inset-0 bg-slate-800 z-[6000] hidden flex-col items-center justify-center pt-24 pb-16 px-8">
+        <h1 class="text-5xl font-black text-white mb-6 tracking-tight">기술연구소</h1>
+        <h2 class="text-2xl font-black text-slate-300 mb-auto text-center">쌓은 기술포인트로 동력기관을 잠금해제하여 사용하세요.</h2>
+        <div id="lab-cards" class="flex flex-row flex-nowrap justify-center gap-6 max-w-6xl w-full mb-auto mt-4"></div>
+        <button id="btn-close-lab" onclick="closeLab()" class="mt-8 bg-slate-600 text-white px-6 py-3 rounded-xl font-bold border-2 border-slate-500 hidden hover:bg-slate-500">돌아가기</button>
+    </div>
+</div>
+
+<script>
+    const scene = document.getElementById('objects-layer');
+    const stageTitle = document.getElementById('stage-title');
+    const co2Meter = document.getElementById('co2-meter');
+    const nightFilter = document.getElementById('night-filter');
+    const overlay = document.getElementById('overlay');
+    const tpAmount = document.getElementById('tp-amount');
+    const labScreen = document.getElementById('lab-screen');
+    const labCards = document.getElementById('lab-cards');
+
+    let state = {
+        stage: 1, cargoRemaining: 10, inVehicle: 0, tripsCount: 0,
+        isThirsty: false, isSleeping: false, isPoopBlocked: false,
+        co2Level: 0, coalUsed: 0, oilUsed: 0, elecUsed: 0,
+        hybridOilUsed: 0, hybridElecUsed: 0, hydrogenUsed: 0,
+        startX: 200, isMoving: false, isGameOver: false,
+        errorTimeout: null, techPoints: 0,
+        unlocked: { internal: false, hybrid: false, electric: false, fuelCell: false },
+        upgrade6Unlocked: false, eco6Upgraded: false,
+        upgrade7Unlocked: false, eco7Upgraded: false
+    };
+
+    const techTree = [
+        { id: 'internal', name: '내연기관', cost: 100, stage: 4 },
+        { id: 'hybrid', name: '하이브리드', cost: 200, stage: 5 },
+        { id: 'electric', name: '전동기관', cost: 300, stage: 6 },
+        { id: 'fuelCell', name: '연료전지', cost: 500, stage: 7 }
+    ];
+
+    const stageConfig = {
+        1: { title: "1단계: 사람의 힘", icon: "🚶", cap: 1, startX: 200, cargoX: 50, total: 10 },
+        2: { title: "2단계: 동물의 힘, 바퀴 이용", icon: "🐎", cap: 4, startX: 200, cargoX: 50, total: 10 },
+        3: { title: "3단계: 증기기관", icon: "🚂", cap: 10, startX: 340, cargoX: 200, startY: 280, total: 10 },
+        4: { title: "4단계: 내연기관", icon: "🚚", cap: 5, startX: 330, cargoX: 250, total: '무한' },
+        5: { title: "5단계: 하이브리드", icon: "🚛", cap: 5, startX: 340, cargoX: 260, total: '무한' },
+        6: { title: "6단계: 전동기관", icon: "🚛", cap: 5, startX: 330, cargoX: 250, total: '무한' },
+        7: { title: "7단계: 연료전지", icon: "🚛", cap: 5, startX: 430, cargoX: 350, total: '무한' } 
+    };
+
+    function resetGame() {
+        document.getElementById('intro-screen').style.display = 'flex';
+        state = {
+            stage: 1, cargoRemaining: 10, inVehicle: 0, tripsCount: 0,
+            isThirsty: false, isSleeping: false, isPoopBlocked: false,
+            co2Level: 0, coalUsed: 0, oilUsed: 0, elecUsed: 0,
+            hybridOilUsed: 0, hybridElecUsed: 0, hydrogenUsed: 0,
+            startX: 200, isMoving: false, isGameOver: false,
+            errorTimeout: null, techPoints: 0,
+            unlocked: { internal: false, hybrid: false, electric: false, fuelCell: false },
+            upgrade6Unlocked: false, eco6Upgraded: false,
+            upgrade7Unlocked: false, eco7Upgraded: false
+        };
+        updateTP(0);
+        scene.innerHTML = '';
+        document.getElementById('btn-to-lab').classList.add('hidden');
+    }
+
+    function startGame() {
+        document.getElementById('intro-screen').style.display = 'none';
+        initCO2();
+        initStage();
+    }
+
+    function showGameClear() {
+        state.isGameOver = true;
+        const clearScreen = document.getElementById('clear-screen');
+        const titleText = document.getElementById('clear-title');
+        
+        let title = "";
+        if (state.co2Level < 12) title = "당신은 지구를 수호하는 기술 이용자입니다.";
+        else if (state.co2Level >= 12 && state.co2Level < 13) title = "당신은 노력하는 기술 이용자입니다.";
+        else if (state.co2Level >= 13 && state.co2Level < 14) title = "당신은 보통의 기술 이용자입니다.";
+        else if (state.co2Level >= 14 && state.co2Level < 15) title = "당신은 아슬아슬한 기술 이용자입니다.";
+        else title = "당신은 기후 난민이 된 기술 이용자입니다.";
+        
+        titleText.innerText = title;
+        clearScreen.classList.remove('hidden');
+        clearScreen.classList.add('flex');
+    }
+
+    function updateTP(amount = 0) {
+        state.techPoints += amount;
+        tpAmount.innerText = state.techPoints;
+        if (state.techPoints >= 1000 && !state.isGameOver) showGameClear();
+    }
+
+    function initCO2() {
+        co2Meter.innerHTML = '';
+        for (let i = 0; i < 15; i++) { 
+            const div = document.createElement('div');
+            div.className = 'co2-segment';
+            co2Meter.appendChild(div);
+        }
+    }
+
+    function updateCO2() {
+        const segments = co2Meter.querySelectorAll('.co2-segment');
+        const fullBlocks = Math.floor(state.co2Level + 0.01);
+        const fraction = state.co2Level - fullBlocks;
+
+        segments.forEach((s, i) => {
+            s.style.background = ''; 
+            s.style.borderColor = '';
+            s.style.boxShadow = '';
+            
+            if (i < fullBlocks) {
+                s.classList.add('co2-on');
+            } else if (i === fullBlocks && fraction > 0.1) {
+                s.classList.remove('co2-on');
+                const percent = Math.round(fraction * 100);
+                s.style.background = `linear-gradient(to top, #ef4444 ${percent}%, #e2e8f0 ${percent}%)`;
+                s.style.borderColor = '#b91c1c';
+            } else {
+                s.classList.remove('co2-on');
+            }
+        });
+    }
+
+    function checkGameOver() {
+        if (state.co2Level >= 15 && !state.isGameOver) {
+            state.isGameOver = true;
+            state.isMoving = true;
+            showClimateCrisis();
+        }
+    }
+
+    function openLab() {
+        labScreen.classList.remove('hidden');
+        labScreen.classList.add('flex');
+        renderLabCards();
+        document.getElementById('btn-close-lab').style.display = state.stage >= 4 ? 'block' : 'none';
+    }
+
+    function closeLab() {
+        labScreen.classList.add('hidden');
+        labScreen.classList.remove('flex');
+    }
+
+    function unlockTech(id, cost) {
+        if (state.techPoints >= cost && !state.unlocked[id]) {
+            updateTP(-cost);
+            state.unlocked[id] = true;
+            renderLabCards();
+        }
+    }
+
+    function goToStage(stageNum) {
+        closeLab();
+        let icon = ""; let text = "";
+
+        if (stageNum === 5) { icon = "⚡⛽"; text = "하이브리드 등장!"; }
+        else if (stageNum === 6) { icon = "⚡"; text = "전동기관 등장!"; }
+        else if (stageNum === 4) { icon = "🚚"; text = "내연기관 등장!"; }
+        else if (stageNum === 7) { 
+            icon = '<div class="w-24 h-24 rounded-full bg-blue-50 border-8 border-blue-400 flex items-center justify-center font-black text-blue-600 text-5xl leading-none pt-2 mx-auto mb-4">H</div>'; 
+            text = "수소 연료전지 등장!"; 
+        }
+
+        if (icon && text) showTransition(icon, text, stageNum);
+        else {
+            state.stage = stageNum; state.cargoRemaining = stageConfig[stageNum].total;
+            state.inVehicle = 0; state.tripsCount = 0; state.oilUsed = 0;
+            state.elecUsed = 0; state.hybridOilUsed = 0; state.hybridElecUsed = 0; state.hydrogenUsed = 0;
+            initStage();
+        }
+        document.getElementById('btn-to-lab').classList.remove('hidden');
+    }
+
+    function renderLabCards() {
+        labCards.innerHTML = '';
+        techTree.forEach(tech => {
+            const isUnlocked = state.unlocked[tech.id];
+            const card = document.createElement('div');
+            const bgClass = isUnlocked ? 'bg-white border-blue-400' : 'bg-slate-500 border-slate-600';
+            const textClass = isUnlocked ? 'text-slate-800' : 'text-slate-300';
+            card.className = `w-48 h-64 rounded-2xl flex flex-col items-center justify-center relative transition-colors border-4 shadow-xl m-2 shrink-0 ${bgClass}`;
+            let html = `<div class="text-xl font-black mb-4 text-center ${textClass}">${tech.name}<br>${tech.cost}P</div>`;
+            if (!isUnlocked) html += `<div class="absolute text-7xl opacity-40 cursor-pointer hover:scale-110 transition-transform" onclick="unlockTech('${tech.id}', ${tech.cost})">🔒</div>`;
+            else if (tech.stage) html += `<button onclick="goToStage(${tech.stage})" class="absolute bottom-6 bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-lg font-bold shadow-md transition-colors">${tech.name} 사용</button>`;
+            else html += `<div class="absolute bottom-6 text-slate-400 font-bold text-sm bg-slate-100 px-3 py-1 rounded-full border border-slate-200">개발 중</div>`;
+            card.innerHTML = html; labCards.appendChild(card);
+        });
+    }
+
+    function showClimateCrisis() {
+        const rainContainer = document.createElement('div');
+        rainContainer.className = "absolute inset-0 pointer-events-none z-[4000] overflow-hidden";
+        scene.appendChild(rainContainer);
+        for (let i = 0; i < 100; i++) {
+            const drop = document.createElement('div'); drop.className = "absolute bg-blue-400 w-0.5 h-4 opacity-70";
+            drop.style.left = Math.random() * 100 + "%"; drop.style.top = (Math.random() * -100) + "px";
+            drop.style.animation = `rainFall ${0.5 + Math.random() * 0.5}s linear infinite`; rainContainer.appendChild(drop);
+        }
+        const flood = document.createElement('div');
+        flood.className = "absolute bottom-0 left-0 w-full bg-blue-600/80 z-[3000] transition-all duration-[5000ms] ease-out";
+        flood.style.height = "0px"; scene.appendChild(flood);
+        setTimeout(() => flood.style.height = "100vh", 100);
+        const msg = document.createElement('div');
+        msg.className = "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-5xl font-black bg-red-600/90 p-8 rounded-2xl shadow-2xl z-[5000] whitespace-nowrap text-center leading-tight pointer-events-auto";
+        msg.innerHTML = "CO2 배출량 증가로<br>기후위기 발생!<br><span class='text-2xl mt-4 block text-yellow-300'>당신은 기후 난민이 된 기술 이용자입니다.</span><br><button onclick=\"resetGame()\" class=\"mt-8 bg-white text-red-600 px-6 py-3 rounded-xl font-black text-2xl shadow-lg border-2 border-red-800 hover:bg-slate-100 transition-colors pointer-events-auto\">다시 시도하기</button>"; 
+        scene.appendChild(msg);
+    }
+
+    function showTransition(icon, text, nextStage) {
+        if (state.isGameOver) return;
+        overlay.style.opacity = "1"; overlay.style.pointerEvents = "auto";
+        overlay.innerHTML = `<div class="${nextStage === 7 ? '' : 'text-[100px] mb-4'}">${icon}</div><div class="text-4xl font-black text-slate-800">${text}</div>`;
+        setTimeout(() => {
+            state.stage = nextStage; state.cargoRemaining = stageConfig[nextStage].total;
+            state.inVehicle = 0; state.tripsCount = 0; state.coalUsed = 0; state.oilUsed = 0;
+            state.elecUsed = 0; state.hybridOilUsed = 0; state.hybridElecUsed = 0; state.hydrogenUsed = 0;
+            overlay.style.opacity = "0"; overlay.style.pointerEvents = "none"; initStage();
+        }, 3000);
+    }
+
+    function createDraggable(config) {
+        const el = document.createElement('div'); el.className = `sprite ${config.className || ''}`;
+        el.style.left = config.x + 'px'; el.style.top = config.y + 'px'; el.innerHTML = config.html;
+        let isDragging = false; let offset = { x: 0, y: 0 };
+        const start = (e) => {
+            if (state.isGameOver || state.isSleeping || state.isMoving || (state.isPoopBlocked && config.type !== 'poop')) return;
+            if (state.isThirsty && config.type !== 'water') return;
+            if ((state.stage >= 3) && config.type === 'vehicle') return;
+            const cx = e.touches ? e.touches[0].clientX : e.clientX;
+            const cy = e.touches ? e.touches[0].clientY : e.clientY;
+            isDragging = true; offset.x = cx - el.offsetLeft; offset.y = cy - el.offsetTop; el.style.zIndex = 1000;
+        };
+        const move = (e) => {
+            if (!isDragging) return;
+            const cx = e.touches ? e.touches[0].clientX : e.clientX;
+            const cy = e.touches ? e.touches[0].clientY : e.clientY;
+            let newX = cx - offset.x;
+            let newY = cy - offset.y;
+            
+            if (config.type === 'vehicle' && state.stage <= 2) {
+                const iconPart = el.querySelector('.icon-part');
+                if (iconPart) {
+                    if (newX > el.offsetLeft + 2) iconPart.style.transform = 'scaleX(-1)';
+                    else if (newX < el.offsetLeft - 2) iconPart.style.transform = 'scaleX(1)';
+                }
+                const minX = 0;
+                const maxX = window.innerWidth - el.offsetWidth;
+                const minY = 0;
+                const maxY = window.innerHeight - el.offsetHeight;
+                
+                if (newX < minX) newX = minX;
+                if (newX > maxX) newX = maxX;
+                if (newY < minY) newY = minY;
+                if (newY > maxY) newY = maxY;
+            }
+            
+            el.style.left = newX + 'px'; el.style.top = newY + 'px'; 
+            handleDragLogic(el, config.type);
+        };
+        const end = () => { if (!isDragging) return; isDragging = false; el.style.zIndex = 20; handleDropLogic(el, config.type); };
+        el.addEventListener('mousedown', start); window.addEventListener('mousemove', move); window.addEventListener('mouseup', end);
+        el.addEventListener('touchstart', start); window.addEventListener('touchmove', move, {passive: false}); window.addEventListener('touchend', end);
+        scene.appendChild(el); return el;
+    }
+
+    function isOverlapping(r1, r2) { return !(r1.right < r2.left || r1.left > r2.right || r1.bottom < r2.top || r1.top > r2.bottom); }
+
+    function tryLoadCargo(el) {
+        const vehicle = document.getElementById('main-vehicle'); if (!vehicle) return false;
+        const rect = el.getBoundingClientRect(); const vRect = vehicle.getBoundingClientRect();
+        if (isOverlapping(rect, vRect)) {
+            const isNearStart = vehicle.offsetLeft < state.startX + 100;
+            if (isNearStart && state.inVehicle < stageConfig[state.stage].cap) {
+                state.inVehicle++; el.remove(); addCargoToVehicle(vehicle);
+                if (state.stage >= 4) { const iconPart = vehicle.querySelector('.icon-part'); if (iconPart) iconPart.style.transform = 'scaleX(-1)'; spawnInfiniteCargo(); }
+                return true;
+            } else if (!isNearStart) {
+                const errorMsg = document.getElementById('error-msg');
+                if (errorMsg) { errorMsg.style.display = 'block'; clearTimeout(state.errorTimeout); state.errorTimeout = setTimeout(() => errorMsg.style.display = 'none', 2000); }
+            }
+        }
+        return false;
+    }
+
+    function handleDragLogic(el, type) { if (type === 'cargo') tryLoadCargo(el); checkFuelDrop(el, el.getBoundingClientRect(), type); checkPoopWaterDrop(el, el.getBoundingClientRect(), type); const rect = el.getBoundingClientRect(); const goalRect = document.querySelector('.goal-post').getBoundingClientRect(); if (type === 'vehicle' && state.stage < 3) { const centerX = rect.left + rect.width / 2; if (centerX >= goalRect.left && state.inVehicle > 0) completeTrip(); } }
+    function handleDropLogic(el, type) { if (type === 'cargo') tryLoadCargo(el); checkFuelDrop(el, el.getBoundingClientRect(), type); checkPoopWaterDrop(el, el.getBoundingClientRect(), type); }
+
+    function checkFuelDrop(el, rect, type) {
+        if (type === 'oil' && state.stage === 4) { const engine = document.getElementById('internal-engine'); if (engine && isOverlapping(rect, engine.getBoundingClientRect())) { el.remove(); useFuel('oil'); spawnInfiniteFuel(); } }
+        if (type === 'coal' && state.stage === 3) { const furnace = document.getElementById('furnace-fire'); if (furnace && isOverlapping(rect, furnace.getBoundingClientRect())) { el.remove(); useFuel('coal'); } }
+        if (type === 'electricity' && state.stage === 6) { const motor = document.getElementById('electric-motor'); if (motor && isOverlapping(rect, motor.getBoundingClientRect())) { el.remove(); useFuel('electricity'); spawnInfiniteElectricity(); } }
+        if (type === 'electricity' && state.stage === 5) { const engine = document.getElementById('hybrid-engine'); if (engine && isOverlapping(rect, engine.getBoundingClientRect())) { el.remove(); useFuel('hybrid-electricity'); spawnInfiniteHybridElec(); } }
+        if (type === 'oil' && state.stage === 5) { const engine = document.getElementById('hybrid-engine'); if (engine && isOverlapping(rect, engine.getBoundingClientRect())) { el.remove(); useFuel('hybrid-oil'); spawnInfiniteHybridOil(); } }
+        if (type === 'hydrogen' && state.stage === 7) { const engine = document.getElementById('fuel-cell-engine'); if (engine && isOverlapping(rect, engine.getBoundingClientRect())) { el.remove(); useFuel('hydrogen'); spawnInfiniteHydrogen(); } }
+    }
+
+    function checkPoopWaterDrop(el, rect, type) {
+        if (type === 'water') { const vehicle = document.getElementById('main-vehicle'); if (vehicle && isOverlapping(rect, vehicle.getBoundingClientRect())) { state.isThirsty = false; el.remove(); const bubble = vehicle.querySelector('.speech-bubble'); if (bubble) bubble.remove(); } }
+        if (type === 'poop') { const elRect = el.getBoundingClientRect(); if (elRect.left < 50 || elRect.right > window.innerWidth - 50 || elRect.top < 50 || elRect.bottom > window.innerHeight - 50) { el.remove(); state.isPoopBlocked = false; const msg = document.getElementById('poop-msg'); if (msg) msg.remove(); } }
+    }
+
+    function addCargoToVehicle(v) {
+        const c = document.createElement('div'); c.className = "item-box absolute z-30";
+        if (state.stage === 2) { const cartContainer = v.querySelector('.cart-container'); if (cartContainer) { c.style.bottom = (5 + (Math.floor((state.inVehicle-1)/2)) * 30) + "px"; c.style.left = (5 + ((state.inVehicle-1)%2) * 35) + "px"; cartContainer.appendChild(c); return; } }
+        else if (state.stage >= 3) { c.style.bottom = (20 + (Math.floor((state.inVehicle - 1) / 2)) * 25) + "px"; c.style.left = (10 + ((state.inVehicle - 1) % 2) * 20) + "px"; }
+        else { c.style.bottom = (state.inVehicle * 35) + "px"; }
+        c.innerText = "짐"; v.appendChild(c);
+    }
+
+    function useFuel(type) {
+        if (type === 'coal') { state.coalUsed++; state.co2Level = Math.min(15, state.co2Level + 1); updateCO2(); const engine = document.getElementById('engine-wheel'); if(engine) engine.style.transform = `rotate(${state.coalUsed * 144}deg)`; const v = document.getElementById('main-vehicle'); const dist = (window.innerWidth - 200) - state.startX; if(v) { v.style.transition = "left 0.5s ease-out"; v.style.left = (state.startX + (dist * (state.coalUsed / 5))) + 'px'; } checkGameOver(); if (!state.isGameOver && state.coalUsed >= 5) setTimeout(completeTrip, 600); }
+        else if (type === 'oil') { state.oilUsed++; const oilStatus = document.getElementById('oil-status'); if (oilStatus) oilStatus.innerText = `기름 공급: ${state.oilUsed}/3`; if (state.oilUsed >= 3) { state.oilUsed = 0; state.co2Level = Math.min(15, state.co2Level + 3); updateCO2(); if (oilStatus) oilStatus.innerText = `기름 공급: 0/3`; checkGameOver(); if (!state.isGameOver) runInternalEngine(); } }
+        else if (type === 'electricity') { 
+            state.elecUsed++; 
+            const elecStatus = document.getElementById('elec-status'); 
+            if (elecStatus) elecStatus.innerText = `전기 공급: ${state.elecUsed}/3`; 
+            if (state.elecUsed >= 3) { 
+                state.elecUsed = 0; 
+                let increment = state.eco6Upgraded ? 0.334 : 1;
+                state.co2Level = Math.min(15, state.co2Level + increment); 
+                updateCO2(); 
+                if (elecStatus) elecStatus.innerText = `전기 공급: 0/3`; 
+                showCO2Bubble(state.eco6Upgraded ? '신재생에너지 발전으로 발전 과정에서 탄소를 기존보다 덜 배출하게 되었습니다.' : '전기를 만드는 과정에서 탄소가 배출되었습니다.'); 
+                checkGameOver(); 
+                if (!state.isGameOver) runElectricMotor(); 
+            } 
+        }
+        else if (type === 'hybrid-electricity') { if(state.hybridElecUsed < 1) state.hybridElecUsed++; updateHybridStatus(); checkHybridEngine(); }
+        else if (type === 'hybrid-oil') { if(state.hybridOilUsed < 2) state.hybridOilUsed++; updateHybridStatus(); checkHybridEngine(); }
+        else if (type === 'hydrogen') { 
+            state.hydrogenUsed++; 
+            const hStatus = document.getElementById('hydrogen-status'); 
+            if (hStatus) hStatus.innerText = `수소 공급: ${state.hydrogenUsed}/3`; 
+            if (state.hydrogenUsed >= 3) { 
+                state.hydrogenUsed = 0; 
+                let increment = state.eco7Upgraded ? 0.334 : 1;
+                state.co2Level = Math.min(15, state.co2Level + increment); 
+                updateCO2(); 
+                if (hStatus) hStatus.innerText = `수소 공급: 0/3`; 
+                showCO2Bubble(state.eco7Upgraded ? '그린 수소 생산으로 수소 생산 과정에서 탄소를 기존보다 덜 배출하게 되었습니다.' : '수소를 얻는 과정에서 CO2가 배출되었습니다.'); 
+                checkGameOver(); 
+                if (!state.isGameOver) runFuelCellEngine(); 
+            } 
+        }
+    }
+
+    function showCO2Bubble(text) {
+        const co2Ui = document.getElementById('co2-container-ui');
+        if (co2Ui) {
+            const oldBubble = co2Ui.querySelector('.elec-bubble'); if (oldBubble) oldBubble.remove();
+            
+            const bubble = document.createElement('div'); 
+            bubble.className = 'speech-bubble elec-bubble'; 
+            
+            bubble.style.top = '50%'; 
+            bubble.style.right = 'calc(100% + 15px)'; 
+            bubble.style.left = 'auto'; 
+            bubble.style.transform = 'translateY(-50%)'; 
+            bubble.style.fontSize = '12px'; 
+            bubble.style.zIndex = '1000'; 
+            bubble.innerText = text; 
+            
+            co2Ui.appendChild(bubble);
+            setTimeout(() => { if(bubble && bubble.parentNode) bubble.remove(); }, 3000);
+        }
+    }
+
+    function updateHybridStatus() { const status = document.getElementById('hybrid-status'); if(status) status.innerHTML = `<span class="mb-1">기름: ${state.hybridOilUsed}/2</span><span>전기: ${state.hybridElecUsed}/1</span>`; }
+    function checkHybridEngine() { if(state.hybridOilUsed >= 2 && state.hybridElecUsed >= 1) { state.hybridOilUsed = 0; state.hybridElecUsed = 0; updateHybridStatus(); state.co2Level = Math.min(15, state.co2Level + 2); updateCO2(); checkGameOver(); if(!state.isGameOver) runHybridEngine(); } }
+
+    function processPointsAndCargo() {
+        if (state.inVehicle > 0) {
+            let pts = state.inVehicle * 10;
+            if (state.stage === 5) pts = state.inVehicle * 20; 
+            else if (state.stage === 6) pts = state.inVehicle * 30;
+            else if (state.stage === 7) pts = state.inVehicle * 50;
+            updateTP(pts); if(state.stage < 4) state.cargoRemaining -= state.inVehicle;
+            state.inVehicle = 0; state.tripsCount++;
+        }
+    }
+
+    function runInternalEngine() {
+        state.isMoving = true; const v = document.getElementById('main-vehicle'); const piston = document.getElementById('piston'); const crank = document.getElementById('crank');
+        if(piston) piston.classList.add('piston-move'); if(crank) crank.classList.add('crank-rotate');
+        if(v) { v.style.transition = "left 3s linear"; v.style.left = (window.innerWidth - 250) + 'px'; }
+        setTimeout(() => {
+            if(v) { v.querySelectorAll('.item-box').forEach(b => b.remove()); const iconPart = v.querySelector('.icon-part'); if (iconPart) iconPart.style.transform = 'scaleX(1)'; }
+            completeTrip(); if(v) { v.style.transition = "left 2s ease-in-out"; v.style.left = state.startX + 'px'; }
+            setTimeout(() => { if(piston) piston.classList.remove('piston-move'); if(crank) crank.classList.remove('crank-rotate'); state.isMoving = false; }, 2000);
+        }, 3000);
+    }
+
+    function runElectricMotor() {
+        state.isMoving = true; const v = document.getElementById('main-vehicle'); const rotor = document.getElementById('rotor'); if (rotor) { rotor.style.animationPlayState = "running"; rotor.style.animationDuration = "0.3s"; }
+        if(v) { v.style.transition = "left 3s ease-in-out"; v.style.left = (window.innerWidth - 250) + 'px'; }
+        setTimeout(() => {
+            if(v) { v.querySelectorAll('.item-box').forEach(b => b.remove()); const iconPart = v.querySelector('.icon-part'); if (iconPart) iconPart.style.transform = 'scaleX(1)'; }
+            completeTrip(); if(v) { v.style.transition = "left 2s ease-in-out"; v.style.left = state.startX + 'px'; }
+            setTimeout(() => { if (rotor) { rotor.style.animationPlayState = "paused"; rotor.style.animationDuration = "3s"; } state.isMoving = false; }, 2000);
+        }, 3000);
+    }
+
+    function runHybridEngine() {
+        state.isMoving = true; const v = document.getElementById('main-vehicle'); const rotor = document.getElementById('hybrid-rotor');
+        if(rotor) { rotor.style.transition = "transform 3s linear"; let rot = parseInt(rotor.getAttribute('data-rot') || '0'); rot += 1080; rotor.style.transform = `rotate(${rot}deg)`; rotor.setAttribute('data-rot', rot); }
+        if(v) { v.style.transition = "left 3s ease-in-out"; v.style.left = (window.innerWidth - 250) + 'px'; }
+        setTimeout(() => {
+            if(v) { v.querySelectorAll('.item-box').forEach(b => b.remove()); const iconPart = v.querySelector('.icon-part'); if (iconPart) iconPart.style.transform = 'scaleX(1)'; }
+            completeTrip(); if(v) { v.style.transition = "left 2s ease-in-out"; v.style.left = state.startX + 'px'; }
+            setTimeout(() => { state.isMoving = false; }, 2000);
+        }, 3000);
+    }
+
+    function runFuelCellEngine() {
+        state.isMoving = true; const v = document.getElementById('main-vehicle'); const h2o = document.getElementById('fuel-h2o');
+        if (h2o) { h2o.style.transition = "transform 0.5s ease-out, opacity 0.5s"; h2o.style.transform = "translateY(20px)"; h2o.style.opacity = "0"; setTimeout(() => { h2o.style.transition = "none"; h2o.style.transform = "translateY(0)"; h2o.style.opacity = "1"; }, 600); }
+        if(v) { v.style.transition = "left 3s ease-in-out"; v.style.left = (window.innerWidth - 250) + 'px'; }
+        setTimeout(() => {
+            if(v) { v.querySelectorAll('.item-box').forEach(b => b.remove()); const iconPart = v.querySelector('.icon-part'); if (iconPart) iconPart.style.transform = 'scaleX(1)'; }
+            completeTrip(); if(v) { v.style.transition = "left 2s ease-in-out"; v.style.left = state.startX + 'px'; }
+            setTimeout(() => { state.isMoving = false; }, 2000);
+        }, 3000);
+    }
+
+    function completeTrip() { 
+        processPointsAndCargo(); 
+        state.coalUsed = 0; 
+        const v = document.getElementById('main-vehicle'); 
+        if(v) v.querySelectorAll('.item-box').forEach(i => i.remove()); 
+        
+        if (state.cargoRemaining <= 0 && state.stage < 4) { 
+            if (state.stage === 1) showTransition("⚙️", "바퀴 등장!", 2); 
+            else if (state.stage === 2) showTransition("🚂", "증기기관 등장!", 3); 
+            else if (state.stage === 3) openLab(); 
+            return; 
+        } 
+
+        if (state.stage === 6 && !state.upgrade6Unlocked) {
+            state.upgrade6Unlocked = true;
+            const btn = document.getElementById('stage-upgrade-btn');
+            if (btn) {
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                btn.classList.add('hover:bg-green-500');
+            }
+        }
+        if (state.stage === 7 && !state.upgrade7Unlocked) {
+            state.upgrade7Unlocked = true;
+            const btn = document.getElementById('stage-upgrade-btn');
+            if (btn) {
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                btn.classList.add('hover:bg-green-500');
+            }
+        }
+
+        checkStageEvents(); 
+    }
+
+    function showUpgradeModal(stg) {
+        if (stg === 6 && !state.upgrade6Unlocked) return;
+        if (stg === 7 && !state.upgrade7Unlocked) return;
+        
+        const modal = document.createElement('div');
+        modal.id = 'upgrade-modal';
+        modal.className = "absolute inset-0 bg-slate-900/60 z-[8000] flex flex-col items-center justify-center p-4 backdrop-blur-sm pointer-events-auto";
+        
+        let text = "";
+        let cost = 0;
+        if (stg === 6) {
+            text = "신재생에너지 연구에 기술포인트를 200P 사용하면 신재생에너지 발전률을 높일 수 있고, 전기를 만드는 과정에서 배출되는 탄소를 줄일 수 있습니다.<br><br>신재생에너지 연구에 <span class='text-blue-600 font-black'>200P</span> 사용하시겠습니까?";
+            cost = 200;
+        } else if (stg === 7) {
+            text = "그린 수소 연구에 기술포인트를 300P 사용하면 수소 생산 방식을 물을 전기분해하는 방식으로 바꿀 수 있고, 수소 생산 과정에서 배출되는 탄소를 줄일 수 있습니다.<br><br>그린 수소 연구에 <span class='text-blue-600 font-black'>300P</span> 사용하시겠습니까?";
+            cost = 300;
+        }
+
+        modal.innerHTML = `
+            <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-2xl text-center border-4 border-green-500 relative">
+                <p class="text-xl font-bold text-slate-800 mb-6 break-keep leading-relaxed">${text}</p>
+                <div id="upgrade-error" class="text-red-500 font-bold mb-4 h-6 text-lg"></div>
+                <div class="flex justify-center gap-6">
+                    <button id="btn-upgrade-yes" class="bg-blue-600 hover:bg-blue-500 text-white px-10 py-4 rounded-xl font-black text-xl transition-colors shadow-md">예</button>
+                    <button id="btn-upgrade-no" class="bg-slate-500 hover:bg-slate-400 text-white px-10 py-4 rounded-xl font-black text-xl transition-colors shadow-md">아니오</button>
+                </div>
+            </div>
+        `;
+        document.getElementById('game-container').appendChild(modal);
+
+        document.getElementById('btn-upgrade-yes').onclick = () => {
+            if (state.techPoints >= cost) {
+                updateTP(-cost);
+                
+                if (stg === 6) state.eco6Upgraded = true;
+                if (stg === 7) state.eco7Upgraded = true;
+                modal.remove();
+                const btn = document.getElementById('stage-upgrade-btn');
+                if (btn) btn.remove();
+            } else {
+                const errorDiv = document.getElementById('upgrade-error');
+                errorDiv.innerText = "기술포인트가 부족합니다!";
+                setTimeout(() => { if (errorDiv) errorDiv.innerText = ""; }, 2000);
+            }
+        };
+        document.getElementById('btn-upgrade-no').onclick = () => {
+            modal.remove();
+        };
+    }
+
+    function spawnFuel(type, count) { for(let i=0; i<count; i++) { if (type === 'coal') createDraggable({ type: type, x: 50 + (i*50), y: window.innerHeight - 100, html: '<div class="text-4xl">🌑</div>' }); } }
+    function spawnInfiniteFuel() { createDraggable({ type: 'oil', x: 100, y: window.innerHeight - 162, html: '<div class="text-4xl">⛽</div>' }); }
+    function spawnInfiniteElectricity() { createDraggable({ type: 'electricity', x: 100, y: window.innerHeight - 162, html: '<div class="text-4xl">⚡</div>' }); }
+    function spawnInfiniteHybridElec() { createDraggable({ type: 'electricity', x: 68, y: window.innerHeight - 162, html: '<div class="text-4xl">⚡</div>' }); }
+    function spawnInfiniteHybridOil() { createDraggable({ type: 'oil', x: 138, y: window.innerHeight - 162, html: '<div class="text-4xl">⛽</div>' }); }
+    function spawnInfiniteHydrogen() { createDraggable({ type: 'hydrogen', x: 160, y: window.innerHeight - 162, html: '<div class="w-10 h-10 rounded-full bg-blue-50 border-4 border-blue-400 flex items-center justify-center font-black text-blue-600 text-lg leading-none pt-1 shadow-md">H</div>' }); }
+    function spawnInfiniteCargo() { const conf = stageConfig[state.stage]; createDraggable({ type: 'cargo', x: conf.cargoX - 12, y: window.innerHeight - 212, html: '짐', className: 'item-box' }); }
+
+    function checkStageEvents() { if (state.stage === 1) { if (state.tripsCount === 3 || state.tripsCount === 7) makeThirsty(); if (state.tripsCount === 5) makeSleep(); } else if (state.stage === 2) { if (state.tripsCount === 1) makePoop(); if (state.tripsCount === 2) makeSleep(); } }
+    function makeThirsty() { state.isThirsty = true; const v = document.getElementById('main-vehicle'); const b = document.createElement('div'); b.className = 'speech-bubble'; b.style.top = '-80px'; b.innerText = '목말라요! 물 드래그! 💧'; if(v) v.appendChild(b); createDraggable({ type: 'water', x: 180, y: 130, html: '<div class="text-5xl">💧</div>' }); }
+    function makeSleep() { state.isSleeping = true; nightFilter.style.display = 'flex'; setTimeout(() => { nightFilter.style.display = 'none'; state.isSleeping = false; }, 3000); }
+    function makePoop() { state.isPoopBlocked = true; createDraggable({ type: 'poop', x: window.innerWidth / 2, y: window.innerHeight - 180, html: '<div class="text-6xl">💩</div>' }); const msg = document.createElement('div'); msg.id = 'poop-msg'; msg.className = "absolute top-[120px] left-1/2 -translate-x-1/2 bg-red-500 text-white p-3 rounded-full font-black z-[1000]"; msg.innerText = "말똥을 치워야 갈 수 있습니다! (화면 밖으로 드래그)"; scene.appendChild(msg); }
+
+    function initStage() {
+        scene.innerHTML = ''; const conf = stageConfig[state.stage]; if (!conf) return; 
+        stageTitle.innerText = conf.title; state.startX = conf.startX; updateCO2();
+        
+        let instrHtml = "드래그하여 짐을 싣고 옮기세요.";
+        if (state.stage === 4) instrHtml += "<br><span class='text-lg font-black text-blue-600 drop-shadow-sm'>짐 1개당 10P | 기름 3개당 CO2 3칸 증가</span>";
+        else if (state.stage === 5) instrHtml += "<br><span class='text-lg font-black text-blue-600 drop-shadow-sm'>짐 1개당 20P | 기름 2개+전기 1개당 CO2 2칸 증가</span>";
+        else if (state.stage === 6) instrHtml += "<br><span class='text-lg font-black text-blue-600 drop-shadow-sm'>짐 1개당 30P | 전기 3개당 CO2 1칸 증가</span>";
+        else if (state.stage === 7) instrHtml += "<br><span class='text-lg font-black text-blue-600 drop-shadow-sm'>짐 1개당 50P | 수소 3개당 CO2 1칸 증가</span>";
+        const instr = document.getElementById('instruction-text');
+        instr.innerHTML = instrHtml;
+        
+        const goal = document.createElement('div'); goal.className = "goal-post"; goal.innerHTML = '<span class="goal-label">도착지점</span>'; scene.appendChild(goal);
+        let vHtml = `<div class="icon-part flex items-end transition-transform"><div class="text-[100px]">${conf.icon}</div></div>`;
+        let startY = window.innerHeight - 250;
+        if (state.stage === 2) { vHtml = `<div class="icon-part flex items-end transition-transform"><div class="text-[100px]">🐎</div><div class="relative ml-[-10px] mb-2"><div class="w-24 h-12 bg-amber-800 border-4 border-amber-900 rounded-sm relative"><div class="cart-container absolute inset-0"></div></div><div class="absolute -bottom-4 left-0 flex space-x-12"><div class="w-8 h-8 rounded-full border-4 border-amber-900 flex items-center justify-center bg-transparent spin"><div class="w-full h-1 bg-amber-900 absolute"></div><div class="h-full w-1 bg-amber-900 absolute"></div></div><div class="w-8 h-8 rounded-full border-4 border-amber-900 flex items-center justify-center bg-transparent spin"><div class="w-full h-1 bg-amber-900 absolute"></div><div class="h-full w-1 bg-amber-900 absolute"></div></div></div></div></div>`; }
+        if (state.stage === 3) { startY = window.innerHeight - conf.startY; vHtml = `<div class="icon-part flex items-end transition-transform" style="transform: scaleX(-1);"><div class="text-[100px]">${conf.icon}</div></div>`; }
+        if (state.stage >= 4) vHtml = `<div class="icon-part flex items-end transition-transform" style="transform: scaleX(1);"><div class="text-[100px]">${conf.icon}</div></div>`;
+        const vehicle = createDraggable({ id: 'main-vehicle', type: 'vehicle', x: conf.startX, y: startY, html: vHtml }); vehicle.id = 'main-vehicle';
+        
+        if (state.stage === 3) {
+            const machine = document.createElement('div'); machine.className = "absolute left-6 flex flex-col items-center bg-white/70 p-4 rounded-xl border-4 border-slate-300 z-10"; machine.style.top = "90px";
+            machine.innerHTML = `<div class="text-xs font-bold text-slate-700 mb-2">증기기관</div><div class="w-24 h-16 bg-blue-400 border-4 border-blue-600 rounded-t-lg flex items-center justify-center text-white text-xs font-bold relative z-10">물탱크</div><div id="furnace-fire" class="w-24 h-20 bg-slate-800 rounded-b-lg border-4 border-slate-900 flex items-center justify-center text-5xl relative z-20">🔥</div><div class="text-[11px] font-bold text-red-600 mt-2">석탄을 공급하세요</div><div id="engine-wheel" class="w-16 h-16 border-8 border-slate-600 rounded-full flex items-center justify-center bg-slate-200 mt-2"><div class="w-full h-2 bg-slate-600"></div></div>`;
+            scene.appendChild(machine); spawnFuel('coal', 10);
+            const rail = document.createElement('div'); rail.className = "absolute w-full h-4 bg-slate-500 border-y-2 border-slate-700 z-0"; rail.style.left = "0px"; rail.style.top = (window.innerHeight - conf.startY + 95) + "px"; scene.appendChild(rail);
+            const resetBtn = document.createElement('div'); resetBtn.className = "absolute left-1/2 -translate-x-1/2 bg-slate-800 text-white px-4 py-2 rounded-lg font-bold cursor-pointer border-2 border-slate-600 z-[100] hover:bg-slate-700 shadow-md"; resetBtn.style.top = (window.innerHeight - 150) + "px"; resetBtn.innerText = "새로운 기차 출발시키기"; resetBtn.onclick = () => { if(state.isGameOver) return; const oldV = document.getElementById('main-vehicle'); if (oldV) oldV.id = 'old-vehicle-' + Date.now(); const newV = createDraggable({ type: 'vehicle', x: conf.startX, y: window.innerHeight - conf.startY, html: `<div class="icon-part flex items-end transition-transform" style="transform: scaleX(-1);"><div class="text-[100px]">${conf.icon}</div></div>` }); newV.id = 'main-vehicle'; state.coalUsed = 0; if (document.getElementById('engine-wheel')) document.getElementById('engine-wheel').style.transform = `rotate(0deg)`; }; scene.appendChild(resetBtn);
+        }
+        if (state.stage === 4) {
+            const engine = document.createElement('div'); engine.id = "internal-engine"; engine.className = "absolute left-[40px] top-[120px] w-40 h-48 bg-slate-100 border-4 border-slate-400 rounded-xl flex flex-col items-center p-2 z-10"; engine.innerHTML = `<div class="text-[12px] font-bold mb-2">내연기관</div><div class="w-16 h-24 border-x-4 border-b-4 border-slate-800 relative shrink-0"><div id="piston" class="absolute top-0 w-full h-8 bg-slate-500"></div></div><div id="crank" class="w-10 h-10 shrink-0 border-4 border-red-500 rounded-full mt-2 relative flex items-start justify-center pt-1"><div class="w-2 h-2 bg-slate-800 rounded-full"></div></div><div id="oil-status" class="text-xs font-bold text-red-600 mt-2">기름 공급: 0/3</div>`;
+            scene.appendChild(engine); spawnInfiniteFuel(); 
+        }
+        if (state.stage === 5) {
+            const engine = document.createElement('div'); engine.id = "hybrid-engine"; engine.className = "absolute left-10 top-[120px] w-48 h-48 bg-emerald-50 border-4 border-emerald-400 rounded-xl flex flex-col items-center justify-center p-2 z-10 shadow-lg relative"; engine.innerHTML = `<div class="text-[14px] font-black text-emerald-800 mb-2">하이브리드 엔진</div><div id="hybrid-rotor" class="w-16 h-16 border-8 border-dashed border-emerald-500 rounded-full flex items-center justify-center bg-white" data-rot="0"><div class="w-2 h-2 bg-slate-800 rounded-full mb-8"></div></div><div id="hybrid-status" class="text-xs font-bold text-emerald-700 mt-4 flex flex-col items-center"><span class="mb-1">기름: 0/2</span><span>전기: 0/1</span></div>`;
+            scene.appendChild(engine); spawnInfiniteHybridElec(); spawnInfiniteHybridOil();
+        }
+        if (state.stage === 6) {
+            const motor = document.createElement('div'); motor.id = "electric-motor"; motor.className = "absolute left-[40px] top-[120px] w-40 h-48 bg-blue-50 border-4 border-blue-300 rounded-xl flex flex-col items-center justify-center p-2 z-10 shadow-lg relative"; motor.innerHTML = `<div class="text-[14px] font-black text-blue-800 mb-2">전동모터</div><div id="rotor" class="w-20 h-20 border-8 border-blue-500 rounded-full border-t-transparent animate-spin flex items-center justify-center bg-white" style="animation-duration: 3s; animation-play-state: paused;"><div class="text-2xl">⚡</div></div><div id="elec-status" class="text-xs font-bold text-blue-700 mt-4">전기 공급: 0/3</div>`;
+            scene.appendChild(motor); spawnInfiniteElectricity(); 
+            
+            if (!state.eco6Upgraded) {
+                const btn = document.createElement('button');
+                btn.id = 'stage-upgrade-btn';
+                btn.className = `absolute bottom-10 left-1/2 -translate-x-1/2 bg-green-600 text-white px-8 py-4 rounded-xl font-black text-xl shadow-lg border-2 border-green-800 transition-all z-[1000] ${state.upgrade6Unlocked ? 'hover:bg-green-500' : 'opacity-50 cursor-not-allowed'}`;
+                btn.innerText = '신재생에너지 발전률 높이기';
+                btn.onclick = () => showUpgradeModal(6);
+                scene.appendChild(btn);
+            }
+        }
+        if (state.stage === 7) {
+            const engine = document.createElement('div'); engine.id = "fuel-cell-engine"; engine.className = "absolute left-[40px] top-[120px] w-[280px] h-48 bg-cyan-50 border-4 border-cyan-400 rounded-xl flex flex-col items-center p-2 z-10 shadow-lg relative"; engine.innerHTML = `<div class="text-[14px] font-black text-cyan-800 mb-2">연료전지</div><div class="w-full flex-1 flex border-4 border-slate-700 rounded-full relative items-center justify-between px-2 bg-white"><div class="text-xs font-black text-slate-500">H₂➔</div><div class="flex h-full py-1 space-x-1 w-24"><div class="flex-1 bg-orange-200 border-2 border-orange-400 flex items-center justify-center text-[10px] font-bold text-orange-800">-</div><div class="flex-1 bg-blue-100 border-2 border-blue-300 flex items-center justify-center text-[8px] font-bold text-blue-800 text-center leading-tight">막</div><div class="flex-1 bg-green-200 border-2 border-green-400 flex items-center justify-center text-[10px] font-bold text-green-800">+</div></div><div id="fuel-h2o" class="text-xs font-black text-blue-500 transition-transform">➔H₂O</div></div><div id="hydrogen-status" class="text-xs font-bold text-cyan-700 mt-4">수소 공급: 0/3</div>`;
+            scene.appendChild(engine); spawnInfiniteHydrogen();
+
+            if (!state.eco7Upgraded) {
+                const btn = document.createElement('button');
+                btn.id = 'stage-upgrade-btn';
+                btn.className = `absolute bottom-10 left-1/2 -translate-x-1/2 bg-green-600 text-white px-8 py-4 rounded-xl font-black text-xl shadow-lg border-2 border-green-800 transition-all z-[1000] ${state.upgrade7Unlocked ? 'hover:bg-green-500' : 'opacity-50 cursor-not-allowed'}`;
+                btn.innerText = '수소 생산 방식 바꾸기';
+                btn.onclick = () => showUpgradeModal(7);
+                scene.appendChild(btn);
+            }
+        }
+
+        if (state.stage >= 4) { 
+            for(let i=0; i<4; i++) { const fake = document.createElement('div'); fake.className = "item-box absolute z-10 opacity-70 pointer-events-none"; fake.style.left = (conf.cargoX - i*3) + 'px'; fake.style.top = (window.innerHeight - 212 - i*3) + 'px'; fake.innerText = '짐'; scene.appendChild(fake); } 
+            spawnInfiniteCargo(); 
+        } else { 
+            for (let i = 0; i < 10; i++) {
+                let cx = conf.cargoX + (i % 2 * 55); 
+                let cy = window.innerHeight - 200 - (Math.floor(i / 2) * 50); 
+                createDraggable({ type: 'cargo', x: cx, y: cy, html: '짐', className: 'item-box' }); 
+            }
+        }
+    }
+</script>
+<script>(()=>{let embedded=false;const apply=()=>{document.documentElement.classList.toggle('gc-fullscreen',embedded||!!document.fullscreenElement);dispatchEvent(new Event('resize'))};addEventListener('message',e=>{if(e.source===parent&&e.origin==='https://game-center-site.beefly1136.workers.dev'&&e.data?.type==='game-center:fullscreen'){embedded=!!e.data.active;apply()}});document.addEventListener('fullscreenchange',apply);apply()})();</script></body>
+</html>

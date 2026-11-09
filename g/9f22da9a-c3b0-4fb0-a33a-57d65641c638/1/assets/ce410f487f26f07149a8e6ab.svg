@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="zincGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0f2fe" />
+      <stop offset="40%" stop-color="#7dd3fc" />
+      <stop offset="80%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#0369a1" />
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="16" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" />
+  <!-- Zinc Block 3D Hexagonal / Crystalline -->
+  <polygon points="30,45 60,25 95,35 65,55" fill="#bae6fd" />
+  <polygon points="65,55 95,35 90,75 60,95" fill="#0284c7" />
+  <polygon points="30,45 65,55 60,95 25,85" fill="url(#zincGrad)" />
+  <line x1="35" y1="48" x2="62" y2="54" stroke="#ffffff" stroke-width="2" opacity="0.9" />
+  <!-- Chemical Symbol Stamp -->
+  <circle cx="60" cy="74" r="14" fill="rgba(15, 23, 42, 0.7)" stroke="#bae6fd" stroke-width="1" />
+  <text x="60" y="79" fill="#e0f2fe" font-family="'Orbitron', sans-serif" font-size="12" font-weight="900" text-anchor="middle">Zn</text>
+  <text x="60" y="110" fill="#7dd3fc" font-family="sans-serif" font-size="10.5" font-weight="bold" text-anchor="middle">아연 (Zinc)</text>
+</svg>

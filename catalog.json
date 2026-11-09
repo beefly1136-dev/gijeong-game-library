@@ -1,0 +1,152 @@
+{
+  "updated": "2026-11-09",
+  "games": [
+    {
+      "number": 21,
+      "title": "CAR MAKER LAB",
+      "entry": "g/320c3995-7c53-4bcf-8c71-c96c21f84ead/1/index.html",
+      "previousEntry": "g/320c3995-7c53-4bcf-8c71-c96c21f84ead/1/index.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=21"
+    },
+    {
+      "number": 1,
+      "title": "커뮤니케이션 타임머신",
+      "entry": "g/5a430918-4e60-4d78-b960-5c66f4a4e553/2/index.html",
+      "previousEntry": "g/5a430918-4e60-4d78-b960-5c66f4a4e553/2/corrected-20261106h.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=1"
+    },
+    {
+      "number": 20,
+      "title": "건설기술 탐험대",
+      "entry": "g/30714452-66b9-4109-903d-db7f46998a7c/2/index.html",
+      "previousEntry": "g/30714452-66b9-4109-903d-db7f46998a7c/2/scenes-20261106m.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=20"
+    },
+    {
+      "number": 19,
+      "title": "바느질 시뮬레이터",
+      "entry": "g/4315df1c-4341-494c-814e-5d687d53a555/1/index.html",
+      "previousEntry": "g/4315df1c-4341-494c-814e-5d687d53a555/1/corrected-20261106h.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=19"
+    },
+    {
+      "number": 18,
+      "title": "테크스토리",
+      "entry": "g/b62340fc-dae6-4e0d-8715-d69832674e49/1/index.html",
+      "previousEntry": "g/b62340fc-dae6-4e0d-8715-d69832674e49/1/scenes-20261106l.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=18"
+    },
+    {
+      "number": 17,
+      "title": "제로의 이면",
+      "entry": "g/72e4be77-e0ae-4827-a1b1-bd38097c24b5/1/index.html",
+      "previousEntry": "g/72e4be77-e0ae-4827-a1b1-bd38097c24b5/1/corrected-20261106h.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=17"
+    },
+    {
+      "number": 16,
+      "title": "가정식사 한 끼 뚝딱_리뉴얼ver",
+      "entry": "g/a1957033-1aa7-454d-87cf-864d513d06c1/1/index.html",
+      "previousEntry": "g/a1957033-1aa7-454d-87cf-864d513d06c1/1/corrected-20261106h.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=16"
+    },
+    {
+      "number": 15,
+      "title": "여섯 마을의 선택",
+      "entry": "g/6572d986-47df-4676-8752-bf33e6a73503/1/index.html",
+      "previousEntry": "g/6572d986-47df-4676-8752-bf33e6a73503/1/corrected-20261106h.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=15"
+    },
+    {
+      "number": 14,
+      "title": "네오 메이커 2080 : 에코 타워의 재건",
+      "entry": "g/9f22da9a-c3b0-4fb0-a33a-57d65641c638/1/index.html",
+      "previousEntry": "g/9f22da9a-c3b0-4fb0-a33a-57d65641c638/1/corrected-20261106h.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=14"
+    },
+    {
+      "number": 13,
+      "title": "청소년기 성장과 건강 게임",
+      "entry": "g/c2e00a21-001c-4ec2-863c-f96ffcc3e705/1/index.html",
+      "previousEntry": "g/c2e00a21-001c-4ec2-863c-f96ffcc3e705/1/scenes-20261106l.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=13"
+    },
+    {
+      "number": 12,
+      "title": "지식재산 방탈출 게임",
+      "entry": "g/8784cb01-f8e6-4948-ab64-339b0a49c373/1/index.html",
+      "previousEntry": "g/8784cb01-f8e6-4948-ab64-339b0a49c373/1/corrected-20261106h.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=12"
+    },
+    {
+      "number": 11,
+      "title": "사라진 지원 신호",
+      "entry": "g/713a8f79-f61e-4777-91e6-5fbd6c5b9d3a/1/index.html",
+      "previousEntry": "g/713a8f79-f61e-4777-91e6-5fbd6c5b9d3a/1/corrected-20261106h.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=11"
+    },
+    {
+      "number": 10,
+      "title": "시간의 전령 RPG",
+      "entry": "g/6a69833a-81cf-4732-ae92-01b82cfeae35/1/index.html",
+      "previousEntry": "g/6a69833a-81cf-4732-ae92-01b82cfeae35/1/corrected-20261106h.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=10"
+    },
+    {
+      "number": 9,
+      "title": "가정식사 한 끼 뚝딱",
+      "entry": "g/450b097e-8e37-433e-8704-9acc539a522b/1/index.html",
+      "previousEntry": "g/450b097e-8e37-433e-8704-9acc539a522b/1/corrected-20261106h.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=9"
+    },
+    {
+      "number": 8,
+      "title": "수송 사장님_선택의 대가",
+      "entry": "g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/index.html",
+      "previousEntry": "g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/corrected-20261106h.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=8"
+    },
+    {
+      "number": 7,
+      "title": "수송 기술의 발달 타이쿤",
+      "entry": "g/ee1e7593-c46a-4134-b25f-66f75d4de309/1/index.html",
+      "previousEntry": "g/ee1e7593-c46a-4134-b25f-66f75d4de309/1/corrected-20261106h.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=7"
+    },
+    {
+      "number": 6,
+      "title": "생애 설계 시뮬레이션 게임",
+      "entry": "g/611a46fc-6721-49ce-a9cd-1a37e06ed286/1/index.html",
+      "previousEntry": "g/611a46fc-6721-49ce-a9cd-1a37e06ed286/1/corrected-20261106h.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=6"
+    },
+    {
+      "number": 5,
+      "title": "평화, 안전 지킴이 퀘스트",
+      "entry": "g/45cf5518-31fe-478c-86d6-4cbd1959e5df/1/index.html",
+      "previousEntry": "g/45cf5518-31fe-478c-86d6-4cbd1959e5df/1/corrected-20261106h.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=5"
+    },
+    {
+      "number": 4,
+      "title": "서우의 72시간",
+      "entry": "g/ab9f564f-06b2-4a20-93da-d65f4b5c12e3/1/index.html",
+      "previousEntry": "g/ab9f564f-06b2-4a20-93da-d65f4b5c12e3/1/corrected-20261106h.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=4"
+    },
+    {
+      "number": 3,
+      "title": "오늘의 식단:식단 구성 시뮬레이션",
+      "entry": "g/56a33a1b-847e-40cf-adb0-db0f69762073/1/index.html",
+      "previousEntry": "g/56a33a1b-847e-40cf-adb0-db0f69762073/1/corrected-20261106h.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=3"
+    },
+    {
+      "number": 2,
+      "title": "방송실 긴급 복원 게임",
+      "entry": "g/60926547-504d-464b-a4a7-ec982307ab35/1/index.html",
+      "previousEntry": "g/60926547-504d-464b-a4a7-ec982307ab35/1/corrected-20261106h.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=2"
+    }
+  ]
+}

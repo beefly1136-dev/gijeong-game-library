@@ -1,0 +1,171 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradients -->
+    <linearGradient id="s2WallGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#020617"/>
+      <stop offset="40%" stop-color="#064e3b"/>
+      <stop offset="80%" stop-color="#091428"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+
+    <linearGradient id="s2FloorGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#050b14"/>
+      <stop offset="30%" stop-color="#064e3b"/>
+      <stop offset="70%" stop-color="#0b172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+
+    <linearGradient id="gateSteel" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="25%" stop-color="#334155"/>
+      <stop offset="50%" stop-color="#475569"/>
+      <stop offset="75%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+
+    <linearGradient id="goldSeal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+
+    <filter id="neonGreenBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="neonCyanBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Wall Background -->
+  <rect x="0" y="0" width="1200" height="460" fill="url(#s2WallGrad)"/>
+  <rect x="0" y="455" width="1200" height="15" fill="#020617" stroke="#10b981" stroke-width="1"/>
+
+  <!-- Floor Perspective Grid -->
+  <rect x="0" y="470" width="1200" height="205" fill="url(#s2FloorGrad)"/>
+  <g stroke="#10b981" stroke-opacity="0.18" stroke-width="1">
+    <line x1="0" y1="510" x2="1200" y2="510"/>
+    <line x1="0" y1="560" x2="1200" y2="560"/>
+    <line x1="0" y1="620" x2="1200" y2="620"/>
+    <line x1="600" y1="470" x2="120" y2="675"/>
+    <line x1="600" y1="470" x2="360" y2="675"/>
+    <line x1="600" y1="470" x2="840" y2="675"/>
+    <line x1="600" y1="470" x2="1080" y2="675"/>
+  </g>
+
+  <!-- Ceiling High-Tech Neon Trusses -->
+  <line x1="100" y1="20" x2="1100" y2="20" stroke="#10b981" stroke-width="3" filter="url(#neonGreenBlur)"/>
+  <line x1="120" y1="40" x2="1080" y2="40" stroke="#38bdf8" stroke-width="2" opacity="0.6"/>
+
+  <!-- Header Banner -->
+  <rect x="300" y="50" width="600" height="42" rx="6" fill="#0f172a" stroke="#10b981" stroke-width="2" filter="url(#neonGreenBlur)"/>
+  <text x="600" y="78" font-size="18" font-family="Pretendard, sans-serif" font-weight="900" fill="#34d399" text-anchor="middle" letter-spacing="1">
+    🛠️ 첨단 발명 시제품 제작소 &amp; 특허 전자출원 관제실
+  </text>
+
+  <!-- ==================== 1. LEFT: PROTOTYPE ASSEMBLY JIG WORKBENCH ==================== -->
+  <g transform="translate(140, 160)">
+    <!-- Bench Platform -->
+    <polygon points="40,240 380,240 410,290 10,290" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+    <rect x="25" y="290" width="370" height="60" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
+
+    <!-- Hologram / Blueprint Screen Above Bench -->
+    <rect x="50" y="0" width="320" height="210" rx="8" fill="#064e3b" fill-opacity="0.3" stroke="#10b981" stroke-width="2" filter="url(#neonGreenBlur)"/>
+    <rect x="60" y="10" width="300" height="24" rx="4" fill="#064e3b"/>
+    <text x="210" y="27" font-size="11" font-family="Pretendard, sans-serif" font-weight="bold" fill="#6ee7b7" text-anchor="middle">
+      CAD 분해도: 친환경 스마트 우산 시제품
+    </text>
+
+    <!-- Assembled Smart Umbrella Diagram on Screen -->
+    <g transform="translate(210, 115)">
+      <!-- Umbrella Canopy -->
+      <path d="M -80 20 Q 0 -50 80 20 Z" fill="none" stroke="#34d399" stroke-width="3" filter="url(#neonGreenBlur)"/>
+      <line x1="0" y1="-45" x2="0" y2="70" stroke="#94a3b8" stroke-width="4"/>
+      <!-- Squeegee Gasket -->
+      <ellipse cx="0" cy="15" rx="35" ry="10" fill="#f59e0b" fill-opacity="0.4" stroke="#fbbf24" stroke-width="2"/>
+      <text x="50" y="15" font-size="9" font-family="Pretendard, sans-serif" fill="#fde047">① 탄성 가스켓 링</text>
+      <!-- Diatomite Handle Cap -->
+      <rect x="-8" y="55" width="16" height="18" rx="3" fill="#10b981" stroke="#34d399" stroke-width="1.5"/>
+      <text x="35" y="65" font-size="9" font-family="Pretendard, sans-serif" fill="#6ee7b7">② 규조토 손잡이캡</text>
+      <!-- Top Magnetic Cup -->
+      <path d="M -10 -45 L 10 -45 L 8 -60 L -8 -60 Z" fill="#818cf8" stroke="#c7d2fe" stroke-width="1.5"/>
+      <text x="35" y="-50" font-size="9" font-family="Pretendard, sans-serif" fill="#a5b4fc">③ 자석 물받이 컵</text>
+    </g>
+
+    <!-- Bench Title Tag -->
+    <rect x="120" y="255" width="180" height="24" rx="4" fill="#065f46" stroke="#34d399" stroke-width="1"/>
+    <text x="210" y="271" font-size="11" font-family="Pretendard, sans-serif" font-weight="bold" fill="#ffffff" text-anchor="middle">
+      [미션 4] 시제품 조립 워크벤치
+    </text>
+  </g>
+
+  <!-- ==================== 2. CENTER-RIGHT: PATENT FILING UPLINK TERMINAL ==================== -->
+  <g transform="translate(620, 180)">
+    <!-- Terminal Chassis -->
+    <rect x="0" y="0" width="220" height="270" rx="8" fill="#0f172a" stroke="#0284c7" stroke-width="3" filter="url(#neonCyanBlur)"/>
+    <!-- Screen -->
+    <rect x="15" y="15" width="190" height="150" rx="4" fill="#082f49"/>
+    <!-- Transmission Header -->
+    <rect x="25" y="25" width="170" height="22" rx="3" fill="#0369a1"/>
+    <text x="110" y="40" font-size="9" font-family="Pretendard, sans-serif" font-weight="bold" fill="#ffffff" text-anchor="middle">
+      KIPRIS 특허청 전자출원국
+    </text>
+
+    <!-- Patent Document Preview on Screen -->
+    <rect x="35" y="55" width="150" height="90" rx="3" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="110" y="70" font-size="8" font-family="Pretendard, sans-serif" font-weight="bold" fill="#0f172a" text-anchor="middle">
+      【특허출원서 명세서】
+    </text>
+    <line x1="45" y1="76" x2="175" y2="76" stroke="#94a3b8" stroke-width="1"/>
+    <text x="45" y="90" font-size="6.5" font-family="Pretendard, sans-serif" fill="#334155">• 발명의 명칭: 친환경 빗물받이 우산</text>
+    <text x="45" y="102" font-size="6.5" font-family="Pretendard, sans-serif" fill="#334155">• 기술분야: 생활편의 친환경기술</text>
+    <text x="45" y="114" font-size="6.5" font-family="Pretendard, sans-serif" fill="#334155">• 청구항: 탄성 가스켓 링 포함 우산</text>
+    <!-- Red Official Seal Mark on Document -->
+    <circle cx="160" cy="120" r="10" fill="none" stroke="#dc2626" stroke-width="1.5"/>
+    <text x="160" y="123" font-size="6" font-family="Pretendard, sans-serif" font-weight="bold" fill="#dc2626" text-anchor="middle">출원인</text>
+
+    <!-- Electronic Signature Touchpad -->
+    <rect x="30" y="180" width="160" height="40" rx="4" fill="#020617" stroke="#38bdf8" stroke-width="1"/>
+    <text x="110" y="205" font-size="9" font-family="Pretendard, sans-serif" font-weight="bold" fill="#38bdf8" text-anchor="middle">
+      ✍️ 발명자 공인 전자서명 패드
+    </text>
+
+    <!-- Filing Status Badge -->
+    <rect x="25" y="235" width="170" height="24" rx="4" fill="#0284c7"/>
+    <text x="110" y="251" font-size="10" font-family="Pretendard, sans-serif" font-weight="bold" fill="#ffffff" text-anchor="middle">
+      [미션 5] 특허청 전자출원 전송
+    </text>
+  </g>
+
+  <!-- ==================== 3. FAR RIGHT: GRAND ESCAPE EXIT GATE ==================== -->
+  <g transform="translate(940, 130)">
+    <!-- Gate Frame -->
+    <rect x="0" y="0" width="220" height="370" rx="8" fill="#0f172a" stroke="#10b981" stroke-width="4" filter="url(#neonGreenBlur)"/>
+    <!-- Gate Steel Doors -->
+    <rect x="15" y="15" width="90" height="340" rx="4" fill="url(#gateSteel)" stroke="#334155" stroke-width="2"/>
+    <rect x="115" y="15" width="90" height="340" rx="4" fill="url(#gateSteel)" stroke="#334155" stroke-width="2"/>
+
+    <!-- Sign above Exit Gate -->
+    <rect x="10" y="-40" width="200" height="30" rx="4" fill="#064e3b" stroke="#34d399" stroke-width="2"/>
+    <text x="110" y="-20" font-size="13" font-family="Pretendard, sans-serif" font-weight="900" fill="#a7f3d0" text-anchor="middle" letter-spacing="1">
+      🏛️ 특허센터 정문 (EXIT)
+    </text>
+
+    <!-- Central Neon Strip (Turns Green when cleared) -->
+    <line x1="105" y1="20" x2="105" y2="350" stroke="#10b981" stroke-width="4" filter="url(#neonGreenBlur)"/>
+
+    <!-- Access Sensor Panel -->
+    <rect x="160" y="160" width="30" height="50" rx="4" fill="#020617" stroke="#10b981" stroke-width="1.5"/>
+    <circle cx="175" cy="180" r="8" fill="#10b981" filter="url(#neonGreenBlur)"/>
+    <text x="175" y="184" font-size="9" font-family="Pretendard, sans-serif" font-weight="bold" fill="#ffffff" text-anchor="middle">✓</text>
+  </g>
+</svg>

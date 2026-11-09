@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="copperGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fdba74" />
+      <stop offset="35%" stop-color="#ea580c" />
+      <stop offset="70%" stop-color="#c2410c" />
+      <stop offset="100%" stop-color="#7c2d12" />
+    </linearGradient>
+    <filter id="cShine">
+      <feGaussianBlur stdDeviation="2" result="glow"/>
+      <feMerge>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="120" height="120" rx="16" fill="#131b2e" stroke="#ea580c" stroke-width="1.5" />
+  <!-- Copper Ingot 3D Block -->
+  <polygon points="25,48 55,28 98,34 68,54" fill="#fb923c" />
+  <polygon points="68,54 98,34 92,76 62,96" fill="#c2410c" />
+  <polygon points="25,48 68,54 62,96 18,90" fill="url(#copperGrad)" />
+  <line x1="30" y1="52" x2="62" y2="56" stroke="#fed7aa" stroke-width="2" opacity="0.8" />
+  <!-- Chemical Symbol Stamp -->
+  <circle cx="60" cy="74" r="14" fill="rgba(15, 23, 42, 0.7)" stroke="#fed7aa" stroke-width="1" />
+  <text x="60" y="79" fill="#ffedd5" font-family="'Orbitron', sans-serif" font-size="12" font-weight="900" text-anchor="middle">Cu</text>
+  <text x="60" y="110" fill="#fdba74" font-family="sans-serif" font-size="10.5" font-weight="bold" text-anchor="middle">구리 (Copper)</text>
+</svg>

@@ -1,0 +1,32 @@
+﻿<svg xmlns=http://www.w3.org/2000/svg viewBox=0 0 24 24 width=24 height=24 shape-rendering=crispEdges>
+  <!-- Outer Dark Border -->
+  <rect x=7 y=2 width=10 height=2 fill=#3a1d08/>
+  <rect x=7 y=20 width=10 height=2 fill=#3a1d08/>
+  <rect x=4 y=4 width=3 height=2 fill=#3a1d08/>
+  <rect x=17 y=4 width=3 height=2 fill=#3a1d08/>
+  <rect x=4 y=18 width=3 height=2 fill=#3a1d08/>
+  <rect x=17 y=18 width=3 height=2 fill=#3a1d08/>
+  <rect x=2 y=7 width=2 height=10 fill=#3a1d08/>
+  <rect x=20 y=7 width=2 height=10 fill=#3a1d08/>
+  <!-- Gold Outer Rim -->
+  <rect x=7 y=4 width=10 height=2 fill=#f59f00/>
+  <rect x=4 y=6 width=3 height=2 fill=#f59f00/>
+  <rect x=17 y=6 width=3 height=2 fill=#d97706/>
+  <rect x=4 y=8 width=2 height=8 fill=#f59f00/>
+  <rect x=18 y=8 width=2 height=8 fill=#d97706/>
+  <rect x=4 y=16 width=3 height=2 fill=#d97706/>
+  <rect x=17 y=16 width=3 height=2 fill=#b45309/>
+  <rect x=7 y=18 width=10 height=2 fill=#b45309/>
+  <!-- Inner Highlight Rim -->
+  <rect x=6 y=6 width=11 height=2 fill=#fcd34d/>
+  <rect x=6 y=8 width=2 height=7 fill=#fcd34d/>
+  <!-- Center Gold Base -->
+  <rect x=8 y=8 width=9 height=8 fill=#fbbf24/>
+  <!-- G Letter Engraving -->
+  <rect x=10 y=9 width=5 height=2 fill=#78350f/>
+  <rect x=9 y=10 width=2 height=4 fill=#78350f/>
+  <rect x=10 y=13 width=5 height=2 fill=#78350f/>
+  <rect x=13 y=11 width=2 height=2 fill=#78350f/>
+  <!-- G Letter Highlight -->
+  <rect x=10 y=10 width=4 height=1 fill=#fef08a/>
+</svg>

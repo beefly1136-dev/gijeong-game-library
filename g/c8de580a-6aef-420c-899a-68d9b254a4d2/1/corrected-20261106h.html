@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head><base href="https://san-t-tech-home.san-k.chatgpt.site/transport/game">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>수송 트레이드오프 v9.1</title>
+<style>
+:root{
+  --ink:#2C2C2B; --sub:#7D7A75; --canvas:#FFFFFF; --soft:#F9F8F7; --soft2:#F0EFED; --line:#E6E5E3;
+  --blue:#2783DE; --blue-soft:#E5F2FC; --green:#46A171; --green-soft:#E8F1EC;
+  --orange:#D5803B; --orange-soft:#FBEBDE; --red:#E56458; --red-soft:#FCE9E7; --purple:#BF8EDA;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',system-ui,sans-serif;
+  color:var(--ink); font-size:17px; line-height:1.55;
+  min-height:100vh;
+  background:linear-gradient(180deg,#AFC9E6 0%,#D7E4F2 45%,#F2E9DC 100%);
+}
+#bgimg{position:fixed;left:0;right:0;bottom:0;width:100%;z-index:0;pointer-events:none;opacity:.95;}
+#wrap{position:relative;z-index:1;max-width:600px;margin:0 auto;padding:12px 16px 48px;}
+/* HUD */
+#hud{position:sticky;top:8px;z-index:5;background:rgba(255,255,255,.93);backdrop-filter:blur(6px);
+  border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:14px;display:none;}
+#hud .toprow{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:14px;}
+#hud .round{font-weight:700;}
+#hud .badges{color:var(--sub);}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;}
+.stat{display:flex;align-items:center;gap:6px;font-size:13px;}
+.stat .ico{width:20px;text-align:center;}
+.track{flex:1;height:9px;background:var(--soft2);border-radius:5px;overflow:hidden;}
+.fill{height:100%;border-radius:5px;transition:width .7s cubic-bezier(.22,1,.36,1);}
+.f-money{background:#EAC26B;} .f-cust{background:#5E9FE8;} .f-env{background:#72BC8F;} .f-soc{background:#BF8EDA;}
+.fill.lowstat{background:var(--red) !important;animation:blinklow 1.1s ease-in-out infinite;}
+@keyframes blinklow{50%{opacity:.45;}}
+.stat .val{width:28px;text-align:right;font-variant-numeric:tabular-nums;color:var(--sub);font-size:12px;}
+/* 지표 설명 드롭다운 */
+.infobtn{border:1px solid var(--line);background:var(--soft);border-radius:8px;padding:3px 10px;font-size:12.5px;
+  font-family:inherit;cursor:pointer;color:var(--ink);white-space:nowrap;}
+.infobtn:hover{border-color:var(--blue);background:var(--blue-soft);}
+#statinfo{display:none;margin-top:9px;border-top:1px solid var(--line);padding-top:9px;}
+#statinfo.open{display:block;}
+.si-row{display:flex;gap:8px;font-size:13px;line-height:1.55;margin:6px 0;text-align:left;}
+.si-ico{width:20px;text-align:center;flex:0 0 auto;}
+.si-val{display:inline-block;background:var(--soft2);border-radius:5px;padding:0 6px;font-weight:700;font-size:12px;font-variant-numeric:tabular-nums;}
+.si-note{font-size:12px;color:var(--sub);margin:8px 0 0;}
+/* Cards */
+.card{background:var(--canvas);border:1px solid var(--line);border-radius:16px;padding:24px;
+  box-shadow:0 1px 2px rgba(0,0,0,.05),0 4px 12px rgba(0,0,0,.04);margin-bottom:14px;
+  animation:pop .35s ease;}
+@keyframes pop{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+h1{font-size:27px;margin:0 0 4px;line-height:1.3;}
+h2{font-size:21px;margin:0 0 10px;}
+h3{font-size:17px;margin:14px 0 8px;}
+p{margin:7px 0;}
+.sub{color:var(--sub);font-size:15px;}
+.center{text-align:center;}
+.callout{background:var(--blue-soft);border-radius:10px;padding:13px 15px;font-size:15px;margin:12px 0;}
+.callout.warn{background:var(--orange-soft);}
+.callout.good{background:var(--green-soft);}
+.chip{display:inline-block;background:var(--soft2);border-radius:6px;padding:3px 9px;font-size:13px;margin:2px 3px 2px 0;color:var(--ink);}
+.chip.hl{background:var(--blue-soft);font-weight:700;}
+.btn{display:inline-block;background:var(--blue);color:#fff;border:none;border-radius:10px;
+  padding:14px 24px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;min-height:46px;}
+.btn:hover{filter:brightness(1.06);}
+.btn.second{background:var(--soft2);color:var(--ink);}
+.btn.small{padding:9px 16px;font-size:14px;}
+.btnrow{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap;}
+/* 순차 공개 (한 화면 한 메시지) */
+.rv{opacity:0;transform:translateY(12px);transition:opacity .45s ease,transform .45s ease;}
+.rv.show{opacity:1;transform:none;}
+.stline{font-size:20px;font-weight:600;line-height:1.6;margin:12px 0;}
+.stline.quiet{font-size:16px;font-weight:400;color:var(--sub);}
+/* 배송 애니메이션 */
+.roadwrap{position:relative;height:104px;margin:18px 0 8px;overflow:hidden;}
+.roadline{position:absolute;left:0;right:0;bottom:26px;height:4px;
+  background:repeating-linear-gradient(90deg,var(--sub) 0 26px,transparent 26px 44px);opacity:.5;border-radius:2px;}
+.mover{position:absolute;bottom:34px;left:-70px;font-size:48px;animation:drive 1.6s ease-in-out forwards;}
+@keyframes drive{0%{left:-70px;}100%{left:calc(100% + 30px);}}
+.mover.flip{transform:scaleX(-1);}
+.pulse{animation:pulsy 1.1s ease infinite;}
+@keyframes pulsy{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+/* 컨페티 */
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden;}
+.confetti span{position:absolute;top:-6vh;font-size:19px;animation:fall 2.3s linear forwards;}
+@keyframes fall{to{transform:translateY(115vh) rotate(560deg);opacity:.85;}}
+/* Vehicles */
+.vgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+.vcard{border:1.5px solid var(--line);border-radius:12px;padding:13px;cursor:pointer;background:var(--canvas);
+  text-align:left;font-family:inherit;font-size:15px;transition:transform .12s, border-color .12s;}
+.vcard:hover:not(:disabled){transform:translateY(-2px);border-color:var(--blue);}
+.vcard:disabled{opacity:.45;cursor:not-allowed;background:var(--soft);}
+.vcard .vemoji{font-size:28px;}
+.vcard .vname{font-weight:700;margin:2px 0 4px;font-size:16px;}
+.vcard .vstats{font-size:12.5px;color:var(--sub);line-height:1.6;}
+.vcard .evtag{display:inline-block;background:var(--orange-soft);color:var(--orange);border-radius:5px;
+  font-size:11.5px;padding:1px 6px;margin-top:4px;font-weight:700;}
+.vcard .noreason{color:var(--red);font-size:12px;font-weight:700;}
+/* Result */
+.stamp{display:inline-block;font-size:24px;font-weight:800;color:var(--green);
+  border:3px solid var(--green);border-radius:12px;padding:6px 18px;transform:rotate(-3deg);margin:6px 0;}
+.gainloss{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;}
+.gl{border-radius:10px;padding:13px;font-size:14.5px;}
+.gl.gain{background:var(--green-soft);} .gl.loss{background:var(--red-soft);}
+.gl b{display:block;margin-bottom:6px;font-size:15.5px;}
+.gl ul{margin:0;padding-left:18px;}
+.gl li{margin:3px 0;}
+/* 이벤트 */
+.evcard{border-left:4px solid var(--orange);animation:pop .35s ease, shake .5s ease .35s;}
+@keyframes shake{0%,100%{transform:none;}20%{transform:translateX(-6px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(2px);}}
+.evbig{font-size:54px;text-align:center;margin:4px 0;}
+/* 챕터 & 에필로그 */
+.chapter{background:linear-gradient(160deg,#EAF3FC 0%,#FFFFFF 70%);text-align:center;}
+.chapter .cemoji{font-size:60px;margin:6px 0;}
+.night{background:#242C3B;border:none;color:#F2F1EF;}
+.night .stline{color:#F2F1EF;}
+.night .sub,.night .stline.quiet{color:#AEB4C0;}
+/* Quiz modal */
+#modal{position:fixed;inset:0;background:rgba(30,30,30,.45);z-index:20;display:none;
+  align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 16px;}
+#modal.show{display:flex;}
+.mcard{background:var(--canvas);border-radius:16px;max-width:480px;width:100%;padding:22px;
+  box-shadow:0 8px 30px rgba(0,0,0,.18);animation:pop .3s ease;margin:auto 0;}
+.mascotrow{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.mascotrow img{width:64px;height:auto;}
+.mascotrow .bubble{background:var(--soft);border-radius:12px;padding:9px 13px;font-size:14.5px;flex:1;}
+.qcat{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:4px;}
+.qtext{font-weight:700;font-size:17.5px;margin-bottom:12px;}
+.opts{display:flex;flex-direction:column;gap:8px;}
+.opt{border:1.5px solid var(--line);background:var(--canvas);border-radius:10px;padding:12px 15px;
+  text-align:left;font-family:inherit;font-size:15.5px;cursor:pointer;min-height:46px;}
+.opt:hover:not(:disabled){border-color:var(--blue);background:var(--blue-soft);}
+.opt.correct{border-color:var(--green);background:var(--green-soft);font-weight:700;}
+.opt.wrong{border-color:var(--red);background:var(--red-soft);}
+.opt:disabled{cursor:default;}
+.exp{background:var(--soft);border-radius:10px;padding:11px 13px;font-size:14px;margin-top:10px;}
+/* Timeline & end */
+.timeline{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;}
+.tl{background:var(--soft);border-radius:8px;padding:6px 9px;font-size:13px;}
+.reportbox{background:var(--soft);border-radius:12px;padding:15px;margin:12px 0;}
+.badgebig{font-size:22px;letter-spacing:2px;}
+canvas{display:block;margin:0 auto;}
+.divider{border:none;border-top:1px solid var(--line);margin:14px 0;}
+.progress-dots{display:flex;gap:4px;justify-content:center;margin:8px 0 2px;flex-wrap:wrap;}
+.pdot{width:8px;height:8px;border-radius:50%;background:var(--soft2);}
+.pdot.done{background:var(--blue);}
+.pdot.now{background:var(--orange);}
+.small-note{font-size:12.5px;color:var(--sub);}
+.vcard.rent{ border-style:dashed; border-color:#E8B24B; background:#FFFBF2; }
+.renttag{ display:inline-block; font-size:11px; font-weight:700; color:#8A6A1F; background:#FDEDCB; border-radius:6px; padding:2px 7px; margin:3px 0; }
+.figcard{ display:flex; gap:14px; align-items:center; background:#FFF9F0; border:1px solid #F0E3CE; border-radius:14px; padding:14px; margin:12px 0; }
+.figcard img{ width:112px; height:auto; flex:0 0 auto; }
+.figavatar{ width:112px; flex:0 0 auto; font-size:72px; text-align:center; line-height:1.4; }
+@media (max-width:480px){ .figcard{ flex-direction:column; text-align:center; } }
+.usegrid{ display:flex; flex-wrap:wrap; gap:10px; margin:8px 0 14px; }
+.usestat{ display:flex; flex-direction:column; align-items:center; background:#F7FAFF; border:1px solid #DCE7F5; border-radius:12px; padding:10px 12px; min-width:84px; }
+.usestat.top{ background:#FFF6DF; border-color:#F0D48A; box-shadow:0 2px 8px rgba(240,180,60,.25); }
+.use-emoji{ font-size:40px; line-height:1.15; }
+.usestat.top .use-emoji{ font-size:58px; }
+.use-count{ font-size:18px; font-weight:800; margin-top:2px; }
+.use-name{ font-size:12px; color:#666; }
+.use-crown{ font-size:11px; color:#A97800; font-weight:700; margin-top:2px; }
+.collgrid{ display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 14px; }
+.collslot{ position:relative; display:flex; flex-direction:column; align-items:center; gap:3px; width:76px; padding:9px 4px 7px; background:#F4F1EA; border:1px dashed #CFC6B5; border-radius:12px; }
+.collslot.got{ background:#FFF9F0; border:1px solid #F0D9AF; }
+.collslot img{ width:48px; height:48px; border-radius:50%; }
+.collemoji{ font-size:32px; line-height:48px; height:48px; }
+.collslot:not(.got) .collemoji{ filter:grayscale(1); opacity:.5; }
+.collname{ font-size:11px; color:#555; text-align:center; }
+.collslot.now{ outline:3px solid #FFC84A; }
+.collnew{ position:absolute; top:-8px; right:-7px; background:#FF5A5F; color:#fff; font-size:10px; font-weight:800; padding:2px 6px; border-radius:10px; }
+.noanim .rv{opacity:1 !important;transform:none !important;transition:none !important;}
+.noanim .card,.noanim .mover,.noanim .confetti,.noanim .pulse{animation:none !important;}
+.titleimg{width:120px;height:auto;margin:0 auto 8px;display:block;}
+@media (max-width:420px){
+  .vgrid{grid-template-columns:1fr;}
+  .gainloss{grid-template-columns:1fr;}
+  #wrap{padding:10px 12px 40px;}
+  .card{padding:18px;}
+  .stline{font-size:18px;}
+}
+</style>
+<link rel="stylesheet" href="v9-ui.css">
+<link rel="preload" as="image" href="https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-8e8e82d884bb7d2d910fc40b.webp" fetchpriority="high"><style id="gc-fullscreen-only">
+html.gc-fullscreen,html.gc-fullscreen body{width:100%;min-height:100%;min-height:100dvh;margin:0!important;padding:0!important;box-sizing:border-box}
+html.gc-fullscreen #app,html.gc-fullscreen #root{width:100%;min-height:100dvh}
+html.gc-fullscreen .wrapper,html.gc-fullscreen .dashboard,html.gc-fullscreen main{max-width:none}
+html.gc-fullscreen .room-container{max-width:none;max-height:none}
+html.gc-fullscreen .console-container{max-width:none;width:100%;min-height:100dvh;border-radius:0}
+html.gc-fullscreen #game-app-viewport{height:100dvh}
+html.gc-fullscreen #game-frame{width:100%;max-width:none;height:100dvh;min-height:0;border:0;border-radius:0}
+html.gc-fullscreen #stage-viewport{min-height:0;padding-bottom:var(--gc-panel-space,240px)}
+html.gc-fullscreen #avatar-img{max-height:min(410px,44dvh)}
+html.gc-fullscreen #interaction-panel{max-height:55dvh;overflow-y:auto}
+@media(max-width:900px){html.gc-fullscreen #game-frame{height:100dvh}html.gc-fullscreen #interaction-panel{bottom:8px;width:calc(100% - 16px);padding:12px}html.gc-fullscreen #top-nav{padding:8px;gap:8px;flex-wrap:wrap}}
+</style></head>
+<body>
+<img id="bgimg" src="https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-8e8e82d884bb7d2d910fc40b.webp" alt="">
+<div id="wrap">
+  <div id="hud">
+    <div class="toprow"><span class="round" id="hud-round"></span><span style="display:flex;align-items:center;gap:8px;"><span class="badges" id="hud-badges"></span><button class="infobtn" type="button" onclick="toggleInfo()">❓ 지표 설명 <span id="info-arrow">▾</span></button></span></div>
+    <div class="stats">
+      <div class="stat"><span class="ico">💰</span><div class="track"><div class="fill f-money" id="bar-money"></div></div><span class="val" id="val-money"></span></div>
+      <div class="stat"><span class="ico">⏱️</span><div class="track"><div class="fill f-cust" id="bar-cust"></div></div><span class="val" id="val-cust"></span></div>
+      <div class="stat"><span class="ico">🌍</span><div class="track"><div class="fill f-env" id="bar-env"></div></div><span class="val" id="val-env"></span></div>
+      <div class="stat"><span class="ico">👥</span><div class="track"><div class="fill f-soc" id="bar-soc"></div></div><span class="val" id="val-soc"></span></div>
+    </div>
+    <div id="statinfo">
+      <div class="si-row"><span class="si-ico">💰</span><div><b>예산</b> <span class="si-val" id="si-money"></span> — 회사의 돈. 배송 보수로 벌고, 운송 비용과 매 라운드 유지비 −3으로 빠져나간다. <b>0이 되면 파산!</b></div></div>
+      <div class="si-row"><span class="si-ico">⏱️</span><div><b>고객 만족</b> <span class="si-val" id="si-cust"></span> — 배송 속도에 대한 평가. 긴급 미션을 빠른 수단으로 해내면 오르고, 늦으면 크게 떨어진다. 같은 수단만 3연속 쓰면 −4. <b>0이 되면 계약 해지!</b></div></div>
+      <div class="si-row"><span class="si-ico">🌍</span><div><b>환경</b> <span class="si-val" id="si-env"></span> — 도시의 공기. 배송에서 나온 CO₂만큼 낮아진다(거리가 멀고 왕복 배송일수록 더 많이). <b>0이 되면 영업 정지!</b></div></div>
+      <div class="si-row"><span class="si-ico">👥</span><div><b>사회</b> <span class="si-val" id="si-soc"></span> — 지역 일자리와 이웃의 신뢰. 자전거·수소는 올리고, 드론 소음·로봇 자동화는 내린다. <b>0이 되면 지역 사회의 외면!</b></div></div>
+      <p class="si-note">🔴 게이지가 빨갛게 깜빡이면 25 미만 — 위험 신호! · 챕터가 바뀔 때 네 지표가 모두 40 이상이면 안정 경영 보너스 💰+8</p>
+    </div>
+  </div>
+  <div id="screen"></div>
+</div>
+<div id="modal"></div>
+
+<script>
+/* ==========================================================================
+   ⚙️ 선생님 설정
+   quizFrequency: "gate"(관문만) | "alternate"(격 라운드, 기본값) | "every"(매 라운드)
+   textSpeed: 문장이 한 줄씩 나타나는 간격(ms). 0으로 하면 즉시 표시(플레이 타임 단축)
+   ========================================================================== */
+const CONFIG = { quizFrequency: "alternate", textSpeed: 480, upkeep: 3, startStats: { money: 50, cust: 60, env: 65, soc: 65 } };
+const TOTAL_ROUNDS = 12;
+const GATE_AFTER = [4, 8];          // 관문 퀴즈: 챕터 경계
+const BONUS_ALT = [2, 6, 10];       // 보너스 퀴즈(격 라운드 기본값)
+const BONUS_EVERY = [1, 2, 3, 5, 6, 7, 9, 10, 11];
+
+const MASCOT = "https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-15c33fc4e6c2ad06d8fc7bd5.webp";
+
+/* ----- 챕터 (스토리 진행) ----- */
+const CHAPTERS = [
+  { start:1, emoji:"🛖", title:"1장 · 동네 배송 시절", sub:"작은 창고에서 시작하다", lines:[
+    "당신은 오늘, 작은 배송 회사를 차렸다.",
+    "가진 것은 중고 트럭 한 대와 자전거 한 대.",
+    "비싼 장비가 필요하면 외주 업체에 맡길 수도 있다. 물론, 비싸게.",
+    "…첫 손님이 문을 두드린다!" ] },
+  { start:5, emoji:"🏢", title:"2장 · 전국으로!", sub:"첫 투자 유치 성공", lines:[
+    "소문이 났다. 주문이 밀려든다.",
+    "그리고 — 첫 투자 유치에 성공했다!",
+    "이 투자금을 어디에 쓸 것인가?",
+    "당신의 선택이 회사의 색깔을 결정한다." ] },
+  { start:9, emoji:"🏙️", title:"3장 · 미래가 걸린 계약", sub:"도시가 지켜보고 있다", lines:[
+    "당신의 회사는 이제 도시의 일부다.",
+    "시청이 '미래 도시 물류 파트너'를 찾는다.",
+    "두 번째 투자금이 들어왔다 — 미래 기술에 투자할 차례다.",
+    "마지막 네 번의 선택이 이 도시의 10년 후를 결정한다." ] },
+];
+
+/* ----- 투자 분기 (챕터 진입 시 선택) ----- */
+const INVESTS = [
+  null,
+  { title:"💼 첫 투자금, 어디에 쓸까?", options:[
+    { id:"speed",  emoji:"🚀", name:"스피드 노선", desc:"🚁 배송 드론 + 🛵 전기 오토바이 도입", add:["drone","moto"], perk:null, perkText:"긴급 미션에 강해진다" },
+    { id:"clean",  emoji:"🌱", name:"클린 노선", desc:"⚡ 전기 트럭 + 💧 수소 트럭 조기 도입", add:["ev","h2"], perk:null, perkText:"환경 지표 방어에 유리하다" },
+    { id:"people", emoji:"👥", name:"상생 노선", desc:"⚡ 전기 트럭 + 🚲 자전거 배송단 확충", add:["ev"], perk:"bikeplus", perkText:"자전거 용량 ↑ · 사회 점수 추가 보너스" },
+    { id:"rail",   emoji:"🚆", name:"철길 노선", desc:"🚆 화물 열차 + ⚡ 전기 트럭 도입", add:["rail","ev"], perk:null, perkText:"대량·장거리를 저탄소로 나른다" },
+  ]},
+  { title:"🏙️ 미래 도시 투자, 어디에 걸까?", options:[
+    { id:"sky",    emoji:"🛫", name:"하늘 노선", desc:"🛫 UAM 화물 항공기 + 🚁 드론 도입", add:["uam","drone"], perk:null, perkText:"하늘길로 거리 한계 돌파" },
+    { id:"auto",   emoji:"🤖", name:"자동화 노선", desc:"🤖 AMR 물류 로봇 + 스마트 물류센터", add:["amr"], perk:"hub", perkText:"모든 배송 비용 −2" },
+    { id:"h2city", emoji:"💧", name:"수소 도시 노선", desc:"💧 수소 트럭 + 수소 충전망 구축", add:["h2"], perk:"h2cheap", perkText:"수소 트럭 비용 −6" },
+    { id:"sea",    emoji:"🚢", name:"바닷길 노선", desc:"🚢 연안 화물선 + 🚆 화물 열차 도입", add:["ship","rail"], perk:null, perkText:"가장 싼 대량 수송로 확보" },
+  ]},
+];
+
+
+/* ----- 수송 수단 (cost 비용 / speed 1느림~3빠름 / env 환경영향 / soc 사회영향 / cap 용량 1~3 / range 거리 1~3) ----- */
+const VEHICLES = [
+  { id:"ice",  unlock:1, emoji:"🚚", name:"내연기관 트럭", cost:10, speed:2, env:-10, soc:0,  cap:3, range:3, desc:"싸고 어디든 가지만 CO₂ 배출이 크다" },
+  { id:"ev",   unlock:2, emoji:"⚡", name:"전기 트럭",     cost:15, speed:2, env:-4,  soc:0,  cap:3, range:2, desc:"깨끗해 보이지만, 전기는 어디서 왔을까?" },
+  { id:"h2",   unlock:3, emoji:"💧", name:"수소 트럭",     cost:24, speed:2, env:-1,  soc:0,  cap:3, range:3, desc:"가장 깨끗하지만 그만큼 비싸다" },
+  { id:"drone",unlock:2, emoji:"🚁", name:"배송 드론",     cost:14, speed:3, env:-3,  soc:-3, cap:1, range:2, desc:"빠르지만 소음 민원, 소량만 가능" },
+  { id:"amr",  unlock:3, emoji:"🤖", name:"AMR 물류 로봇", cost:18, speed:1, env:-3,  soc:-6, cap:2, range:1, desc:"인건비 절감, 하지만 일자리는?" },
+  { id:"bike", unlock:1, emoji:"🚲", name:"자전거 배달",   cost:5,  speed:1, env:0,   soc:5,  cap:1, range:1, desc:"탄소 0, 지역 일자리 창출, 느리다" },
+  { id:"uam",  unlock:3, emoji:"🛫", name:"UAM 화물 항공", cost:30, speed:3, env:-2,  soc:-2, cap:2, range:3, desc:"하늘을 나는 최첨단 물류 — 가장 빠르고 가장 비싸다" },
+  { id:"moto", unlock:1, emoji:"🛵", name:"전기 오토바이", cost:8,  speed:3, env:-1,  soc:0,  cap:1, range:2, desc:"골목을 누비는 소량 긴급 배송의 강자" },
+  { id:"rail", unlock:2, emoji:"🚆", name:"화물 열차",     cost:12, speed:1, env:-2,  soc:1,  cap:3, range:3, desc:"대량·장거리를 적은 탄소로 — 대신 느리다" },
+  { id:"ship", unlock:3, emoji:"🚢", name:"연안 화물선",   cost:9,  speed:1, env:-3,  soc:1,  cap:3, range:3, desc:"가장 싸게, 많이, 멀리 — 하지만 뱃길은 몹시 느리다" },
+];
+
+/* ----- 미션 12개 (dist 1~3 / urg 1~3 / vol 1~3 / reward 보수 / story 도입 문장) ----- */
+const MISSIONS = [
+  { emoji:"📄", title:"도심 서류 배송", dist:1, urg:2, vol:1, reward:15, story:["첫 의뢰가 들어왔다!","시내 5km, 계약서 한 통.","오늘 안에만 도착하면 된다."] },
+  { emoji:"🍰", title:"생신 케이크 배송", dist:1, urg:2, vol:1, reward:18, story:["단골손님의 특별 주문.","할머니 생신 케이크, 10km.","녹기 전에! 하지만 조심조심."] },
+  { emoji:"🥬", title:"신선식품 긴급 배송", dist:2, urg:3, vol:2, reward:25, story:["마트 사장님의 다급한 전화.","“채소가 시들기 전에 와야 해요!”","30km — 시간이 없다!"] },
+  { emoji:"📦", title:"택배 200건 대란", dist:1, urg:2, vol:3, reward:30, story:["온라인 쇼핑 대란이 터졌다!","시내 전역으로 택배 200건.","물량이 어마어마하다."] },
+  { emoji:"🩸", title:"병원 혈액 초긴급", dist:2, urg:3, vol:1, reward:26, story:["병원의 긴급 요청!","혈액 운송, 15km.","1분 1초가 생명이다."] },
+  { emoji:"🏔️", title:"산간 마을 생필품", dist:3, urg:1, vol:2, reward:28, story:["80km 산길 너머의 마을.","생필품 정기 배송 계약이다.","길은 멀지만, 누군가는 가야 한다."] },
+  { emoji:"⛈️", title:"폭우 구호 물자", dist:2, urg:3, vol:3, reward:35, story:["밤사이 폭우가 도시를 덮쳤다.","구호 물자를 40km 밖 대피소로!","도로 사정이 좋지 않다."] },
+  { emoji:"🎪", title:"축제 물품 당일 배송", dist:2, urg:3, vol:3, reward:35, story:["도시 축제가 오늘 개막한다!","무대 물품 대량 배송, 50km.","도시 전체가 지켜보고 있다."] },
+  { emoji:"🏝️", title:"섬마을 의약품", dist:3, urg:3, vol:1, reward:30, story:["태풍으로 다리가 끊긴 섬마을.","의약품이 급하다 — 70km.","과연 어떤 수단이 닿을 수 있을까?"] },
+  { emoji:"💉", title:"백신 콜드체인 배송", dist:2, urg:3, vol:2, reward:38, story:["신종 독감이 유행하기 시작했다.","보건소로 백신을 옮겨야 한다 — 45km.","온도가 오르기 전에, 빠르고 정확하게!"] },
+  { emoji:"🌉", title:"교량 통제 우회 배송", dist:3, urg:2, vol:2, reward:36, story:["안전 점검으로 강북대교가 통제됐다.","공장 부품을 90km 우회해서 배송해야 한다.","땅이 막혔다면 — 하늘은 어떨까?"] },
+  { emoji:"🌆", title:"미래 도시 최종 심사", dist:2, urg:2, vol:3, reward:45, story:["드디어 최종 심사의 날.","시청의 '미래 도시 물류' 시범 배송.","이 한 번의 선택에","당신의 10년이 담긴다."] },
+];
+
+/* ----- 랜덤 이벤트 ----- */
+const EVENTS = [
+  { id:"fuel",  emoji:"⛽", title:"유가 급등!", text:"국제 유가가 치솟았다. 다음 배송에서 내연기관 트럭 비용이 2배가 된다.", mod:{ target:"ice", costX:2 } },
+  { id:"subsidy", emoji:"🌱", title:"그린수소 보조금", text:"정부가 수소 운송 보조금을 발표했다. 다음 배송에서 수소 트럭 비용이 절반!", mod:{ target:"h2", costX:0.5 } },
+  { id:"grid", emoji:"🔌", title:"전력망 비상", text:"발전소 사정으로 석탄 발전 비중이 늘었다. 다음 배송에서 전기 트럭의 CO₂ 배출이 2배로 계산된다. (전기는 1차 에너지가 아니라는 것, 기억하지?)", mod:{ target:"ev", envX:2 } },
+  { id:"droneban", emoji:"🚫", title:"드론 규제 강화", text:"도심 드론 비행 규제가 강화됐다. 다음 배송에서 드론 비용(허가비 포함)이 2배!", mod:{ target:"drone", costX:2 } },
+  { id:"calm", emoji:"🌤️", title:"평온한 한 주", text:"별일 없이 지나갔다. 이런 날도 있어야지.", mod:null },
+  { id:"rival", emoji:"🏬", title:"경쟁사 저가 공세!", text:"대형 물류 회사가 반값 배송을 시작했다. 고객 일부가 흔들린다… ⏱️ -5", apply:s=>{s.cust-=5;}, mod:null },
+  { id:"tax",  emoji:"🌍", title:"탄소세 부과!", text:"누적된 CO₂ 배출로 탄소세가 부과됐다. 💰 -15", cond:s=>s.env<55, apply:s=>{s.money-=15;}, mod:null },
+  { id:"strike", emoji:"✊", title:"배송 노동 갈등", text:"자동화 위주 경영에 지역 배송 노동자들이 반발했다. 배송이 지연되어 ⏱️ -10", cond:s=>s.soc<55, apply:s=>{s.cust-=10;}, mod:null },
+  { id:"praise", emoji:"📰", title:"지역 언론의 칭찬", text:"'지역과 함께하는 배송 회사'로 보도되어 신규 고객이 늘었다. ⏱️ +6", cond:s=>s.soc>=75, apply:s=>{s.cust+=6;}, mod:null },
+  { id:"greencert", emoji:"💚", title:"친환경 기업 인증!", text:"깨끗한 배송 기록으로 친환경 인증을 받았다. 보조금 지급 💰 +10", cond:s=>s.env>=75, apply:s=>{s.money+=10;}, mod:null },
+  { id:"h2price", emoji:"📈", title:"수소 가격 급등!", text:"세계적으로 수소 수요가 폭증했다. 다음 배송에서 수소 트럭 비용이 2배!", mod:{ target:"h2", costX:2 } },
+  { id:"forest", emoji:"🌳", title:"도시 숲 캠페인 초청", text:"꾸준한 저탄소 배송이 알려져 시의 도시 숲 캠페인에 초청됐다. 🌍 +7", cond:s=>s.env>=60, apply:s=>{s.env+=7;}, mod:null },
+];
+
+/* ==========================================================================
+   📚 퀴즈 문항 풀 (cat: history 발달사 / energy 에너지 변환 / future 미래 물류 / judge 판단형)
+   opts[0]이 정답 — 화면에 나올 때 자동으로 섞입니다.
+   ========================================================================== */
+const CATS = { history:"🏛️ 수송 기술 발달사", energy:"⚡ 동력원과 에너지 변환", future:"🤖 미래 수송·물류", judge:"⚖️ 지속가능성 판단" };
+const QUIZ = [
+  { cat:"history", q:"수송 수단이 발달해 온 순서로 알맞은 것은?", opts:["마차 → 증기기관차 → 내연기관 자동차 → 전기·수소차","증기기관차 → 마차 → 전기·수소차 → 내연기관 자동차","내연기관 자동차 → 마차 → 증기기관차 → 전기·수소차","마차 → 내연기관 자동차 → 증기기관차 → 전기·수소차"], exp:"동력원이 사람·동물 → 증기 → 내연기관 → 전기·수소로 바뀔 때마다 수송 기술이 크게 도약했어요." },
+  { cat:"history", q:"증기기관이 수송에 가져온 가장 큰 변화는?", opts:["사람과 동물의 힘에서 벗어나 대량·장거리 수송이 가능해졌다","연료 없이 움직이는 수송이 가능해졌다","하늘을 나는 수송이 시작되었다","수송 속도가 느려졌지만 더 안전해졌다"], exp:"증기기관 덕분에 기차와 증기선이 등장하며 산업혁명의 물류를 이끌었어요." },
+  { cat:"history", q:"자동차가 널리 보급된 결정적 계기는?", opts:["컨베이어 벨트 대량 생산으로 가격이 크게 내려갔다","자동차 디자인이 예뻐졌다","말의 수가 갑자기 줄어들었다","휘발유가 공짜였다"], exp:"1913년 포드의 컨베이어 벨트 생산 방식이 자동차 가격을 확 낮춰 보통 사람도 살 수 있게 됐어요." },
+  { cat:"history", q:"다음 중 가장 최근에 등장한 수송 기술은?", opts:["자율주행 자동차","증기기관차","내연기관 자동차","범선"], exp:"자율주행은 센서·AI·GPS가 모두 발달한 최근에야 가능해진 기술이에요." },
+  { cat:"history", q:"컨테이너의 발명이 '물류 혁명'이라 불리는 이유는?", opts:["크기를 통일해 배·기차·트럭 사이에 옮겨 싣기 쉬워졌다","화물이 가벼워졌다","배의 속도가 2배가 되었다","창고가 필요 없어졌다"], exp:"규격 통일 하나로 환적 비용과 시간이 극적으로 줄어 세계 무역이 폭발적으로 성장했어요." },
+  { cat:"history", q:"철도의 발달이 사회에 준 가장 큰 영향은?", opts:["도시 사이 이동 시간이 줄고 물자 교류가 크게 늘었다","사람들이 여행을 하지 않게 되었다","모든 도시가 사라졌다","물건 값이 모두 올랐다"], exp:"철도망은 도시와 산업의 지도를 바꿨어요. 수송 기술은 사회 구조까지 바꿉니다." },
+  { cat:"energy", q:"전기 자동차의 에너지 변환 과정으로 알맞은 것은?", opts:["배터리의 화학 에너지 → 전기 에너지 → 운동 에너지","열 에너지 → 화학 에너지 → 전기 에너지","운동 에너지 → 전기 에너지 → 화학 에너지","빛 에너지 → 열 에너지 → 운동 에너지"], exp:"배터리에 저장된 화학 에너지가 전기가 되고, 모터에서 운동 에너지로 바뀌어요." },
+  { cat:"energy", q:"내연기관 자동차는 연료의 어떤 에너지를 이용할까?", opts:["화학 에너지를 태워 열을 만들고 운동 에너지로 바꾼다","위치 에너지를 바로 사용한다","소리 에너지를 모아 사용한다","빛 에너지를 저장해 사용한다"], exp:"연료의 화학 에너지 → 연소(열) → 피스톤의 운동. 변환 단계마다 에너지 일부는 손실돼요." },
+  { cat:"energy", q:"수소 연료 전지차(FCEV)가 달릴 때 배출하는 것은?", opts:["물(수증기)","이산화탄소","미세먼지 덩어리","질소 가스만"], exp:"수소와 산소가 반응해 전기를 만들고, 남는 건 물뿐이에요. 그래서 '궁극의 친환경차'로 불려요." },
+  { cat:"energy", q:"전기차를 '항상 친환경'이라 말하기 어려운 이유는?", opts:["전기를 만든 1차 에너지원에 따라 CO₂ 배출이 달라지기 때문","전기차는 소음이 크기 때문","전기차는 바퀴가 없기 때문","전기차는 밤에만 달릴 수 있기 때문"], exp:"석탄 발전 전기로 충전하면 CO₂를 '간접 배출'하는 셈이에요. 전기는 2차 에너지라는 걸 기억!" },
+  { cat:"energy", q:"'그린 수소'란 무엇일까?", opts:["재생에너지 전기로 물을 분해해 만든 수소","석탄에서 뽑아낸 수소","색이 초록색인 수소","식물에서 짜낸 수소"], exp:"만들 때 CO₂ 배출이 없는 수소예요. 가장 깨끗하지만 아직 가장 비싸다는 게 트레이드오프!" },
+  { cat:"energy", q:"다음 중 2차 에너지는?", opts:["전기","석유","태양빛","바람"], exp:"전기는 자연에서 바로 얻는 게 아니라 1차 에너지를 가공해 만든 2차 에너지예요." },
+  { cat:"future", q:"AGV와 AMR의 가장 큰 차이는?", opts:["AGV는 정해진 경로만, AMR은 스스로 경로를 찾아 이동한다","AGV는 하늘을 난다","AMR은 사람이 직접 운전한다","둘은 이름만 다르고 완전히 같다"], exp:"AGV(무인 운반 차량)는 정해진 길, AMR(자율주행 물류 로봇)은 주변을 인식해 스스로 길을 찾아요." },
+  { cat:"future", q:"자율주행차에 꼭 필요한 기술이 아닌 것은?", opts:["증기기관","주변을 인식하는 센서","판단하는 인공지능","위치를 파악하는 GPS"], exp:"자율주행 = 인식(센서) + 판단(AI) + 위치(GPS·지도). 증기기관은 200년 전 기술이죠." },
+  { cat:"future", q:"FCEV는 무엇의 줄임말일까?", opts:["수소 연료 전지 자동차","초고속 전기 자동차","무인 화물 자동차","태양광 자동차"], exp:"Fuel Cell Electric Vehicle — 수소 연료 전지로 전기를 만들어 달리는 차예요." },
+  { cat:"future", q:"하이퍼루프가 매우 빠를 수 있는 원리는?", opts:["공기를 뺀 튜브 속을 달려 공기 저항을 줄인다","엔진이 여러 개 달려 있다","내리막길만 골라 달린다","바람의 힘으로 밀어 준다"], exp:"진공에 가까운 튜브 + 자기부상 = 공기 저항과 마찰을 최소화해 비행기급 속도를 노려요." },
+  { cat:"future", q:"UAM(도심 항공 모빌리티)이란?", opts:["도심 하늘을 나는 새로운 교통 수단","지하 초고속 열차","무인 화물선","우주 관광선"], exp:"Urban Air Mobility — '하늘을 나는 택시'처럼 도심 상공을 활용하는 미래 교통이에요." },
+  { cat:"future", q:"물류 센터 자동화의 효과로 가장 알맞은 것은?", opts:["분류 속도와 정확도는 높아지지만 일자리 구조가 바뀐다","모든 사람의 일자리가 늘어난다","배송이 오히려 느려진다","전기가 필요 없어진다"], exp:"효율은 올라가지만 사람의 일이 바뀌어요. 기술 발달에는 언제나 빛과 그림자가 함께!" },
+  { cat:"judge", q:"5km 거리, 소량의 긴급 서류를 '탄소 배출 없이' 배송하려면?", opts:["자전거 배달","내연기관 트럭","대형 화물선","경유 오토바이"], exp:"짧은 거리 + 소량이라면 자전거가 탄소 0의 답이 될 수 있어요. 상황에 따라 최선이 달라져요." },
+  { cat:"judge", q:"아주 먼 거리의 대량 화물 수송에서 에너지 효율이 높은 수단은?", opts:["철도·선박","오토바이","드론","자전거"], exp:"한 번에 많이 실을수록 화물 1개당 에너지가 줄어요. 그래서 장거리 대량 수송은 철도·배가 유리해요." },
+  { cat:"judge", q:"'지금 당장 모두 그린 수소로 바꾸자'는 주장의 가장 큰 현실적 걸림돌은?", opts:["생산 비용이 아직 매우 비싸다","수소는 지구에 존재하지 않는다","수소차는 만들 수 없다","그린 수소는 오염이 심하다"], exp:"기술적으로는 가능하지만 비용이 문제예요. '누가 그 비용을 낼 것인가'가 진짜 쟁점이죠." },
+  { cat:"judge", q:"물류 자동화를 도입할 때 함께 고민해야 할 사회 문제는?", opts:["일자리 구조의 변화","로봇의 취미 생활","창고의 벽지 색깔","상자의 모양"], exp:"자동화로 사라지는 일과 새로 생기는 일 — 그 사이에 있는 '사람'을 생각해야 해요." },
+  { cat:"judge", q:"'탄소 중립'의 뜻으로 알맞은 것은?", opts:["배출한 만큼 흡수해 실질 배출량을 0으로 만드는 것","탄소를 전혀 사용하지 않는 것","탄소를 지금보다 더 배출하는 것","탄소로 연료를 만드는 것"], exp:"배출량 - 흡수량 = 0. 그래서 '넷 제로(Net Zero)'라고도 불러요." },
+  { cat:"judge", q:"이 게임의 핵심 개념, '트레이드오프(trade-off)'란?", opts:["하나를 얻으면 다른 하나를 어느 정도 포기하게 되는 관계","무엇이든 공짜로 얻는 방법","항상 모두가 이기는 선택","아무것도 선택하지 않는 것"], exp:"모든 선택에는 대가가 있어요. 좋은 선택이란 그 대가를 '알고' 감수하는 선택이에요." },
+];
+
+/* ========================= 게임 엔진 ========================= */
+let S; // state
+const $ = id => document.getElementById(id);
+const screen = () => $("screen");
+const clamp = (v,a=0,b=100) => Math.max(a, Math.min(b, Math.round(v)));
+const shuffle = arr => { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+
+function newState(){
+  return { round:1, stats:{...CONFIG.startStats}, history:[], usedQuiz:new Set(), badges:0,
+    nextMod:null, lastEvent:null, bonusIdx:0, lastVeh:null, streak:0,
+    fleet:new Set(["ice","bike"]), perks:new Set() };
+}
+const BONUS_REWARDS = [
+  { label:"💰 예산 +10", apply:s=>s.money+=10 },
+  { label:"🌍 환경 +8 (친환경 캠페인 효과)", apply:s=>s.env+=8 },
+  { label:"⏱️ 고객 만족 +7", apply:s=>s.cust+=7 },
+  { label:"👥 사회 +7 (지역 상생 홍보)", apply:s=>s.soc+=7 },
+];
+
+/* ----- 순차 공개 연출 (한 화면 한 메시지) ----- */
+let rvTimers = [];
+function reveal(interval){
+  const iv = interval ?? CONFIG.textSpeed;
+  rvTimers.forEach(clearTimeout); rvTimers = [];
+  const els = [...document.querySelectorAll(".rv:not(.show)")];
+  if (iv <= 0){ els.forEach(el=>el.classList.add("show")); return; }
+  els.forEach((el,i)=>rvTimers.push(setTimeout(()=>el.classList.add("show"), 160 + i*iv)));
+}
+function ffwd(){
+  rvTimers.forEach(clearTimeout); rvTimers = [];
+  document.querySelectorAll(".rv").forEach(e=>e.classList.add("show"));
+}
+function confetti(n){
+  const c = document.createElement("div"); c.className = "confetti";
+  const pick = ["🎉","✨","⭐","🎊","💙","💚","🧡"];
+  for(let i=0;i<(n||24);i++){
+    const s = document.createElement("span");
+    s.textContent = pick[Math.floor(Math.random()*pick.length)];
+    s.style.left = Math.random()*100 + "vw";
+    s.style.animationDelay = (Math.random()*0.7) + "s";
+    s.style.fontSize = (14 + Math.random()*12) + "px";
+    c.appendChild(s);
+  }
+  document.body.appendChild(c);
+  setTimeout(()=>c.remove(), 3200);
+}
+
+function chapterOf(round){
+  for(let i=CHAPTERS.length-1;i>=0;i--) if(round >= CHAPTERS[i].start) return i;
+  return 0;
+}
+function updateHUD(){
+  $("hud").style.display = "block";
+  const ch = CHAPTERS[chapterOf(S.round)];
+  $("hud-round").textContent = `${ch.emoji} 라운드 ${Math.min(S.round,TOTAL_ROUNDS)} / ${TOTAL_ROUNDS}`;
+  $("hud-badges").textContent = S.badges > 0 ? `배지 🎖️×${S.badges}` : "";
+  for(const k of ["money","cust","env","soc"]){
+    S.stats[k] = clamp(S.stats[k]);
+    $("bar-"+k).style.width = S.stats[k] + "%";
+    $("bar-"+k).classList.toggle("lowstat", S.stats[k] < 25);
+    $("val-"+k).textContent = S.stats[k];
+  }
+  syncInfoVals();
+}
+function toggleInfo(){
+  const p = $("statinfo");
+  const open = p.classList.toggle("open");
+  const arrow = $("info-arrow"); if (arrow) arrow.textContent = open ? "▴" : "▾";
+  if (open) syncInfoVals();
+}
+function syncInfoVals(){
+  if (!S) return;
+  for(const k of ["money","cust","env","soc"]){
+    const el = $("si-"+k);
+    if (el) el.textContent = clamp(S.stats[k]);
+  }
+}
+function dots(){
+  let h = '<div class="progress-dots">';
+  for(let i=1;i<=TOTAL_ROUNDS;i++) h += `<span class="pdot ${i<S.round?"done":i===S.round?"now":""}"></span>`;
+  return h + "</div>";
+}
+
+/* ---------- 타이틀 ---------- */
+function renderTitle(){
+  $("hud").style.display = "none";
+  screen().innerHTML = `
+  <div class="card center">
+    <img class="titleimg" src="${MASCOT}" alt="자문 로봇 볼트 박사">
+    <h1>🚚 수송 사장님<br><span style="font-size:18px;color:var(--sub);">선택의 대가</span></h1>
+    <p class="stline">중고 트럭 한 대로 시작한 회사.<br>12번의 선택으로 <b>10년 후의 도시</b>를 만든다.</p>
+    <div class="callout" style="text-align:left;">
+      🎯 <b>이 게임은 점수 게임이 아니다.</b><br>
+      모든 수송 수단에는 <b>대가</b>가 있다 — 싸면 더럽고, 깨끗하면 비싸고, 빠르면 시끄럽다.<br>
+      💼 회사가 성장하면 <b>투자 노선</b>을 직접 골라 새 장비를 도입한다.<br>
+      🤝 없는 장비는 <b>외주 임대</b>로 빌려 쓸 수 있다 — 단, 비싸다(×1.8).
+    </div>
+    <p><span class="chip">💰 예산</span><span class="chip">⏱️ 고객</span><span class="chip">🌍 환경</span><span class="chip">👥 사회</span></p>
+    <p class="sub"><b>넷 중 하나라도 0이 되면 게임 오버!</b> 매 라운드 유지비 💰3이 빠져나간다 — 균형이 생명.</p>
+    <div class="btnrow"><button class="btn pulse" onclick="startGame()">🚀 회사 설립하기</button></div>
+    <p class="small-note" style="margin-top:10px;">🤖 볼트 박사의 퀴즈에 첫 시도로 답하면 배지 🎖️ | 화면을 탭하면 문장이 빨리 나와요<br>※ 수치는 학습용으로 단순화한 모델입니다. "현실은 뭐가 다를까?"도 함께 생각해 보세요.</p>
+  </div>`;
+}
+function startGame(){ S = newState(); renderChapter(0); }
+
+/* ---------- 챕터 인트로 (스토리텔링) ---------- */
+function renderChapter(idx){
+  const ch = CHAPTERS[idx];
+  let bonusHtml = "";
+  if (idx > 0){
+    if (["money","cust","env","soc"].every(k=>S.stats[k]>=40)){
+      S.stats.money += 8;
+      bonusHtml = `<div class="callout rv" style="text-align:left;">🏦 <b>안정 경영 보너스!</b> 모든 지표 40 이상 — 투자자 신뢰로 💰 +8</div>`;
+    } else {
+      bonusHtml = `<div class="callout warn rv" style="text-align:left;">📉 일부 지표가 흔들리고 있다. <b>하나라도 0이 되면 회사는 끝이다!</b></div>`;
+    }
+  }
+  updateHUD();
+  if (idx > 0) confetti(26);
+  screen().innerHTML = `
+  <div class="card chapter" onclick="ffwd()">
+    <div class="cemoji rv">${ch.emoji}</div>
+    <h1 class="rv">${ch.title}</h1>
+    <p class="sub rv">${ch.sub}${idx>0 ? " — 회사가 성장했다! 🎉" : ""}</p>
+    <hr class="divider">
+    ${ch.lines.map(l=>`<p class="stline rv">${l}</p>`).join("")}
+    <p class="rv" style="text-align:center;"><span class="chip hl">🔓 현재 보유: ${fleetLabel()}</span></p>
+    ${bonusHtml}
+    <div class="btnrow rv"><button class="btn" onclick="event.stopPropagation(); ${idx>0?`renderInvest(${idx})`:"renderMission()"};">${idx===0?"첫 미션 받기 ▶":"💼 투자 결정하기 ▶"}</button></div>
+  </div>`;
+  reveal();
+}
+
+/* ---------- 미션 & 선택 ---------- */
+function fleetLabel(){
+  return VEHICLES.filter(v=>S.fleet.has(v.id)).map(v=>v.emoji+" "+v.name).join(" · ");
+}
+
+/* ---------- 투자 분기 화면 ---------- */
+function renderInvest(idx){
+  updateHUD();
+  const inv = INVESTS[idx];
+  const cards = inv.options.map((o,i)=>`
+    <button class="vcard" onclick="applyInvest(${idx},${i})">
+      <span class="vemoji">${o.emoji}</span>
+      <div class="vname">${o.name}</div>
+      <div class="vstats">${o.desc}</div>
+      <div class="evtag">✨ ${o.perkText}</div>
+    </button>`).join("");
+  screen().innerHTML = `
+  <div class="card" onclick="ffwd()">
+    <h2 class="rv">${inv.title}</h2>
+    <p class="stline rv">투자금은 한 번뿐. 어떤 노선을 고르느냐에 따라</p>
+    <p class="stline rv">회사의 장비와 강점이 달라진다.</p>
+    <p class="rv"><span class="chip">🔓 현재 보유: ${fleetLabel()}</span></p>
+    <div class="vgrid rv">${cards}</div>
+    <p class="sub rv" style="margin-top:8px;">💡 선택하지 않은 장비도 <b>외주 임대(비용 ×1.8)</b>로 빌려 쓸 수 있다.</p>
+  </div>`;
+  reveal();
+}
+function applyInvest(idx, i){
+  const o = INVESTS[idx].options[i];
+  o.add.forEach(id => S.fleet.add(id));
+  if (o.perk) S.perks.add(o.perk);
+  confetti(22);
+  screen().innerHTML = `
+  <div class="card center" onclick="ffwd()">
+    <div class="cemoji rv">${o.emoji}</div>
+    <h2 class="rv">${o.name} 투자 완료!</h2>
+    <p class="stline rv">${o.desc}</p>
+    <p class="stline rv">✨ ${o.perkText}</p>
+    <p class="rv"><span class="chip hl">🔓 보유 장비: ${fleetLabel()}</span></p>
+    <div class="btnrow rv"><button class="btn" onclick="event.stopPropagation(); renderMission();">미션 받기 ▶</button></div>
+  </div>`;
+  reveal();
+}
+
+function effectiveVehicle(v0){
+  let cost = v0.cost, env = v0.env, cap = v0.cap, tags = [];
+  if (S.perks.has("h2cheap") && v0.id === "h2"){ cost -= 6; tags.push("💧 수소 충전망: 비용 -6"); }
+  if (S.perks.has("bikeplus") && v0.id === "bike"){ cap = 2; tags.push("👥 배송단 확충: 용량 ↑ · 사회 +2"); }
+  if (S.nextMod && S.nextMod.target === v0.id){
+    if (S.nextMod.costX){ cost = Math.round(cost * S.nextMod.costX); tags.push(S.nextMod.costX > 1 ? "⚡ 이벤트: 비용 상승!" : "⚡ 이벤트: 비용 할인!"); }
+    if (S.nextMod.envX){ env = Math.round(env * S.nextMod.envX); tags.push("⚡ 이벤트: CO₂ 증가!"); }
+  }
+  const rented = !S.fleet.has(v0.id);
+  if (rented) cost = Math.round(cost * 1.8);
+  if (S.perks.has("hub")){ cost = Math.max(3, cost - 2); tags.push("🤖 스마트 물류센터: 비용 -2"); }
+  return { ...v0, cost, env, cap, tags, rented };
+}
+function checkAvail(v, m){
+  if (v.range < m.dist) return "거리가 너무 멀어요";
+  if (v.id === "ship" && m.dist < 2) return "뱃길로 갈 거리가 아니에요";
+  if (m.vol - v.cap >= 2) return "물량을 감당 못 해요";
+  return null;
+}
+function renderMission(){
+  updateHUD();
+  const m = MISSIONS[S.round-1];
+  const distL = ["","단거리","중거리","장거리"][m.dist], urgL=["","여유","보통","긴급!"][m.urg], volL=["","소량","중량","대량"][m.vol];
+  let vhtml = "";
+  for(const v0 of VEHICLES){
+    const v = effectiveVehicle(v0);
+    const no = checkAvail(v, m);
+    const trips = (m.vol > v.cap) ? 2 : 1;
+    const showCost = v.cost * trips;
+    vhtml += `<button class="vcard${v.rented?" rent":""}" ${no?"disabled":""} onclick="pickVehicle('${v.id}')">
+      <span class="vemoji">${v.emoji}</span>
+      <div class="vname">${v.name}</div>
+      ${v.rented && !no ? '<div class="renttag">🤝 외주 임대 · 비용 ×1.8</div>' : ""}
+      <div class="vstats">💰 비용 ${showCost} · ${["","🐢 느림","🚗 보통","🚀 빠름"][v.speed]}<br>🌍 ${v.env===0?"배출 없음":"CO₂ "+v.env} · 👥 ${v.soc>0?"+"+v.soc:v.soc}</div>
+      <div class="vstats" style="margin-top:3px;">${v.desc}</div>
+      ${trips>1 && !no ? '<div class="evtag">📦 2회 왕복 필요 (비용·배출 2배)</div>' : ""}
+      ${v.tags.map(t=>`<div class="evtag">${t}</div>`).join("")}
+      ${no?`<div class="noreason">❌ ${no}</div>`:""}
+    </button>`;
+  }
+  screen().innerHTML = `
+  <div class="card" onclick="ffwd()">
+    ${dots()}
+    <h2 class="rv">${m.emoji} 미션 ${S.round} · ${m.title}</h2>
+    ${m.story.map(l=>`<p class="stline rv">${l}</p>`).join("")}
+    <p class="rv"><span class="chip">📏 ${distL}</span><span class="chip">⏰ ${urgL}</span><span class="chip">📦 ${volL}</span><span class="chip hl">💵 보수 +${m.reward}</span></p>
+  </div>
+  <div class="card rv">
+    <h3 style="margin-top:0;">어떤 수단으로 배송할까?</h3>
+    <p class="sub" style="margin:2px 0 8px;">점선 카드는 🤝 <b>외주 임대</b> — 없는 장비를 비싸게 빌려 쓴다.</p>
+    <div class="vgrid">${vhtml}</div>
+  </div>`;
+  reveal();
+}
+
+function pickVehicle(id){
+  const m = MISSIONS[S.round-1];
+  const v = effectiveVehicle(VEHICLES.find(x=>x.id===id));
+  S.nextMod = null;
+  const trips = (m.vol > v.cap) ? 2 : 1;
+  const cost = v.cost * trips;
+  const distF = [0,1,1.5,2][m.dist];
+  const envD = Math.round(v.env * distF * trips);
+  const effSpeed = trips>1 ? v.speed-1 : v.speed;
+  const diff = effSpeed - m.urg;
+  const custD = diff>=1 ? 6 : diff===0 ? 4 : diff===-1 ? -8 : -14;
+  let socD = v.soc;
+  if (v.id === "bike" && S.perks.has("bikeplus")) socD += 2;
+  const gains=[], losses=[];
+  gains.push(`💵 배송 보수 +${m.reward}`);
+  if(custD>0) gains.push(`⏱️ 고객 만족 +${custD} ${diff>=1?"(빠른 배송에 감동!)":"(제때 도착)"}`);
+  else losses.push(`⏱️ 고객 만족 ${custD} ${trips>1?"(왕복 배송으로 지연)":"(긴급 배송에 너무 느렸다)"}`);
+  if(socD>0) gains.push(`👥 사회 +${socD} (지역 일자리·상생)`);
+  else if(socD<0) losses.push(`👥 사회 ${socD} ${v.id==="amr"?"(일자리 감소 반발)":"(소음·민원 발생)"}`);
+  losses.push(`💰 운송 비용 -${cost}${v.rented ? " (🤝 외주 임대료 포함)" : ""}`);
+  losses.push(`💰 운영 유지비 -${CONFIG.upkeep} (창고·보험·인건비)`);
+  if(envD<0) losses.push(`🌍 환경 ${envD} (CO₂ 배출)`);
+  else gains.push(`🌍 탄소 배출 0!`);
+  S.stats.money += m.reward - cost - CONFIG.upkeep;
+  S.stats.cust += custD;
+  S.stats.env += envD;
+  S.stats.soc += socD;
+  if (S.lastVeh === v.id) S.streak++; else { S.streak = 1; S.lastVeh = v.id; }
+  if (S.streak >= 3){ S.stats.cust -= 4; losses.push(`⏱️ 고객 만족 -4 (같은 수단만 ${S.streak}연속 — “이 회사, 전략이 없네?”)`); }
+  S.history.push({ m, v, gains, losses });
+  renderDelivery(v, () => {
+    updateHUD();
+    if (S.stats.money <= 0) return renderGameOver("money");
+    if (S.stats.cust <= 0) return renderGameOver("cust");
+    if (S.stats.env <= 0) return renderGameOver("env");
+    if (S.stats.soc <= 0) return renderGameOver("soc");
+    renderResult(gains, losses, m, v);
+  });
+}
+
+/* ---------- 배송 애니메이션 ---------- */
+function renderDelivery(v, then){
+  updateHUD();
+  screen().innerHTML = `
+  <div class="card center">
+    <div class="roadwrap"><span class="mover${["ice","drone","bike","moto","ship"].includes(v.id)?" flip":""}">${v.emoji}</span><div class="roadline"></div></div>
+    <p class="stline">${v.name}, 출발!</p>
+    <p class="sub">배송 중…</p>
+  </div>`;
+  setTimeout(then, 1750);
+}
+
+const TRADEOFF_COMMENTS = {
+  ice:"싸고 확실했다. 하지만 그 청구서는 대기 중의 CO₂로 발행됐다.",
+  ev:"깨끗한 선택처럼 보인다. 그런데 그 전기는 어디서 왔을까?",
+  h2:"가장 깨끗한 길을 골랐다. 지갑이 그 대가를 치렀다.",
+  drone:"하늘길은 빨랐다. 하지만 소음은 누군가의 창문을 두드렸다.",
+  amr:"로봇은 불평하지 않는다. 하지만 일자리를 잃은 사람은?",
+  bike:"지구에게도 동네에게도 좋은 선택. 하지만 시간은 흘러갔다.",
+  uam:"하늘길은 막힘이 없었다. 하지만 요금 청구서와 소음 민원도 함께 날아왔다.",
+  moto:"골목길을 누비며 빨랐다. 하지만 실을 수 있는 건 딱 하나뿐이었다.",
+  rail:"철길은 많은 짐을 조용히 옮겼다. 하지만 열차 시간표는 고객을 기다려 주지 않았다.",
+  ship:"바닷길은 가장 쌌다. 하지만 파도의 속도는 사람이 정할 수 없었다.",
+};
+function renderResult(gains, losses, m, v){
+  const success = S.stats.cust > 0;
+  screen().innerHTML = `
+  <div class="card center" onclick="ffwd()">
+    ${dots()}
+    <div class="rv"><span class="stamp">${success ? "✅ 배송 완료!" : "배송 완료"}</span></div>
+    <p class="sub rv">${m.emoji} ${m.title} — ${v.name} 투입</p>
+    <div class="gainloss" style="text-align:left;">
+      <div class="gl gain rv"><b>✅ 얻은 것</b><ul>${gains.map(g=>`<li>${g}</li>`).join("")}</ul></div>
+      <div class="gl loss rv"><b>💸 잃은 것</b><ul>${losses.map(l=>`<li>${l}</li>`).join("")}</ul></div>
+    </div>
+    <div class="callout warn rv" style="text-align:left;">⚖️ ${TRADEOFF_COMMENTS[v.id]}</div>
+    <div class="btnrow rv"><button class="btn" onclick="event.stopPropagation(); afterResult();">계속 ▶</button></div>
+  </div>`;
+  reveal(420);
+}
+
+function afterResult(){
+  if (S.round >= TOTAL_ROUNDS) return renderEpilogue();
+  renderEvent();
+}
+
+/* ---------- 이벤트 ---------- */
+function renderEvent(){
+  const conds = EVENTS.filter(e => e.cond && e.cond(S.stats) && S.lastEvent !== e.id);
+  const uncond = EVENTS.filter(e => !e.cond && S.lastEvent !== e.id && (!e.mod || S.fleet.has(e.mod.target)));
+  const pool = conds.length && Math.random() < 0.7 ? conds : uncond;
+  const ev = pool[Math.floor(Math.random() * pool.length)];
+  S.lastEvent = ev.id;
+  if (ev.apply) ev.apply(S.stats);
+  if (ev.mod) S.nextMod = ev.mod;
+  updateHUD();
+  if (S.stats.money <= 0) return renderGameOver("money");
+  if (S.stats.cust <= 0) return renderGameOver("cust");
+  if (S.stats.env <= 0) return renderGameOver("env");
+  if (S.stats.soc <= 0) return renderGameOver("soc");
+  screen().innerHTML = `
+  <div class="card evcard center">
+    <p class="sub" style="margin:0;">📢 뉴스 속보</p>
+    <div class="evbig">${ev.emoji}</div>
+    <h2>${ev.title}</h2>
+    <p class="stline" style="font-size:17px;font-weight:500;">${ev.text}</p>
+    <div class="btnrow"><button class="btn" onclick="afterEvent()">확인 ▶</button></div>
+  </div>`;
+}
+function afterEvent(){
+  const r = S.round;
+  const freq = CONFIG.quizFrequency;
+  const isGate = GATE_AFTER.includes(r);
+  const bonusSlots = freq === "every" ? BONUS_EVERY : freq === "alternate" ? BONUS_ALT : [];
+  const next = () => {
+    S.round++;
+    const chIdx = CHAPTERS.findIndex(c => c.start === S.round);
+    if (chIdx > 0) renderChapter(chIdx); else renderMission();
+  };
+  if (isGate) return openGateQuiz(next);
+  if (bonusSlots.includes(r)) return openBonusOffer(next);
+  next();
+}
+
+/* ---------- 퀴즈 공통 ---------- */
+function drawQuestion(){
+  let avail = QUIZ.map((q,i)=>i).filter(i=>!S.usedQuiz.has(i));
+  if (!avail.length){ S.usedQuiz.clear(); avail = QUIZ.map((q,i)=>i); }
+  const i = avail[Math.floor(Math.random()*avail.length)];
+  S.usedQuiz.add(i);
+  return QUIZ[i];
+}
+function quizHTML(q, mode, rewardLabel){
+  const opts = shuffle(q.opts.map((t,i)=>({t, ok:i===0})));
+  window.__opts = opts; window.__q = q;
+  return `
+  <div class="mcard">
+    <div class="mascotrow">
+      <img src="${MASCOT}" alt="볼트 박사">
+      <div class="bubble">${mode==="gate" ? "🚧 <b>다음 챕터로 가는 기술 브리핑!</b> 이 문제를 풀어야 회사가 성장할 수 있어요. 틀려도 다시 도전할 수 있으니 걱정 말아요!" : mode==="bonus" ? `💡 <b>긴급 자문!</b> 맞히면 <b>${rewardLabel}</b> 보상!` : "🏁 <b>퀴즈 러시!</b>"}</div>
+    </div>
+    <div class="qcat">${CATS[q.cat]}</div>
+    <div class="qtext">Q. ${q.q}</div>
+    <div class="opts">${opts.map((o,i)=>`<button class="opt" id="opt-${i}" onclick="answer(${i})">${o.t}</button>`).join("")}</div>
+    <div id="quiz-foot"></div>
+  </div>`;
+}
+let quizCtx = null;
+function openGateQuiz(onPass){
+  quizCtx = { mode:"gate", onPass, firstTry:true };
+  $("modal").innerHTML = quizHTML(drawQuestion(), "gate");
+  $("modal").classList.add("show");
+}
+function openBonusOffer(onDone){
+  const reward = BONUS_REWARDS[S.bonusIdx % BONUS_REWARDS.length];
+  quizCtx = { mode:"bonusOffer", onDone, reward };
+  $("modal").innerHTML = `
+  <div class="mcard">
+    <div class="mascotrow">
+      <img src="${MASCOT}" alt="볼트 박사">
+      <div class="bubble">💡 <b>볼트 박사의 긴급 자문 요청!</b><br>퀴즈에 도전할래요? 맞히면 <b>${reward.label}</b>, 틀려도 손해는 없어요.</div>
+    </div>
+    <div class="btnrow">
+      <button class="btn" onclick="acceptBonus()">🧠 도전!</button>
+      <button class="btn second" onclick="declineBonus()">다음에요</button>
+    </div>
+  </div>`;
+  $("modal").classList.add("show");
+}
+function acceptBonus(){
+  S.bonusIdx++;
+  quizCtx = { mode:"bonus", onDone: quizCtx.onDone, reward: quizCtx.reward };
+  $("modal").innerHTML = quizHTML(drawQuestion(), "bonus", quizCtx.reward.label);
+}
+function declineBonus(){ S.bonusIdx++; closeModal(); quizCtx.onDone(); }
+function closeModal(){ $("modal").classList.remove("show"); $("modal").innerHTML = ""; }
+
+function answer(i){
+  const o = window.__opts[i], q = window.__q;
+  document.querySelectorAll(".opt").forEach(b=>b.disabled=true);
+  const foot = $("quiz-foot");
+  if (o.ok){
+    $("opt-"+i).classList.add("correct");
+    let msg = "⭕ 정답!";
+    if (quizCtx.mode === "gate"){
+      if (quizCtx.firstTry){ S.badges++; msg += " 첫 시도 성공 — 기술 이해 배지 🎖️ 획득!"; confetti(20); updateHUD(); }
+      foot.innerHTML = `<div class="exp">${msg}<br>💡 ${q.exp}</div><div class="btnrow"><button class="btn" onclick="gatePass()">다음 챕터로 ▶</button></div>`;
+    } else if (quizCtx.mode === "bonus"){
+      quizCtx.reward.apply(S.stats); updateHUD();
+      foot.innerHTML = `<div class="exp">${msg} 보상 지급: <b>${quizCtx.reward.label}</b><br>💡 ${q.exp}</div><div class="btnrow"><button class="btn" onclick="bonusDone()">계속 ▶</button></div>`;
+    } else if (quizCtx.mode === "rush"){
+      quizCtx.correct++;
+      foot.innerHTML = `<div class="exp">${msg} 💡 ${q.exp}</div><div class="btnrow"><button class="btn" onclick="rushNext()">다음 문제 ▶</button></div>`;
+    }
+  } else {
+    $("opt-"+i).classList.add("wrong");
+    window.__opts.forEach((oo,j)=>{ if(oo.ok) $("opt-"+j).classList.add("correct"); });
+    if (quizCtx.mode === "gate"){
+      quizCtx.firstTry = false;
+      foot.innerHTML = `<div class="exp">❌ 아쉬워요! <br>💡 ${q.exp}</div><div class="btnrow"><button class="btn" onclick="gateRetry()">다른 문제로 재도전 🔄</button></div>`;
+    } else if (quizCtx.mode === "bonus"){
+      foot.innerHTML = `<div class="exp">❌ 아쉬워요! 손해는 없어요.<br>💡 ${q.exp}</div><div class="btnrow"><button class="btn" onclick="bonusDone()">계속 ▶</button></div>`;
+    } else if (quizCtx.mode === "rush"){
+      foot.innerHTML = `<div class="exp">❌ 💡 ${q.exp}</div><div class="btnrow"><button class="btn" onclick="rushNext()">다음 문제 ▶</button></div>`;
+    }
+  }
+}
+function gatePass(){ closeModal(); quizCtx.onPass(); }
+function gateRetry(){ $("modal").innerHTML = quizHTML(drawQuestion(), "gate"); }
+function bonusDone(){ closeModal(); quizCtx.onDone(); }
+
+/* ---------- 게임 오버 ---------- */
+function renderGameOver(why){
+  closeModal();
+  const t = {
+    money:{ e:"💸", title:"회사 파산!", lines:["금고가 바닥났다.","아무리 깨끗하고 빠른 배송도,","회사가 없으면 계속할 수 없다."] },
+    cust:{ e:"📉", title:"계약 해지!", lines:["배송 지연이 쌓여 고객이 모두 떠났다.","아무리 착한 배송도,","오지 않으면 의미가 없다."] },
+    env:{ e:"🌫️", title:"영업 정지 명령!", lines:["누적된 CO₂로 도시가 잿빛이 됐다.","환경 규제 위반 — 운행 허가 취소.","싼 배송의 청구서는 하늘로 날아왔다."] },
+    soc:{ e:"✊", title:"지역 사회의 외면!", lines:["일자리를 잃은 사람들이 거리로 나왔다.","불매 운동이 시작됐다.","도시의 신뢰 없이는, 배송할 곳도 없다."] },
+  }[why];
+  screen().innerHTML = `
+  <div class="card center" onclick="ffwd()">
+    <div style="font-size:56px;" class="rv">${t.e}</div>
+    <h1 class="rv">${t.title}</h1>
+    ${t.lines.map(l=>`<p class="stline rv">${l}</p>`).join("")}
+    <div class="callout warn rv">🤔 무엇을 아끼려다, 무엇을 잃었을까? — 실패도 하나의 데이터다.</div>
+    <div class="btnrow rv"><button class="btn" onclick="event.stopPropagation(); startGame();">🔄 다시 도전</button></div>
+  </div>`;
+  reveal();
+}
+
+/* ---------- 에필로그: 10년 후 (스토리텔링 엔딩) ---------- */
+function epilogueLines(){
+  const s = S.stats, L = [];
+  L.push("🔮 그로부터 10년 후 —");
+  L.push("당신의 선택이 만든 미래.");
+  if (s.env >= 65)      L.push("🌤️ 도시의 하늘은 맑다. 아이들이 강가에서 뛰어놀고, 사람들은 이 도시의 공기를 자랑한다.");
+  else if (s.env >= 45) L.push("🌥️ 하늘은 그럭저럭 맑다. 하지만 여름은 해마다 조금씩 더워지고 있다.");
+  else                  L.push("🌫️ 도시는 잿빛 스모그에 덮였다. 마스크 없이 나서는 날이 드물고, 탄소세 고지서가 쌓여 간다.");
+  if (s.soc >= 65)      L.push("👥 골목마다 배송 일자리가 살아 있다. 사람들은 당신의 회사를 '우리 회사'라고 부른다.");
+  else if (s.soc >= 45) L.push("🤝 로봇과 사람이 어색하게 공존한다. 누군가는 새 일을 찾았고, 누군가는 아직 찾고 있다.");
+  else                  L.push("🤖 물류는 로봇이 채웠다. 빠르고 정확하다. 그러나 일자리를 잃은 사람들의 항의가 계속된다.");
+  if (s.money >= 65)      L.push("💰 회사 금고는 든든하다. 새로운 기술에 투자할 여력도 충분하다.");
+  else if (s.money >= 40) L.push("💼 회사는 그럭저럭 굴러간다. 다음 위기가 오기 전까지는.");
+  else                    L.push("💸 회사는 늘 적자 걱정이다. 옳은 선택도, 돈이 없으면 계속할 수 없었다.");
+  if (s.cust >= 65)      L.push("⭐ 고객들은 말한다. “이 회사는 약속을 지켜.”");
+  else if (s.cust >= 45) L.push("📦 고객들은 묻는다. “조금만 더 빨라질 순 없나요?”");
+  else                   L.push("📉 떠난 고객은 돌아오지 않았다. 신뢰는 가장 비싼 화물이었다.");
+  L.push("…이 미래는 당신의 12번의 선택이 만든 것이다.");
+  return L;
+}
+function renderEpilogue(){
+  updateHUD();
+  screen().innerHTML = `
+  <div class="card night" onclick="ffwd()">
+    <h1 class="center rv">🌃 에필로그</h1>
+    ${epilogueLines().map(l=>`<p class="stline rv">${l}</p>`).join("")}
+    <div class="btnrow rv"><button class="btn" onclick="event.stopPropagation(); renderEnd();">📊 최종 경영 리포트 ▶</button></div>
+  </div>`;
+  reveal(650);
+}
+
+/* ---------- 최종 리포트 ---------- */
+function ceoReport(){
+  const s = S.stats;
+  const axes = [ {k:"money",n:"예산",e:"💰"}, {k:"cust",n:"고객 만족",e:"⏱️"}, {k:"env",n:"환경",e:"🌍"}, {k:"soc",n:"사회",e:"👥"} ];
+  const sorted = [...axes].sort((a,b)=>s[b.k]-s[a.k]);
+  const hi = sorted[0], lo = sorted[3];
+  const spread = s[hi.k] - s[lo.k];
+  const types = {
+    money:{ t:"💼 효율 우선형 CEO", d:"비용을 지키는 데 탁월했다." },
+    cust:{ t:"⚡ 스피드 중심형 CEO", d:"고객과의 약속을 최우선으로 지켰다." },
+    env:{ t:"🌍 환경 우선형 CEO", d:"지구를 위한 선택을 멈추지 않았다." },
+    soc:{ t:"👥 사람 중심형 CEO", d:"일자리와 지역 사회를 끝까지 챙겼다." },
+  };
+  const costs = {
+    money:"하지만 회사 금고가 얇아졌다 — 지속가능성도 돈이 있어야 지킬 수 있다.",
+    cust:"하지만 고객의 신뢰를 잃었다 — 오지 않는 배송은 아무리 깨끗해도 의미가 없다.",
+    env:"하지만 환경 비용을 미래 세대에게 미뤄 두었다.",
+    soc:"하지만 효율 뒤에서 일자리와 지역 사회가 흔들렸다.",
+  };
+  if (spread <= 12) return { t:"⚖️ 균형형 CEO", d:"네 지표의 균형을 지켜냈다.", c:"하지만 '균형'은 때로 아무도 완전히 만족시키지 못했다는 뜻이기도 하다. 당신의 균형은 전략이었나, 회피였나?" };
+  return { t:types[hi.k].t, d:types[hi.k].d, c:costs[lo.k] };
+}
+function drawRadar(){
+  const cv = $("radar"); if(!cv) return;
+  const ctx = cv.getContext("2d");
+  const cx=170, cy=130, R=86;
+  const s=S.stats, vals=[s.money,s.cust,s.env,s.soc].map(v=>v/100);
+  const labels=["💰 예산","⏱️ 고객","🌍 환경","👥 사회"];
+  ctx.clearRect(0,0,340,260);
+  for(let ring=1;ring<=4;ring++){
+    ctx.beginPath();
+    for(let i=0;i<=4;i++){ const a=-Math.PI/2+i*Math.PI/2; const r=R*ring/4;
+      const x=cx+r*Math.cos(a), y=cy+r*Math.sin(a); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }
+    ctx.strokeStyle="#E6E5E3"; ctx.stroke();
+  }
+  ctx.beginPath();
+  for(let i=0;i<=4;i++){ const a=-Math.PI/2+i*Math.PI/2; const v=vals[i%4];
+    const x=cx+R*v*Math.cos(a), y=cy+R*v*Math.sin(a); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }
+  ctx.fillStyle="rgba(39,131,222,.22)"; ctx.fill(); ctx.strokeStyle="#2783DE"; ctx.lineWidth=2; ctx.stroke();
+  ctx.fillStyle="#2C2C2B"; ctx.font="13px sans-serif"; ctx.textAlign="center";
+  const lp=[[cx,cy-R-14],[cx+R+38,cy+4],[cx,cy+R+22],[cx-R-38,cy+4]];
+  labels.forEach((l,i)=>ctx.fillText(l,lp[i][0],lp[i][1]));
+}
+/* ---------- 유명 인물 매칭 ---------- */
+const FIGS = {
+  money:{ img:"https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-bb90ef6ceb379bc9d3c4cd6e.webp",  name:"헨리 포드",   tag:"💼 효율 혁신가", desc:"컨베이어 벨트 대량 생산으로 자동차 값을 확 낮춰 '모두의 자동차' 시대를 연 경영자.", link:"당신도 비용과 효율을 지키는 데 탁월했다.", caution:"단, 포드의 시대는 CO₂의 대가를 몰랐다 — 당신은 이미 알고 있다." },
+  cust:{ img:"https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-c50c2959103986bd7903abb1.webp", name:"라이트 형제", tag:"⚡ 속도의 개척자", desc:"세계 최초의 동력 비행에 성공해 '더 빠른 세상'의 문을 연 발명가 형제.", link:"당신도 고객과의 약속과 속도를 최우선으로 지켰다.", caution:"단, 빠름의 대가가 누구에게 청구되는지도 늘 살펴야 한다." },
+  env:{  img:"https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-8ac0bcc1f4a3702e1cd09787.webp", name:"레이철 카슨", tag:"🌍 환경의 파수꾼", desc:"『침묵의 봄』으로 환경 오염의 위험을 세상에 알려 환경 운동의 문을 연 과학자.", link:"당신도 지구를 위한 선택을 멈추지 않았다.", caution:"단, 지키는 일에는 늘 비용과 저항이 따른다 — 카슨처럼 버텨야 한다." },
+  soc:{  img:"https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-811ef10de68ccc0bd0a8bdee.webp",  name:"유일한 박사", tag:"👥 상생의 경영자", desc:"회사의 이익을 사회에 돌려준 유한양행 창업자 — '기업은 사회의 것'이라 믿었다.", link:"당신도 일자리와 지역 사회를 끝까지 챙겼다.", caution:"단, 나눔도 회사가 살아 있어야 계속할 수 있다." },
+  bal:{  img:"https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-5a030c7daa263d05446dd7c2.webp", name:"세종대왕",   tag:"⚖️ 균형의 지도자", desc:"과학·문화·민생을 두루 살피며 나라 전체의 균형을 지킨 지도자.", link:"당신도 네 지표의 균형을 끝까지 지켜냈다.", caution:"단, 균형은 회피가 아니라 전략일 때 빛난다." },
+  mix:{ img:"https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-b09c468c4541d8c6fcde159d.webp", emoji:"📦", name:"말콤 맥린", tag:"🧩 물류 시스템 혁신가", desc:"트럭 기사 출신으로 컨테이너를 발명해 배·기차·트럭을 하나로 연결한 물류 혁명가.", link:"당신도 상황마다 최적의 수단을 조합하는 시스템 사고를 보여줬다.", caution:"단, 시스템의 힘은 그것을 움직이는 사람들에게서 나온다." },
+  pioneer:{ img:"https://game-center-play.beefly1136.workers.dev/g/c8de580a-6aef-420c-899a-68d9b254a4d2/1/assets/embedded-f63c57ecf80ef8ebab942ac4.webp", emoji:"🚀", name:"정주영", tag:"🛫 도전의 개척자", desc:"“이봐, 해봤어?” — 맨손으로 조선소와 자동차 공장을 세워 한국 수송 산업을 일으킨 기업가.", link:"당신도 남들이 주저하는 새 기술에 과감히 도전했다.", caution:"단, 도전의 대가가 누구에게 청구되는지도 함께 살펴야 한다." },
+};
+function matchFigure(){
+  const keys = ["money","cust","env","soc"];
+  const s = {}; keys.forEach(k => s[k] = clamp(S.stats[k]));
+  const used = S.history.map(h => h.v.id);
+  const counts = {}; used.forEach(id => counts[id] = (counts[id]||0)+1);
+  const uniq = Object.keys(counts).length;
+  const maxUse = Math.max(...Object.values(counts), 0);
+  const future = used.filter(id => ["drone","amr","uam"].includes(id)).length;
+  const onTime = S.history.filter(h => h.gains.some(g => g.includes("고객 만족 +"))).length;
+  /* 행동 기반 업적 우선 — 달성이 어려운 순서대로 판정 */
+  if (future >= 5) return FIGS.pioneer;                                  /* 미래 기술(드론·로봇·UAM) 5회 이상 */
+  if (S.perks.has("bikeplus") && (counts.bike||0) >= 2 && s.soc >= 70) return FIGS.soc; /* 상생 노선 투자 + 자전거 배송단 적극 활용 */
+  if (uniq >= 8 && maxUse <= 4) return FIGS.mix;                         /* 8종 이상을 골고루(한 수단 4회 이하) */
+  if (Math.min(s.money, s.cust, s.env, s.soc) >= 40) return FIGS.bal;    /* 네 지표 모두 40 이상 사수(안정 경영 기준과 동일) */
+  if (s.env >= 60) return FIGS.env;                                      /* 모두가 깎아 먹는 환경을 60 이상 지켜냄 */
+  if (onTime >= 8) return FIGS.cust;                                     /* 12번 중 8번 이상 제때 배송 */
+  const sorted = [...keys].sort((a,b) => s[b]-s[a]);
+  if (s[sorted[0]] - s[sorted[3]] <= 10) return FIGS.bal;
+  return FIGS[sorted[0]];
+}
+
+function renderEnd(){
+  updateHUD();
+  confetti(34);
+  const rep = ceoReport();
+  const fig = matchFigure();
+  const tl = S.history.map((h,i)=>`<span class="tl">${i+1}. ${h.m.emoji}→${h.v.emoji}${h.v.rented?"🤝":""}</span>`).join("");
+  /* 수송 수단 사용 통계 — 자동 집계 */
+  const useCounts = {};
+  S.history.forEach(h=>{ useCounts[h.v.id]=(useCounts[h.v.id]||0)+1; });
+  const useList = Object.entries(useCounts)
+    .map(([id,n])=>({ v: VEHICLES.find(v=>v.id===id) || S.history.find(h=>h.v.id===id).v, n }))
+    .sort((a,b)=>b.n-a.n);
+  const maxN = useList.length ? useList[0].n : 0;
+  const useHtml = useList.map(u=>`<div class="usestat${u.n===maxN?" top":""}"><span class="use-emoji">${u.v.emoji}</span><span class="use-count">×${u.n}</span><span class="use-name">${u.v.name}</span>${u.n===maxN?`<span class="use-crown">👑 최다 사용</span>`:``}</div>`).join("");
+  /* 인물 도감 — 클리어할 때마다 해금 */
+  const figKey = Object.keys(FIGS).find(k=>FIGS[k]===fig);
+  const COLL_KEY = "tycoonFigColl";
+  let coll = window.__figColl || [];
+  try{ coll = JSON.parse(localStorage.getItem(COLL_KEY) || "[]"); }catch(e){}
+  const isNew = figKey && !coll.includes(figKey);
+  if(isNew){ coll = coll.concat([figKey]); window.__figColl = coll; try{ localStorage.setItem(COLL_KEY, JSON.stringify(coll)); }catch(e){} }
+  const collHtml = Object.keys(FIGS).map(k=>{
+    const f = FIGS[k]; const got = coll.includes(k);
+    const face = got ? (f.img ? `<img src="${f.img}" alt="${f.name}">` : `<span class="collemoji">${f.emoji}</span>`) : `<span class="collemoji">❓</span>`;
+    return `<div class="collslot${got?" got":""}${k===figKey?" now":""}">${face}<span class="collname">${got?f.name:"???"}</span>${(k===figKey&&isNew)?`<span class="collnew">NEW!</span>`:``}</div>`;
+  }).join("");
+  screen().innerHTML = `
+  <div class="card">
+    <h1 class="center">🏁 12라운드 경영 종료!</h1>
+    <p class="sub center">당신의 선택이 남긴 흔적을 확인해 보자.</p>
+    <canvas id="radar" width="340" height="260" style="max-width:100%;"></canvas>
+    <div class="reportbox">
+      <h2 style="margin:0 0 6px;">${rep.t}</h2>
+      <p style="margin:0;">${rep.d} ${rep.c}</p>
+    </div>
+    <div class="figcard">
+      ${fig.img ? `<img src="${fig.img}" alt="${fig.name}">` : `<span class="figavatar">${fig.emoji}</span>`}
+      <div>
+        <p class="sub" style="margin:0;">🎭 당신과 닮은 인물</p>
+        <h2 style="margin:2px 0 6px;">${fig.name}</h2>
+        <p style="margin:0 0 6px;"><span class="chip hl">${fig.tag}</span></p>
+        <p style="margin:0;font-size:14px;">${fig.desc}</p>
+        <p style="margin:6px 0 0;font-size:14px;"><b>${fig.link}</b> ${fig.caution}</p>
+      </div>
+    </div>
+    <p><b>🚛 수송 수단 사용 기록:</b> <span class="small-note">(🤝 외주 임대 포함)</span></p>
+    <div class="usegrid">${useHtml}</div>
+    <p><b>📖 인물 도감:</b> <span class="badgebig">${coll.length} / ${Object.keys(FIGS).length}</span> <span class="small-note">${coll.length>=Object.keys(FIGS).length?"🏆 모든 인물 해금 완료!":"다른 전략으로 클리어하면 새 인물이 해금돼요"}</span></p>
+    <div class="collgrid">${collHtml}</div>
+    <p><b>🎖️ 기술 이해 배지:</b> <span class="badgebig">${S.badges>0 ? "🎖️".repeat(S.badges) : "—"}</span> <span class="small-note">(퀴즈 첫 시도 정답 ${S.badges}회)</span></p>
+    <p><b>📜 선택의 기록:</b> <span class="small-note">(🤝 = 외주 임대)</span></p>
+    <div class="timeline">${tl}</div>
+    <hr class="divider">
+    <div class="callout" style="font-size:15px;">
+      🗣️ <b>토론 질문</b><br>당신의 선택으로 <b>이득을 본 사람</b>과 <b>손해를 본 사람</b>은 누구인가?<br>
+      <span class="small-note">옆 친구의 결과 화면과 비교해 보자 — 왜 서로 다른 선택을 했을까?</span>
+    </div>
+    <div class="btnrow">
+      <button class="btn" onclick="startRush()">🧠 보너스: 기술 연대기 퀴즈 러시</button>
+      <button class="btn second" onclick="startGame()">🔄 다른 전략으로 다시</button>
+    </div>
+  </div>`;
+  drawRadar();
+}
+
+/* ---------- 퀴즈 러시 (보너스 스테이지) ---------- */
+function startRush(){
+  quizCtx = { mode:"rush", correct:0, total:0, max:5 };
+  rushNext();
+}
+function rushNext(){
+  if (quizCtx.total >= quizCtx.max){
+    if (quizCtx.correct >= 4) confetti(26);
+    $("modal").innerHTML = `
+    <div class="mcard center">
+      <img src="${MASCOT}" style="width:80px;" alt="볼트 박사">
+      <h2>🏁 퀴즈 러시 결과</h2>
+      <p style="font-size:24px;font-weight:700;">${quizCtx.correct} / ${quizCtx.max}</p>
+      <p class="sub">${quizCtx.correct>=4?"수송 기술 박사급! 👏":quizCtx.correct>=2?"제법인데? 다음엔 만점에 도전!":"괜찮아요, 오늘 배운 게 진짜 점수예요."}</p>
+      <div class="btnrow"><button class="btn" onclick="closeModal(); renderEnd();">결과 화면으로</button></div>
+    </div>`;
+    $("modal").classList.add("show");
+    return;
+  }
+  quizCtx.total++;
+  $("modal").innerHTML = quizHTML(drawQuestion(), "rush");
+  $("modal").classList.add("show");
+}
+
+/* ---------- 시작 & 디버그 ---------- */
+function debugJump(){
+  const h = location.hash;
+  if (!h || h === "#") return renderTitle();
+  if (h.startsWith("#debug")) document.body.classList.add("noanim");
+  S = newState();
+  if (h === "#debug-choose"){ S.round = 2; updateHUD(); renderMission(); }
+  else if (h === "#debug-choose3"){ S.round = 10; ["ev","drone","uam"].forEach(id=>S.fleet.add(id)); updateHUD(); renderMission(); }
+  else if (h === "#debug-chapter"){ S.round = 5; updateHUD(); renderChapter(1); }
+  else if (h === "#debug-invest"){ S.round = 5; updateHUD(); renderInvest(1); }
+  else if (h === "#debug-invest3"){ S.round = 9; ["ev","h2"].forEach(id=>S.fleet.add(id)); updateHUD(); renderInvest(2); }
+  else if (h === "#debug-delivery"){ S.round = 2; updateHUD(); renderDelivery(VEHICLES[0], ()=>{}); }
+  else if (h === "#debug-result"){ S.round = 2; updateHUD(); pickVehicle("ice"); }
+  else if (h === "#debug-event"){ S.round = 2; updateHUD(); renderEvent(); }
+  else if (h === "#debug-quiz"){ S.round = 4; updateHUD(); renderMission(); openGateQuiz(()=>{}); }
+  else if (h === "#debug-bonus"){ S.round = 1; updateHUD(); renderMission(); openBonusOffer(()=>{}); }
+  else if (h === "#debug-epilogue"){
+    S.stats = { money: 62, cust: 74, env: 38, soc: 47 }; S.round = 12; updateHUD(); renderEpilogue();
+  }
+  else if (h === "#debug-end"){
+    S.stats = { money: 62, cust: 74, env: 45, soc: 58 }; S.badges = 2;
+    S.history = MISSIONS.map((m,i)=>({ m, v: { ...VEHICLES[i % VEHICLES.length], rented: i % 5 === 3 }, gains:[], losses:[] }));
+    S.round = 13; renderEnd();
+  }
+  else if (h === "#debug-over"){ renderGameOver("money"); }
+  else if (h === "#debug-over-env"){ renderGameOver("env"); }
+  else renderTitle();
+}
+debugJump();
+</script>
+<style id="san-router-home-style">
+  #san-router-home{position:fixed!important;right:max(12px,env(safe-area-inset-right))!important;bottom:max(12px,env(safe-area-inset-bottom))!important;z-index:2147483647!important;width:42px!important;height:42px!important;display:grid!important;place-items:center!important;padding:0!important;border:1px solid rgba(255,255,255,.35)!important;border-radius:13px!important;background:rgba(8,17,31,.66)!important;color:#fff!important;box-shadow:0 8px 24px rgba(0,0,0,.3)!important;backdrop-filter:blur(9px)!important;-webkit-backdrop-filter:blur(9px)!important;opacity:.68!important;text-decoration:none!important;transition:opacity .2s ease,transform .2s ease!important}
+  #san-router-home:hover,#san-router-home:focus-visible{opacity:1!important;transform:translateY(-2px)!important;outline:2px solid #fff!important;outline-offset:2px!important}
+  #san-router-home svg{width:20px!important;height:20px!important;display:block!important;fill:none!important;stroke:currentColor!important;stroke-width:2.2!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+  @media(prefers-reduced-motion:reduce){#san-router-home{transition:none!important}}
+</style>
+<a id="san-router-home" href="../" aria-label="활동 선택 화면으로 돌아가기" title="활동 선택 화면으로 돌아가기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-6h5v6"/></svg></a>
+<script src="transport-shared.js"></script><script src="game-link.js"></script><script src="v9-ui.js"></script><script>(()=>{let embedded=false;const apply=()=>{document.documentElement.classList.toggle('gc-fullscreen',embedded||!!document.fullscreenElement);dispatchEvent(new Event('resize'))};addEventListener('message',e=>{if(e.source===parent&&e.origin==='https://game-center-site.beefly1136.workers.dev'&&e.data?.type==='game-center:fullscreen'){embedded=!!e.data.active;apply()}});document.addEventListener('fullscreenchange',apply);apply()})();</script></body>
+</html>

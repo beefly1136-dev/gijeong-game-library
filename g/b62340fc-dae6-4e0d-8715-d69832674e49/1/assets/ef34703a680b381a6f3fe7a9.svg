@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
+  <defs>
+    <radialGradient id="ultCoreGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="18%" stop-color="#fef08a" stop-opacity="0.95"/>
+      <stop offset="42%" stop-color="#f59e0b" stop-opacity="0.8"/>
+      <stop offset="70%" stop-color="#ea580c" stop-opacity="0.5"/>
+      <stop offset="90%" stop-color="#7c2d12" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ultShockwave" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.6"/>
+      <stop offset="85%" stop-color="#c084fc" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="800" height="800" fill="none"/>
+  
+  <!-- Outer Shockwave Ring -->
+  <circle cx="400" cy="400" r="380" fill="url(#ultShockwave)"/>
+  <circle cx="400" cy="400" r="340" fill="url(#ultCoreGlow)"/>
+
+  <!-- 1. Apocalyptic Radiating Energy Rays (16 spikes) -->
+  <g transform="translate(400,400)">
+    <!-- 8 Primary Rays -->
+    <g transform="rotate(0)"><polygon points="-16,0 0,-390 16,0" fill="#fef08a" opacity="0.85"/></g>
+    <g transform="rotate(45)"><polygon points="-16,0 0,-390 16,0" fill="#fde047" opacity="0.85"/></g>
+    <g transform="rotate(90)"><polygon points="-16,0 0,-390 16,0" fill="#fef08a" opacity="0.85"/></g>
+    <g transform="rotate(135)"><polygon points="-16,0 0,-390 16,0" fill="#fde047" opacity="0.85"/></g>
+    <g transform="rotate(180)"><polygon points="-16,0 0,-390 16,0" fill="#fef08a" opacity="0.85"/></g>
+    <g transform="rotate(225)"><polygon points="-16,0 0,-390 16,0" fill="#fde047" opacity="0.85"/></g>
+    <g transform="rotate(270)"><polygon points="-16,0 0,-390 16,0" fill="#fef08a" opacity="0.85"/></g>
+    <g transform="rotate(315)"><polygon points="-16,0 0,-390 16,0" fill="#fde047" opacity="0.85"/></g>
+
+    <!-- 8 Secondary Cyan Rays -->
+    <g transform="rotate(22.5)"><polygon points="-10,0 0,-320 10,0" fill="#67e8f9" opacity="0.75"/></g>
+    <g transform="rotate(67.5)"><polygon points="-10,0 0,-320 10,0" fill="#67e8f9" opacity="0.75"/></g>
+    <g transform="rotate(112.5)"><polygon points="-10,0 0,-320 10,0" fill="#67e8f9" opacity="0.75"/></g>
+    <g transform="rotate(157.5)"><polygon points="-10,0 0,-320 10,0" fill="#67e8f9" opacity="0.75"/></g>
+    <g transform="rotate(202.5)"><polygon points="-10,0 0,-320 10,0" fill="#67e8f9" opacity="0.75"/></g>
+    <g transform="rotate(247.5)"><polygon points="-10,0 0,-320 10,0" fill="#67e8f9" opacity="0.75"/></g>
+    <g transform="rotate(292.5)"><polygon points="-10,0 0,-320 10,0" fill="#67e8f9" opacity="0.75"/></g>
+    <g transform="rotate(337.5)"><polygon points="-10,0 0,-320 10,0" fill="#67e8f9" opacity="0.75"/></g>
+
+    <!-- 2. Dual Concentric Celestial Magic Circles -->
+    <circle cx="0" cy="0" r="280" fill="none" stroke="#fde047" stroke-width="6" stroke-dasharray="18,12"/>
+    <circle cx="0" cy="0" r="240" fill="none" stroke="#38bdf8" stroke-width="4" stroke-dasharray="8,6"/>
+    <circle cx="0" cy="0" r="190" fill="none" stroke="#ffffff" stroke-width="5"/>
+    <circle cx="0" cy="0" r="150" fill="rgba(254, 240, 138, 0.2)" stroke="#f59e0b" stroke-width="8" stroke-dasharray="32,16"/>
+
+    <!-- 3. Rotating Alchemy Runes / Sigils -->
+    <polygon points="0,-240 207,-120 207,120 0,240 -207,120 -207,-120" fill="none" stroke="#67e8f9" stroke-width="4"/>
+    <polygon points="0,240 207,120 207,-120 0,-240 -207,-120 -207,120" fill="none" stroke="#fde047" stroke-width="3" transform="rotate(30)"/>
+
+    <!-- 4. Massive Golden Cosmic Alchemy Gear -->
+    <circle cx="0" cy="0" r="110" fill="#f59e0b" stroke="#fef08a" stroke-width="6"/>
+    <!-- 12 Gear Teeth -->
+    <rect x="-16" y="-136" width="32" height="30" rx="6" fill="#fef08a"/>
+    <rect x="-16" y="106" width="32" height="30" rx="6" fill="#fef08a"/>
+    <rect x="-136" y="-16" width="30" height="32" rx="6" fill="#fef08a"/>
+    <rect x="106" y="-16" width="30" height="32" rx="6" fill="#fef08a"/>
+    <rect x="-16" y="-136" width="32" height="30" rx="6" fill="#fef08a" transform="rotate(30)"/>
+    <rect x="-16" y="106" width="32" height="30" rx="6" fill="#fef08a" transform="rotate(30)"/>
+    <rect x="-16" y="-136" width="32" height="30" rx="6" fill="#fef08a" transform="rotate(60)"/>
+    <rect x="-16" y="106" width="32" height="30" rx="6" fill="#fef08a" transform="rotate(60)"/>
+    <rect x="-16" y="-136" width="32" height="30" rx="6" fill="#fef08a" transform="rotate(120)"/>
+    <rect x="-16" y="106" width="32" height="30" rx="6" fill="#fef08a" transform="rotate(120)"/>
+    <rect x="-16" y="-136" width="32" height="30" rx="6" fill="#fef08a" transform="rotate(150)"/>
+    <rect x="-16" y="106" width="32" height="30" rx="6" fill="#fef08a" transform="rotate(150)"/>
+
+    <!-- 5. Supernova Blinding White Center -->
+    <circle cx="0" cy="0" r="68" fill="#ffffff" stroke="#fde047" stroke-width="8"/>
+    <circle cx="0" cy="0" r="38" fill="#fef08a"/>
+    <circle cx="0" cy="0" r="18" fill="#ffffff"/>
+
+    <!-- Stardust Sparks -->
+    <circle cx="-160" cy="-140" r="8" fill="#ffffff"/>
+    <circle cx="180" cy="-150" r="7" fill="#fde047"/>
+    <circle cx="160" cy="170" r="9" fill="#38bdf8"/>
+    <circle cx="-180" cy="160" r="8" fill="#ffffff"/>
+    <circle cx="0" cy="-280" r="10" fill="#fde047"/>
+    <circle cx="280" cy="0" r="10" fill="#67e8f9"/>
+    <circle cx="0" cy="280" r="10" fill="#fde047"/>
+    <circle cx="-280" cy="0" r="10" fill="#67e8f9"/>
+  </g>
+</svg>

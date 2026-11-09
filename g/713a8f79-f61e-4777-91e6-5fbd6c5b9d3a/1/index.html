@@ -1,0 +1,2246 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head><base href="https://san-t-tech-home.san-k.chatgpt.site/escape/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SAFE-4: 사라진 지원 신호 — HARDCORE SIM v2.6</title>
+<style>
+/* ============================================================
+   SAFE-4 HARDCORE SIM v2.0 — 디자인 토큰 & 베이스
+   ============================================================ */
+:root{
+  --ph:#7dff9e;            /* 인광 녹색 */
+  --ph-dim:#3f9e63;
+  --ph-bright:#d6ffe4;
+  --amber:#ffb000;         /* 경고 호박색 */
+  --amber-dim:#9a6a10;
+  --red:#ff3b30;
+  --bg:#04070a;
+  --panel:#070d0a;
+  --panel-2:#0a120d;
+  --line:rgba(125,255,158,.30);
+  --line-dim:rgba(125,255,158,.14);
+  --mono:"Courier New",ui-monospace,monospace;
+  --kr:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg)}
+html,body{overflow-x:clip}
+body{
+  background:var(--bg);
+  color:var(--ph);
+  font-family:var(--kr);
+  font-size:15px;
+  line-height:1.6;
+  word-break:keep-all;
+  -webkit-font-smoothing:antialiased;
+}
+body.locked{overflow:hidden}
+.mono{font-family:var(--mono)}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
+button:focus-visible,[tabindex]:focus-visible,input:focus-visible{
+  outline:2px solid var(--amber);outline-offset:2px;
+}
+::selection{background:rgba(125,255,158,.25)}
+
+/* ============================================================
+   CRT 스캔라인 & 플리커 오버레이
+   ============================================================ */
+#crt{
+  position:fixed;inset:0;z-index:90;pointer-events:none;
+  background:rgba(80,255,150,.016);
+}
+#crt::before{
+  content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px);
+  opacity:.55;
+}
+#crt::after{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(ellipse at center,transparent 52%,rgba(0,0,0,.55) 100%);
+  animation:crtFlicker 4.2s steps(12) infinite;
+}
+@keyframes crtFlicker{
+  0%,100%{opacity:.92}18%{opacity:.97}23%{opacity:.90}41%{opacity:.98}
+  55%{opacity:.93}70%{opacity:.99}86%{opacity:.91}
+}
+
+/* 국소 글리치 */
+.glitching{animation:glitchAnim .18s steps(2) both!important}
+@keyframes glitchAnim{
+  0%{transform:translate(0);text-shadow:none}
+  25%{transform:translate(-2px,1px);text-shadow:2px 0 rgba(255,59,48,.8),-2px 0 rgba(58,255,196,.8)}
+  50%{transform:translate(2px,-1px);text-shadow:-2px 0 rgba(255,59,48,.8),2px 0 rgba(58,255,196,.8)}
+  75%{transform:translate(-1px,0);text-shadow:1px 0 rgba(58,255,196,.6)}
+  100%{transform:translate(0);text-shadow:none}
+}
+
+/* ============================================================
+   손전등(토치) 비네팅 레이어
+   ============================================================ */
+@property --r{syntax:'<length>';inherits:false;initial-value:300px}
+#torch{
+  position:fixed;inset:0;z-index:4;pointer-events:none;
+  --mx:50vw;--my:42vh;--r:300px;
+  background:radial-gradient(circle var(--r) at var(--mx) var(--my),
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,.10) 42%,
+    rgba(1,4,2,.55) 72%,
+    rgba(1,4,2,.88) 100%);
+  transition:--r .28s ease-out;
+}
+#torch.boost{--r:430px}
+
+/* ============================================================
+   HUD — 비상 전력 / 시설 무결성
+   ============================================================ */
+#hud{
+  position:fixed;top:0;left:0;right:0;z-index:70;
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:8px 14px;
+  background:linear-gradient(180deg,rgba(4,8,6,.92),rgba(4,8,6,.72));
+  border-bottom:1px solid var(--line-dim);
+  font-family:var(--mono);font-size:12px;letter-spacing:.06em;
+}
+#hud[hidden]{display:none}
+.hud-block{display:flex;align-items:center;gap:7px}
+.hud-label{color:var(--ph-dim);font-weight:700}
+.hbar{
+  width:110px;height:11px;border:1px solid var(--line);
+  background:rgba(0,0,0,.5);position:relative;
+}
+.hbar i{display:block;height:100%;width:100%;background:var(--ph);transition:width .3s ease}
+.hud-block.warn .hbar i{background:var(--amber)}
+.hud-block.warn .hud-val{color:var(--amber)}
+.hud-block.crit .hbar i{background:var(--red);animation:hudPulse .8s steps(2) infinite}
+.hud-block.crit .hud-val{color:var(--red);animation:hudPulse .8s steps(2) infinite}
+@keyframes hudPulse{50%{opacity:.35}}
+.hud-val{color:var(--ph);min-width:44px;font-weight:700}
+.zone-pips{display:flex;gap:6px;margin-left:6px}
+.zone-pips b{
+  width:16px;height:16px;border:1px solid var(--line);display:inline-block;
+  background:rgba(0,0,0,.5);
+}
+.zone-pips b.on{background:var(--ph);box-shadow:0 0 8px rgba(125,255,158,.7)}
+#clock{color:var(--ph-dim)}
+#sndBtn{
+  margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  border:1px solid var(--line);padding:4px 10px;color:var(--ph-dim);
+}
+#helpBtn{
+  font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+  border:1px solid rgba(255,176,0,.5);padding:4px 10px;color:var(--amber);
+}
+#reviewBtn{
+  font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+  border:1px solid rgba(125,255,158,.5);padding:4px 10px;color:var(--ph);
+}
+#reviewBtn:hover:not(:disabled){background:rgba(125,255,158,.08)}
+#reviewBtn:disabled{opacity:.34;cursor:not-allowed}
+#helpBtn:hover{background:rgba(255,176,0,.08)}
+#sndBtn.on{color:var(--ph);border-color:var(--ph-dim)}
+#sndBtn:hover{background:rgba(125,255,158,.08)}
+
+/* ============================================================
+   부트 오버레이
+   ============================================================ */
+#boot{
+  position:fixed;inset:0;z-index:200;
+  background:#020403;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+}
+#boot[hidden]{display:none}
+.boot-inner{width:min(680px,100%)}
+#bootLog{
+  font-family:var(--mono);font-size:13px;line-height:1.9;
+  color:var(--ph);white-space:pre-wrap;min-height:300px;
+  text-shadow:0 0 8px rgba(125,255,158,.45);
+}
+#bootLog .dim{color:var(--ph-dim)}
+#bootLog .amber-line{color:var(--amber)}
+#bootLog .red-line{color:var(--red)}
+#bootBtn{
+  display:block;margin-top:26px;padding:13px 34px;
+  font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:.22em;
+  color:#02110a;background:var(--ph);border:1px solid var(--ph);
+  box-shadow:0 0 18px rgba(125,255,158,.4);
+}
+#bootBtn:hover{background:var(--ph-bright)}
+#bootBtn[hidden]{display:none}
+#bootReset{
+  margin-top:14px;font-family:var(--mono);font-size:11px;color:var(--ph-dim);
+  text-decoration:underline;text-underline-offset:3px;
+}
+#bootReset[hidden]{display:none}
+</style>
+<style>
+/* ============================================================
+   스크롤 트랙 & 스테이지 (시네마틱 스크롤 엔진 계승)
+   ============================================================ */
+#track{height:5400px;position:relative}
+#stage{
+  position:sticky;top:0;height:100svh;overflow:hidden;
+  background:#030605;
+}
+.layer{
+  position:absolute;top:0;left:0;height:100%;display:flex;
+  will-change:transform;
+}
+#layerBack{width:452vw;z-index:1}
+#layerMid{width:500vw;z-index:2}
+#layerFront{width:560vw;z-index:3;pointer-events:none}
+.bay{width:calc(100%/5);height:100%;position:relative;flex:none}
+.bay svg{position:absolute;inset:0;width:100%;height:100%}
+
+/* 베이 공통 톤 */
+.bay .scene{position:absolute;inset:0}
+.led{animation:ledBlink 1.6s steps(2) infinite}
+.led.d2{animation-delay:.4s}.led.d3{animation-delay:.9s}.led.d4{animation-delay:1.3s}
+@keyframes ledBlink{50%{opacity:.12}}
+.lamp-flicker{animation:lampFlick 3.1s steps(3) infinite}
+@keyframes lampFlick{0%,88%{opacity:.85}90%{opacity:.15}94%{opacity:.7}96%{opacity:.2}100%{opacity:.85}}
+.steam{animation:steamRise 3.4s ease-in-out infinite}
+.steam.s2{animation-delay:1.7s}
+@keyframes steamRise{0%{opacity:0;transform:translateY(0)}30%{opacity:.16}100%{opacity:0;transform:translateY(-46px)}}
+.bay-label{
+  position:absolute;top:64px;left:50%;transform:translateX(-50%);
+  font-family:var(--mono);font-size:11px;letter-spacing:.3em;
+  color:rgba(125,255,158,.4);white-space:nowrap;
+}
+
+/* ============================================================
+   핫스팟 (조사 노드)
+   ============================================================ */
+.hotspot{
+  position:absolute;width:46px;height:46px;margin:-23px 0 0 -23px;
+  z-index:5;pointer-events:auto;
+  display:flex;align-items:center;justify-content:center;
+}
+.hotspot::before{
+  content:"";width:10px;height:10px;transform:rotate(45deg);
+  background:var(--amber);box-shadow:0 0 10px rgba(255,176,0,.8);
+  animation:hsPulse 2s ease-in-out infinite;
+}
+.hotspot::after{
+  content:"";position:absolute;inset:6px;border:1px solid rgba(255,176,0,.45);
+  transform:rotate(45deg);animation:hsRing 2s ease-in-out infinite;
+}
+@keyframes hsPulse{50%{opacity:.4}}
+@keyframes hsRing{0%{transform:rotate(45deg) scale(.7);opacity:.9}70%{transform:rotate(45deg) scale(1.35);opacity:0}100%{opacity:0}}
+.hotspot.read::before{background:var(--ph-dim);box-shadow:0 0 6px rgba(125,255,158,.4);animation:none}
+.hotspot.read::after{display:none}
+.hs-tag{
+  position:absolute;top:-20px;left:50%;transform:translateX(-50%);
+  font-family:var(--mono);font-size:9px;letter-spacing:.14em;
+  color:var(--amber);white-space:nowrap;
+  background:rgba(4,8,5,.8);padding:1px 5px;border:1px solid rgba(255,176,0,.3);
+}
+.hotspot.read .hs-tag{color:var(--ph-dim);border-color:var(--line-dim)}
+
+/* ============================================================
+   리드아웃 (구역 상태 단말 텍스트)
+   ============================================================ */
+#readout{
+  position:absolute;left:18px;bottom:18px;z-index:6;
+  width:min(520px,calc(100vw - 36px));
+  background:rgba(4,9,6,.88);
+  border:1px solid var(--line);
+  padding:12px 16px;
+  font-family:var(--mono);
+  box-shadow:0 0 24px rgba(0,0,0,.6), inset 0 0 40px rgba(125,255,158,.03);
+}
+#readout::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);
+  opacity:.4;
+}
+#roZone{font-size:12px;letter-spacing:.14em;color:var(--amber);font-weight:700}
+#roStatus{font-size:13px;margin-top:4px;color:var(--ph)}
+#roEvent{font-size:11px;margin-top:6px;color:var(--ph-dim);min-height:1.4em}
+#roEvent.alarm-line{color:var(--red)}
+#gateChip{
+  margin-top:8px;display:none;
+  font-family:var(--mono);font-size:11px;letter-spacing:.12em;
+  border:1px solid var(--amber);color:var(--amber);padding:5px 12px;
+  animation:hudPulse 1.2s steps(2) infinite;
+}
+#gateChip.show{display:inline-block}
+
+#recProg{font-size:11px;margin-top:6px;font-family:var(--mono);letter-spacing:.08em;min-height:1.2em}
+#recProg.lock{color:var(--amber)}
+#recProg.ok{color:var(--ph-bright)}
+.hotspot.needed::before{animation-duration:.7s}
+.hotspot.needed::after{animation-duration:.7s;border-color:rgba(255,176,0,.95)}
+.hotspot.needed .hs-tag{animation:hsPulse .7s ease-in-out infinite}
+
+/* 스크롤 유도 힌트 */
+#scrollHint{
+  position:absolute;bottom:20px;right:22px;z-index:6;
+  font-family:var(--mono);font-size:10px;letter-spacing:.22em;
+  color:var(--ph-dim);text-align:right;
+  animation:hintFloat 2.4s ease-in-out infinite;
+}
+@keyframes hintFloat{50%{transform:translateY(5px)}}
+</style>
+<style>
+/* ============================================================
+   다이얼로그 공통 (기록 뷰어 / 제어 패널)
+   ============================================================ */
+dialog{
+  position:fixed;z-index:85;left:50%;top:50%;transform:translate(-50%,-50%);
+  margin:0;max-height:88svh;overflow-y:auto;
+  background:var(--panel);color:var(--ph);
+  border:1px solid var(--line);
+  box-shadow:0 0 0 1px rgba(0,0,0,.8),0 0 44px rgba(0,0,0,.85),inset 0 0 60px rgba(125,255,158,.03);
+  padding:0;max-width:min(640px,94vw);width:100%;
+  font-family:var(--kr);
+}
+dialog::backdrop{background:transparent}
+#scrim{position:fixed;inset:0;z-index:84;background:rgba(1,3,2,.82);display:none}
+#scrim.on{display:block}
+.dlg-inner{position:relative;padding:18px 20px 16px}
+.dlg-inner::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px);
+  opacity:.35;
+}
+.dlg-corner{position:absolute;width:10px;height:10px;border-color:var(--ph-dim);border-style:solid;border-width:0}
+.dlg-corner.tl{top:4px;left:4px;border-top-width:1px;border-left-width:1px}
+.dlg-corner.tr{top:4px;right:4px;border-top-width:1px;border-right-width:1px}
+.dlg-corner.bl{bottom:4px;left:4px;border-bottom-width:1px;border-left-width:1px}
+.dlg-corner.br{bottom:4px;right:4px;border-bottom-width:1px;border-right-width:1px}
+.dlg-head{
+  display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  border-bottom:1px solid var(--line-dim);padding-bottom:8px;margin-bottom:12px;
+  font-family:var(--mono);
+}
+.dlg-head .tag{font-size:11px;letter-spacing:.18em;color:var(--amber);font-weight:700}
+.dlg-head .meta{font-size:10px;color:var(--ph-dim);letter-spacing:.08em}
+
+/* 기록 뷰어 */
+#recBody{
+  font-size:14.5px;line-height:1.85;color:var(--ph);
+  min-height:120px;white-space:pre-wrap;
+  text-shadow:0 0 6px rgba(125,255,158,.25);
+}
+#recBody .corrupt{
+  background:rgba(125,255,158,.16);color:transparent;
+  letter-spacing:.1em;user-select:none;
+}
+.rec-photo{margin:0 0 14px;border:1px solid var(--line);position:relative;overflow:hidden;background:#020503}
+.rec-photo img{display:block;width:100%;height:auto;filter:saturate(.85) contrast(1.06) brightness(.94)}
+.rec-photo::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.25) 0 1px,transparent 1px 3px)}
+.rec-photo figcaption{position:absolute;left:0;right:0;bottom:0;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--amber);background:rgba(2,6,4,.82);padding:4px 8px;border-top:1px solid var(--line-dim)}
+#recFoot{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  margin-top:14px;border-top:1px solid var(--line-dim);padding-top:10px;
+}
+.drain-note{font-family:var(--mono);font-size:10px;color:var(--amber-dim);letter-spacing:.06em}
+.drain-note.live{color:var(--amber);animation:hudPulse 1s steps(2) infinite}
+
+/* ============================================================
+   제어 패널 — 촉각 컨트롤
+   ============================================================ */
+#panelBody{min-height:220px;position:relative}
+.panel-msg{
+  font-family:var(--mono);font-size:11.5px;min-height:1.5em;
+  color:var(--ph-dim);letter-spacing:.04em;margin-top:12px;
+}
+.panel-msg.err{color:var(--red)}
+.panel-msg.ok{color:var(--ph-bright)}
+#panelClose{
+  font-family:var(--mono);font-size:11px;letter-spacing:.12em;
+  border:1px solid var(--line-dim);color:var(--ph-dim);padding:6px 14px;
+}
+#panelClose:hover{border-color:var(--line);color:var(--ph)}
+
+/* --- 차단기 레버 --- */
+.breaker-row{display:flex;gap:18px;justify-content:center;margin:18px 0 8px;flex-wrap:wrap}
+.lever{display:flex;flex-direction:column;align-items:center;gap:8px;padding:6px 4px;min-width:64px}
+.lever-slot{
+  width:34px;height:96px;border:1px solid var(--line);
+  background:linear-gradient(180deg,#050b07,#0a120c);
+  position:relative;display:block;
+  box-shadow:inset 0 0 12px rgba(0,0,0,.8);
+}
+.lever-handle{
+  position:absolute;left:3px;right:3px;height:26px;bottom:4px;
+  background:linear-gradient(180deg,#2a3a30,#16211a);
+  border:1px solid var(--line-dim);
+  transition:bottom .14s ease-in;
+  box-shadow:0 2px 6px rgba(0,0,0,.7);
+}
+.lever.on .lever-handle{bottom:64px;background:linear-gradient(180deg,#3d5a44,#1d3325);border-color:var(--ph-dim)}
+.lever-lamp{
+  width:10px;height:10px;border-radius:50%;
+  background:#1a241d;border:1px solid var(--line-dim);
+}
+.lever.on .lever-lamp{background:var(--amber);box-shadow:0 0 8px rgba(255,176,0,.8)}
+.lever-label{font-family:var(--mono);font-size:10.5px;color:var(--ph-dim);letter-spacing:.04em;text-align:center;line-height:1.5}
+.lever.on .lever-label{color:var(--ph)}
+.lever:disabled{cursor:default}
+.seq-lamps{display:flex;gap:10px;justify-content:center;margin-top:14px;font-family:var(--mono);font-size:10px;color:var(--ph-dim);align-items:center}
+.seq-lamps b{
+  width:26px;height:26px;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ph-dim);background:rgba(0,0,0,.5);font-size:11px;
+}
+.seq-lamps b.lit{border-color:var(--amber);color:var(--amber);box-shadow:0 0 8px rgba(255,176,0,.35)}
+
+/* --- 바이너리 토글 스위치 --- */
+.toggle-grid{
+  display:grid;grid-template-columns:repeat(8,1fr);gap:10px;
+  margin:20px 0 14px;
+}
+.tswitch{display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 2px;min-width:44px;min-height:76px}
+.tswitch .tsw-rail{
+  width:26px;height:52px;border:1px solid var(--line);
+  background:linear-gradient(180deg,#050b07,#0a120c);
+  position:relative;display:block;
+}
+.tswitch .tsw-cap{
+  position:absolute;left:2px;right:2px;height:22px;top:26px;
+  background:linear-gradient(180deg,#2a3a30,#141f18);
+  border:1px solid var(--line-dim);
+  transition:top .1s ease-in;
+}
+.tswitch[aria-pressed="true"] .tsw-cap{top:2px;background:linear-gradient(180deg,#3d5a44,#1d3325);border-color:var(--ph)}
+.tswitch .tsw-id{font-family:var(--mono);font-size:9.5px;color:var(--ph-dim);letter-spacing:.06em}
+.tswitch .tsw-label{font-family:var(--kr);font-size:9.5px;color:var(--ph-dim);text-align:center;line-height:1.35;word-break:keep-all}
+.tswitch[aria-pressed="true"] .tsw-label{color:var(--ph)}
+.tswitch[aria-pressed="true"] .tsw-id{color:var(--ph)}
+.exec-btn{
+  display:block;margin:16px auto 0;padding:12px 30px;
+  font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.2em;
+  color:var(--amber);background:linear-gradient(180deg,#1a1408,#0d0a04);
+  border:1px solid var(--amber-dim);
+  box-shadow:0 3px 0 #050402, inset 0 1px 0 rgba(255,176,0,.18);
+}
+.exec-btn:hover{color:#ffd27a;border-color:var(--amber)}
+.exec-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #050402}
+.exec-btn.transmit{color:var(--ph);border-color:var(--ph-dim);background:linear-gradient(180deg,#0a1a10,#050d08)}
+.exec-btn.transmit:hover{color:var(--ph-bright);border-color:var(--ph)}
+
+/* --- 슬라이더 (압력 / 주파수) --- */
+.slider-block{margin:16px 0 8px}
+.slider-read{
+  font-family:var(--mono);font-size:30px;font-weight:700;
+  color:var(--ph);text-align:center;letter-spacing:.06em;
+  text-shadow:0 0 12px rgba(125,255,158,.5);margin-bottom:2px;
+}
+.slider-unit{font-size:12px;color:var(--ph-dim);text-align:center;font-family:var(--mono);letter-spacing:.2em;margin-bottom:14px}
+.cal-sticker{
+  display:inline-block;font-family:var(--mono);font-size:9px;
+  color:var(--amber-dim);border:1px solid rgba(154,106,16,.5);
+  padding:1px 6px;letter-spacing:.14em;margin-left:8px;transform:rotate(-3deg);
+}
+input[type="range"].ind{
+  -webkit-appearance:none;appearance:none;
+  width:100%;height:34px;background:transparent;cursor:grab;
+}
+input[type="range"].ind:active{cursor:grabbing}
+input[type="range"].ind::-webkit-slider-runnable-track{
+  height:10px;background:linear-gradient(90deg,#0a1410,#122016);
+  border:1px solid var(--line);
+}
+input[type="range"].ind::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:26px;height:34px;margin-top:-13px;
+  background:linear-gradient(180deg,#33463a,#1a261f);
+  border:1px solid var(--ph-dim);
+  box-shadow:0 0 10px rgba(125,255,158,.3);
+}
+input[type="range"].ind::-moz-range-track{
+  height:10px;background:#0f1c13;border:1px solid var(--line);
+}
+input[type="range"].ind::-moz-range-thumb{
+  width:26px;height:34px;border-radius:0;
+  background:linear-gradient(180deg,#33463a,#1a261f);
+  border:1px solid var(--ph-dim);
+}
+.tick-row{
+  display:flex;justify-content:space-between;
+  font-family:var(--mono);font-size:9px;color:var(--ph-dim);
+  padding:2px 2px 0;letter-spacing:.04em;
+}
+.nudge-row{display:flex;gap:8px;justify-content:center;margin-top:12px}
+.nudge-btn{
+  font-family:var(--mono);font-size:11px;padding:6px 13px;
+  border:1px solid var(--line-dim);color:var(--ph-dim);letter-spacing:.05em;
+}
+.nudge-btn:hover{border-color:var(--line);color:var(--ph)}
+.nudge-btn:active{transform:translateY(1px)}
+
+/* 신호 강도 미터 */
+.sig-meter{
+  height:22px;border:1px solid var(--line);background:rgba(0,0,0,.55);
+  position:relative;overflow:hidden;margin:6px 0 16px;
+}
+.sig-meter i{
+  display:block;height:100%;width:0%;
+  background:repeating-linear-gradient(90deg,var(--ph) 0 6px,transparent 6px 9px);
+  opacity:.85;transition:width .12s linear;
+}
+.sig-meter::after{
+  content:"SIGNAL";position:absolute;right:6px;top:2px;
+  font-family:var(--mono);font-size:9px;color:var(--ph-dim);letter-spacing:.2em;
+}
+
+/* 압력 게이지 바 */
+.p-gauge{
+  height:26px;border:1px solid var(--line);background:rgba(0,0,0,.55);
+  position:relative;margin:6px 0 4px;
+}
+.p-gauge i{
+  display:block;height:100%;width:0%;
+  background:linear-gradient(90deg,var(--ph-dim),var(--ph));
+  transition:width .12s linear;
+}
+.p-gauge .tick{
+  position:absolute;top:0;bottom:0;width:1px;background:var(--line-dim);
+}
+.p-gauge .tick-l{
+  position:absolute;top:-14px;font-family:var(--mono);font-size:8.5px;
+  color:var(--ph-dim);transform:translateX(-50%);
+}
+
+/* ============================================================
+   경보 & 락다운 오버레이
+   ============================================================ */
+#alarm{
+  position:fixed;inset:0;z-index:95;pointer-events:none;
+  display:none;align-items:center;justify-content:center;
+}
+#alarm.go{display:flex;animation:alarmFlash 2.3s ease-out both}
+@keyframes alarmFlash{
+  0%{background:rgba(255,30,20,.55);opacity:1}
+  18%{background:rgba(255,30,20,.08)}
+  36%{background:rgba(255,30,20,.45)}
+  54%{background:rgba(255,30,20,.06)}
+  72%{background:rgba(255,30,20,.35)}
+  100%{background:rgba(255,30,20,0);opacity:1}
+}
+#alarm .alarm-text{
+  font-family:var(--mono);font-size:clamp(18px,4vw,34px);font-weight:700;
+  color:var(--red);letter-spacing:.3em;text-align:center;
+  text-shadow:0 0 20px rgba(255,59,48,.8);
+  animation:glitchAnim .3s steps(2) 4;
+}
+#alarm .alarm-sub{
+  font-size:clamp(11px,1.6vw,14px);color:#ffb3ad;letter-spacing:.18em;margin-top:10px;
+}
+#lockdown{
+  position:fixed;inset:0;z-index:96;
+  background:rgba(8,2,2,.94);
+  display:none;align-items:center;justify-content:center;
+  flex-direction:column;gap:12px;
+}
+#lockdown.on{display:flex}
+#lockdown::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(255,59,48,.05) 0 2px,transparent 2px 6px);
+}
+#lockdown .lk-title{
+  font-family:var(--mono);font-size:clamp(16px,3.4vw,26px);font-weight:700;
+  color:var(--red);letter-spacing:.4em;text-align:center;
+  animation:hudPulse .7s steps(2) infinite;
+}
+#lockCount{
+  font-family:var(--mono);font-size:clamp(48px,10vw,96px);font-weight:700;
+  color:var(--red);text-shadow:0 0 30px rgba(255,59,48,.7);line-height:1;
+}
+#lockdown .lk-sub{font-family:var(--mono);font-size:11px;color:#c9847f;letter-spacing:.2em}
+
+/* ============================================================
+   엔딩 오버레이
+   ============================================================ */
+#ending{
+  position:fixed;inset:0;z-index:150;
+  background:#020403;
+  display:none;align-items:center;justify-content:center;
+  padding:24px;overflow-y:auto;
+}
+#ending.on{display:flex}
+.end-inner{width:min(640px,100%);text-align:center;position:relative;z-index:2}
+.end-class{
+  font-family:var(--mono);font-size:clamp(13px,2vw,16px);
+  letter-spacing:.5em;margin-bottom:10px;
+}
+.end-title{
+  font-size:clamp(24px,5vw,42px);font-weight:900;line-height:1.25;
+  margin-bottom:18px;letter-spacing:.02em;white-space:pre-line;
+}
+.end-body{
+  font-size:14.5px;line-height:1.9;color:#9fd4ae;
+  margin-bottom:24px;white-space:pre-wrap;
+}
+.end-stats{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;
+  margin:0 auto 26px;max-width:520px;
+}
+.end-stat{border:1px solid var(--line-dim);padding:10px 6px;background:rgba(125,255,158,.03)}
+.end-stat b{display:block;font-family:var(--mono);font-size:19px;color:var(--ph)}
+.end-stat span{font-family:var(--mono);font-size:9.5px;color:var(--ph-dim);letter-spacing:.14em}
+.end-a .end-class,.end-a .end-title{color:var(--ph)}
+.end-a .end-title{text-shadow:0 0 24px rgba(125,255,158,.55)}
+.end-b .end-class,.end-b .end-title{color:var(--amber)}
+.end-b .end-title{text-shadow:0 0 24px rgba(255,176,0,.5)}
+.end-c .end-class,.end-c .end-title{color:var(--red)}
+.end-c .end-title{text-shadow:0 0 24px rgba(255,59,48,.55)}
+.end-c .end-body{color:#c9847f}
+#restartBtn{
+  padding:13px 34px;font-family:var(--mono);font-size:13px;font-weight:700;
+  letter-spacing:.22em;border:1px solid var(--line);color:var(--ph);
+  background:rgba(125,255,158,.06);
+}
+#restartBtn:hover{background:rgba(125,255,158,.14);box-shadow:0 0 18px rgba(125,255,158,.3)}
+
+/* 토스트 */
+#toast{
+  position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+  z-index:110;font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;
+  color:var(--ph);background:rgba(4,9,6,.92);border:1px solid var(--line);
+  padding:8px 16px;opacity:0;transition:opacity .25s;pointer-events:none;
+  max-width:92vw;text-align:center;
+}
+#toast.show{opacity:1}
+
+/* ============================================================
+   반응형
+   ============================================================ */
+@media (max-width:640px){
+  #track{height:4600px}
+  #hud{gap:8px;padding:7px 10px;font-size:11px}
+  .hbar{width:64px}
+  .hud-val{min-width:38px}
+  .zone-pips b{width:13px;height:13px}
+  #readout{left:10px;bottom:10px;width:calc(100vw - 20px);padding:10px 12px}
+  #scrollHint{display:none}
+  dialog{max-width:96vw;max-height:92svh}
+  .toggle-grid{grid-template-columns:repeat(4,1fr);gap:12px}
+  .breaker-row{gap:10px}
+  #torch{--r:240px}
+  #torch.boost{--r:380px}
+}
+
+/* ============================================================
+   감속 모션 대응
+   ============================================================ */
+@media (prefers-reduced-motion:reduce){
+  #crt::after{animation:none}
+  .led,.lamp-flicker,.steam,.hotspot::before,.hotspot::after,
+  #scrollHint,#gateChip,.glitching{animation:none!important}
+  .hud-block.crit .hbar i,.hud-block.crit .hud-val{animation:none}
+}
+</style>
+
+<style>
+/* 잔여 유틸 */
+#layerBack{pointer-events:none}
+.tbtn{
+  font-family:var(--mono);font-size:11px;letter-spacing:.12em;
+  border:1px solid var(--line-dim);color:var(--ph-dim);padding:6px 14px;
+}
+.tbtn:hover{border-color:var(--line);color:var(--ph)}
+/* ============================================================
+   v2.6 — 무작위 선택지 / 사례 다시 보기 / 탐색 포인트 재배치
+   ============================================================ */
+.phase-label{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--amber);margin-bottom:10px}
+.link-q{font-size:14.5px;line-height:1.7;color:var(--ph);margin-bottom:14px}
+.chip-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.chip{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;border:1px solid var(--line-dim);background:rgba(125,255,158,.03);padding:9px 11px;min-height:54px}
+.chip b{font-family:var(--mono);font-size:11px;color:var(--ph);letter-spacing:.06em}
+.chip span{font-size:11.5px;color:var(--ph-dim);line-height:1.45}
+.chip:hover{border-color:var(--line)}
+.chip.sel{border-color:var(--ph);background:rgba(125,255,158,.1);box-shadow:0 0 10px rgba(125,255,158,.18)}
+.chip.sel b{color:var(--ph-bright)}
+.chip.wrong{border-color:var(--red);animation:glitchAnim .2s steps(2) 2}
+.chip.cut{border-color:rgba(255,59,48,.55)}
+.chip.cut.done{border-color:var(--ph-dim);opacity:.55}
+.chip.cut.done span{text-decoration:line-through}
+.real-note{font-size:11.5px;color:var(--amber-dim);border:1px dashed rgba(154,106,16,.55);padding:8px 11px;margin-top:14px;line-height:1.6}
+.diag-box{border:1px solid rgba(255,59,48,.4);background:rgba(255,59,48,.05);padding:10px 12px;margin:10px 0}
+.diag-row{font-size:12.5px;color:#ffb3ad;line-height:1.65;padding:2px 0}
+.dmg-line{font-family:var(--mono);font-size:11px;color:var(--amber);letter-spacing:.05em;margin:8px 0}
+.scenario-card{border:1px solid var(--line);background:rgba(125,255,158,.05);padding:12px 14px;font-size:14px;line-height:1.75;margin:10px 0 14px;color:var(--ph-bright)}
+.path-row{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+.path-btn{border:1px solid var(--line-dim);padding:11px 14px;text-align:left;font-size:13.5px;color:var(--ph);background:rgba(0,0,0,.4);line-height:1.5}
+.path-btn:hover{border-color:var(--ph-dim);background:rgba(125,255,158,.06)}
+.path-btn b{font-family:var(--mono);margin-right:8px;color:var(--amber);font-size:11px;letter-spacing:.1em}
+.valve-card{border:1px solid var(--line-dim);padding:10px 12px;margin:8px 0;background:rgba(0,0,0,.35)}
+.valve-card .vc-q{font-size:13.5px;line-height:1.65;margin-bottom:8px;color:var(--ph)}
+.vc-btns{display:flex;gap:8px}
+.vc-btn{flex:1;font-family:var(--mono);font-size:11px;letter-spacing:.1em;padding:9px 0;border:1px solid var(--line-dim);color:var(--ph-dim)}
+.vc-btn:hover{border-color:var(--line);color:var(--ph)}
+.vc-btn.on-cut{border-color:var(--red);color:var(--red);background:rgba(255,59,48,.08)}
+.vc-btn.on-keep{border-color:var(--ph);color:var(--ph);background:rgba(125,255,158,.08)}
+.tl-opt{display:block;width:100%;text-align:left;border:1px solid var(--line-dim);padding:10px 13px;margin:6px 0;font-size:13px;color:var(--ph);background:rgba(0,0,0,.4);line-height:1.5}
+.tl-opt:hover{border-color:var(--ph-dim);background:rgba(125,255,158,.05)}
+.solve-box{font-size:14px;color:var(--ph-bright);line-height:1.85;padding:14px;border:1px solid var(--ph-dim);background:rgba(125,255,158,.06);margin-bottom:12px;white-space:pre-wrap}
+.follow-up{font-size:12.5px;color:var(--amber);border-left:2px solid var(--amber-dim);padding:8px 12px;line-height:1.7;text-align:left}
+.end-sec{font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;color:var(--ph-dim);margin:18px 0 8px}
+.end-concept{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 auto;max-width:520px}
+.ec-row{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--line-dim);padding:8px 12px;background:rgba(125,255,158,.03);font-size:12px;text-align:left}
+.ec-row b{font-family:var(--mono);font-size:12px;flex:none}
+.ec-row b.ok{color:var(--ph)}
+.ec-row b.mid{color:var(--amber)}
+.ec-row b.no{color:var(--red)}
+.end-note{font-size:12px;color:#9fd4ae;border:1px dashed var(--line-dim);padding:10px 14px;margin:0 auto 22px;max-width:520px;line-height:1.8;text-align:left}
+.end-c .end-note{color:#c9847f}
+
+/* 실제 사례 복원 / 현실 도움 */
+#caseReveal{
+  position:fixed;inset:0;z-index:175;display:none;align-items:center;justify-content:center;
+  padding:24px;overflow-y:auto;background:
+    radial-gradient(circle at 50% 8%,rgba(255,176,0,.11),transparent 34%),
+    repeating-linear-gradient(0deg,rgba(125,255,158,.018) 0 1px,transparent 1px 4px),
+    rgba(1,4,3,.985);
+}
+#caseReveal.on{display:flex}
+.case-card{
+  width:min(720px,100%);color:var(--ph-bright);border:1px solid rgba(125,255,158,.46);
+  background:
+    linear-gradient(135deg,rgba(255,176,0,.08),transparent 22%),
+    linear-gradient(180deg,#09120d,#050b08);
+  box-shadow:0 0 0 1px rgba(125,255,158,.07),0 0 32px rgba(125,255,158,.08),0 28px 90px rgba(0,0,0,.78);
+  padding:clamp(20px,4vw,38px);position:relative;overflow:hidden;
+}
+.case-card::before{
+  content:"RESTORED // VERIFIED RECORD";position:absolute;right:-42px;top:21px;
+  transform:rotate(35deg);padding:4px 42px;background:rgba(255,176,0,.12);
+  border-block:1px solid rgba(255,176,0,.38);color:rgba(255,176,0,.68);
+  font:9px/1 var(--mono);letter-spacing:.16em;pointer-events:none;
+}
+.case-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--amber);margin-bottom:9px}
+.case-title{
+  font-size:clamp(24px,4.7vw,40px);line-height:1.22;margin-bottom:16px;font-weight:900;
+  color:var(--ph-bright);text-shadow:0 0 22px rgba(125,255,158,.22);
+}
+.case-fact{font-size:clamp(15px,2vw,17px);line-height:1.75;border-left:3px solid var(--amber);padding:11px 0 11px 14px;color:#ccebd5}
+.case-q{font-size:15px;font-weight:800;margin:22px 0 10px;color:var(--ph)}
+.case-options{display:grid;gap:8px}
+.case-option{
+  color:#b9ddc3;border:1px solid var(--line-dim);background:rgba(0,0,0,.34);
+  padding:11px 13px;text-align:left;font-size:14px;line-height:1.5;min-height:46px;
+}
+.case-option:hover,.case-option:focus-visible{border-color:var(--ph-dim);background:rgba(125,255,158,.065);color:var(--ph-bright)}
+.case-option.good{border-color:var(--ph);background:rgba(125,255,158,.13);color:var(--ph-bright);box-shadow:inset 3px 0 var(--ph)}
+.case-option.bad{border-color:var(--red);background:rgba(255,59,48,.09);color:#ffc1bc;box-shadow:inset 3px 0 var(--red)}
+.case-option.review-answer{cursor:default}
+.case-feedback{min-height:24px;margin-top:10px;font-size:13px;color:#e39b94}
+.case-outcome{display:none;margin-top:16px;padding:15px 16px;background:rgba(125,255,158,.075);border:1px solid rgba(125,255,158,.34);color:#d8f4df}
+.case-outcome.on{display:block;animation:caseIn .42s ease-out both}
+.case-outcome b{display:block;color:var(--amber);font-family:var(--mono);letter-spacing:.12em;font-size:11px;margin-bottom:6px}
+.case-outcome p{font-size:15px;line-height:1.72}
+.case-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px}
+.case-source{font-size:12px;color:var(--ph-dim);text-underline-offset:3px}
+.case-source:hover{color:var(--ph)}
+#caseContinue{padding:11px 20px;background:var(--ph);color:#021109;font-weight:900;box-shadow:0 0 16px rgba(125,255,158,.2)}
+#caseContinue[hidden]{display:none}
+@keyframes caseIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+
+#helpD{width:min(520px,94vw)}
+#reviewD{width:min(620px,94vw)}
+#reviewD::backdrop{background:rgba(1,3,2,.88)}
+.review-lead{font-size:13px;color:var(--ph-dim);line-height:1.65;margin-bottom:12px}
+.review-list{display:grid;gap:8px}
+.review-item{
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;width:100%;
+  border:1px solid var(--line-dim);background:rgba(125,255,158,.035);padding:11px 12px;text-align:left;
+}
+.review-item:hover:not(:disabled){border-color:var(--ph);background:rgba(125,255,158,.08)}
+.review-item:disabled{opacity:.38;cursor:not-allowed}
+.review-no{font:10px/1 var(--mono);letter-spacing:.12em;color:var(--amber)}
+.review-title{font-size:13.5px;color:var(--ph-bright)}
+.review-state{font:10px/1 var(--mono);color:var(--ph-dim)}
+.review-close{display:block;margin:16px 0 0 auto}
+.end-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.help-lead{font-size:16px;color:var(--ph-bright);line-height:1.7;margin-bottom:12px}
+.help-grid{display:grid;gap:8px}
+.help-row{border:1px solid var(--line-dim);padding:10px 12px;font-size:13px;line-height:1.55}
+.help-row b{display:inline-block;min-width:72px;color:var(--amber);font-family:var(--mono)}
+.help-foot{font-size:12px;color:var(--ph-dim);margin-top:12px;line-height:1.7}
+.help-close{display:block;margin:16px 0 0 auto}
+@media (max-width:640px){
+  .chip-grid,.end-concept{grid-template-columns:1fr}
+  #hud #pwrBlock .hbar,#hud #intBlock .hbar{display:none}
+  #reviewBtn{order:5}
+  #helpBtn{order:6}
+  #sndBtn{order:7}
+  .case-actions{align-items:flex-start;flex-direction:column}
+  #caseContinue{width:100%}
+}
+
+</style>
+<style id="san-router-home-style">
+  #san-router-home{position:fixed!important;right:max(12px,env(safe-area-inset-right))!important;bottom:max(12px,env(safe-area-inset-bottom))!important;z-index:2147483647!important;width:42px!important;height:42px!important;display:grid!important;place-items:center!important;padding:0!important;border:1px solid rgba(255,255,255,.35)!important;border-radius:13px!important;background:rgba(8,17,31,.66)!important;color:#fff!important;box-shadow:0 8px 24px rgba(0,0,0,.3)!important;backdrop-filter:blur(9px)!important;-webkit-backdrop-filter:blur(9px)!important;opacity:.68!important;text-decoration:none!important;transition:opacity .2s ease,transform .2s ease!important}
+  #san-router-home:hover,#san-router-home:focus-visible{opacity:1!important;transform:translateY(-2px)!important;outline:2px solid #fff!important;outline-offset:2px!important}
+  #san-router-home svg{width:20px!important;height:20px!important;display:block!important;fill:none!important;stroke:currentColor!important;stroke-width:2.2!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+</style>
+<style id="gc-fullscreen-only">
+html.gc-fullscreen,html.gc-fullscreen body{width:100%;min-height:100%;min-height:100dvh;margin:0!important;padding:0!important;box-sizing:border-box}
+html.gc-fullscreen #app,html.gc-fullscreen #root{width:100%;min-height:100dvh}
+html.gc-fullscreen .wrapper,html.gc-fullscreen .dashboard,html.gc-fullscreen main{max-width:none}
+html.gc-fullscreen .room-container{max-width:none;max-height:none}
+html.gc-fullscreen .console-container{max-width:none;width:100%;min-height:100dvh;border-radius:0}
+html.gc-fullscreen #game-app-viewport{height:100dvh}
+html.gc-fullscreen #game-frame{width:100%;max-width:none;height:100dvh;min-height:0;border:0;border-radius:0}
+html.gc-fullscreen #stage-viewport{min-height:0;padding-bottom:var(--gc-panel-space,240px)}
+html.gc-fullscreen #avatar-img{max-height:min(410px,44dvh)}
+html.gc-fullscreen #interaction-panel{max-height:55dvh;overflow-y:auto}
+@media(max-width:900px){html.gc-fullscreen #game-frame{height:100dvh}html.gc-fullscreen #interaction-panel{bottom:8px;width:calc(100% - 16px);padding:12px}html.gc-fullscreen #top-nav{padding:8px;gap:8px;flex-wrap:wrap}}
+</style></head>
+<body>
+<a id="san-router-home" href="../" aria-label="활동 선택 화면으로 돌아가기" title="활동 선택 화면으로 돌아가기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-6h5v6"/></svg></a>
+
+<!-- ============ 부트 오버레이 ============ -->
+<div id="boot">
+  <div class="boot-inner">
+    <pre id="bootLog"></pre>
+    <button id="bootBtn" hidden>터미널 접속</button>
+    <button id="bootReset" hidden>이전 세션 기록 삭제</button>
+  </div>
+</div>
+
+<!-- ============ HUD ============ -->
+<header id="hud" hidden>
+  <div class="hud-block" id="pwrBlock"><span class="hud-label">PWR</span><div class="hbar"><i id="pwrBar"></i></div><span class="hud-val" id="pwrVal">100%</span></div>
+  <div class="hud-block" id="intBlock"><span class="hud-label">REC</span><div class="hbar"><i id="intBar"></i></div><span class="hud-val" id="intVal">100%</span></div>
+  <div class="hud-block"><span class="hud-label">ZONE</span><div class="zone-pips" id="pips"><b></b><b></b><b></b><b></b></div></div>
+  <div class="hud-block"><span id="clock">00:00</span></div>
+  <button id="reviewBtn" disabled aria-label="해결한 실제 사례 다시 보기">사례 확인 0/4</button>
+  <button id="helpBtn" aria-label="현실에서 도움받는 방법 열기">현실 도움</button>
+  <button id="sndBtn" class="on" aria-label="사운드 켜기/끄기">SND ON</button>
+</header>
+
+<!-- ============ 시네마틱 스크롤 트랙 ============ -->
+<section id="track">
+  <div id="stage">
+
+    <!-- 배경 레이어 (x0.88 패럴랙스) -->
+    <div class="layer" id="layerBack">
+      <div class="bay"><svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="400" height="300" fill="#04080a"/><rect y="250" width="400" height="50" fill="#060a08"/><line x1="0" y1="250" x2="400" y2="250" stroke="rgba(125,255,158,.18)"/><line x1="100" y1="0" x2="100" y2="250" stroke="rgba(125,255,158,.10)"/><line x1="200" y1="0" x2="200" y2="250" stroke="rgba(125,255,158,.10)"/><line x1="300" y1="0" x2="300" y2="250" stroke="rgba(125,255,158,.10)"/></svg></div>
+      <div class="bay"><svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="400" height="300" fill="#050909"/><rect y="250" width="400" height="50" fill="#070a07"/><line x1="0" y1="250" x2="400" y2="250" stroke="rgba(255,176,0,.18)"/><line x1="90" y1="0" x2="90" y2="250" stroke="rgba(255,176,0,.10)"/><line x1="310" y1="0" x2="310" y2="250" stroke="rgba(255,176,0,.10)"/></svg></div>
+      <div class="bay"><svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="400" height="300" fill="#04090a"/><rect y="250" width="400" height="50" fill="#060b09"/><line x1="0" y1="250" x2="400" y2="250" stroke="rgba(125,255,158,.18)"/><line x1="150" y1="0" x2="150" y2="250" stroke="rgba(125,255,158,.10)"/><line x1="250" y1="0" x2="250" y2="250" stroke="rgba(125,255,158,.10)"/></svg></div>
+      <div class="bay"><svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="400" height="300" fill="#050808"/><rect y="250" width="400" height="50" fill="#070a08"/><line x1="0" y1="250" x2="400" y2="250" stroke="rgba(125,255,158,.18)"/><line x1="120" y1="0" x2="120" y2="250" stroke="rgba(125,255,158,.10)"/><line x1="280" y1="0" x2="280" y2="250" stroke="rgba(125,255,158,.10)"/></svg></div>
+      <div class="bay"><svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="400" height="300" fill="#04080b"/><rect y="250" width="400" height="50" fill="#060a09"/><line x1="0" y1="250" x2="400" y2="250" stroke="rgba(125,255,158,.22)"/><line x1="80" y1="0" x2="80" y2="250" stroke="rgba(125,255,158,.10)"/><line x1="320" y1="0" x2="320" y2="250" stroke="rgba(125,255,158,.10)"/></svg></div>
+    </div>
+
+    <!-- 중경 레이어 (x1.0, 핫스팟 포함) -->
+    <div class="layer" id="layerMid">
+      <!-- BAY 0 · 인트로 복도 -->
+      <div class="bay">
+        <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><ellipse cx="200" cy="150" rx="175" ry="125" fill="rgba(125,255,158,.06)"/>
+          <rect width="400" height="300" fill="none"/>
+          <path d="M0 40 Q200 60 400 30" stroke="rgba(125,255,158,.22)" fill="none"/>
+          <path d="M0 54 Q200 78 400 44" stroke="rgba(125,255,158,.14)" fill="none"/>
+          <rect x="160" y="90" width="80" height="162" fill="#0b130d" stroke="rgba(125,255,158,.38)"/>
+          <rect x="169" y="99" width="62" height="144" fill="none" stroke="rgba(125,255,158,.18)"/>
+          <circle cx="226" cy="178" r="3" fill="#ffb000" opacity=".55"/>
+          <circle class="lamp-flicker" cx="200" cy="28" r="5" fill="#7dff9e"/>
+          <ellipse cx="200" cy="33" rx="64" ry="13" fill="rgba(125,255,158,.10)"/>
+          <text x="200" y="124" text-anchor="middle" fill="rgba(125,255,158,.55)" font-family="monospace" font-size="9" letter-spacing="2">SAFE-4 // RECORD MAZE</text>
+        </svg>
+        <div class="bay-label">ARCHIVE ENTRANCE</div>
+      </div>
+      <!-- BAY 1 · 전력 분배반 -->
+      <div class="bay">
+        <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><ellipse cx="200" cy="150" rx="175" ry="125" fill="rgba(255,176,0,.055)"/>
+          <rect x="0" y="26" width="400" height="10" fill="#0e1712"/>
+          <rect x="0" y="42" width="400" height="6" fill="#0c130e"/>
+          <rect x="58" y="84" width="284" height="168" fill="#0e1712" stroke="rgba(255,176,0,.38)"/>
+          <rect x="80" y="112" width="44" height="104" fill="#0a120c" stroke="rgba(125,255,158,.25)"/>
+          <rect x="140" y="112" width="44" height="104" fill="#0a120c" stroke="rgba(125,255,158,.25)"/>
+          <rect x="200" y="112" width="44" height="104" fill="#0a120c" stroke="rgba(125,255,158,.25)"/>
+          <rect x="260" y="112" width="44" height="104" fill="#0a120c" stroke="rgba(125,255,158,.25)"/>
+          <circle class="led" cx="102" cy="98" r="3" fill="#ffb000"/>
+          <circle class="led d2" cx="162" cy="98" r="3" fill="#ffb000"/>
+          <circle class="led d3" cx="222" cy="98" r="3" fill="#ffb000"/>
+          <circle class="led d4" cx="282" cy="98" r="3" fill="#ffb000"/>
+          <text x="200" y="240" text-anchor="middle" fill="rgba(255,176,0,.4)" font-family="monospace" font-size="9" letter-spacing="2">CASE-01</text>
+        </svg>
+        <div class="bay-label">ZONE 01 — CASE FILE 01</div>
+        <button class="hotspot" style="left:18%;top:46%" data-rec="z1r1" aria-label="기록 조회: 목격자의 사적 메모"><span class="hs-tag">MEMO</span></button>
+        <button class="hotspot" style="left:39%;top:66%" data-rec="z1r2" aria-label="기록 조회: 익명 사례 기록 41호"><span class="hs-tag">CASE</span></button>
+        <button class="hotspot" style="left:62%;top:41%" data-rec="z1r3" aria-label="기록 조회: 아동보호 대응 지침 4절"><span class="hs-tag">RULE</span></button>
+        <button class="hotspot" style="left:82%;top:60%" data-rec="z1r4" aria-label="기록 조회: 연결 순서 경고 E-31"><span class="hs-tag">E-31</span></button>
+      </div>
+      <!-- BAY 2 · 통신 기록실 -->
+      <div class="bay">
+        <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><ellipse cx="200" cy="150" rx="175" ry="125" fill="rgba(125,255,158,.06)"/>
+          <rect x="0" y="20" width="400" height="8" fill="#0c1310"/>
+          <rect x="30" y="66" width="76" height="186" fill="#0c1510" stroke="rgba(125,255,158,.32)"/>
+          <rect x="122" y="66" width="76" height="186" fill="#0c1510" stroke="rgba(125,255,158,.32)"/>
+          <rect x="214" y="66" width="76" height="186" fill="#0c1510" stroke="rgba(125,255,158,.32)"/>
+          <rect x="306" y="66" width="76" height="186" fill="#0c1510" stroke="rgba(125,255,158,.32)"/>
+          <g fill="#3aff88">
+            <circle class="led" cx="46" cy="86" r="2"/><circle class="led d2" cx="58" cy="86" r="2"/>
+            <circle class="led d3" cx="46" cy="102" r="2"/><circle class="led d4" cx="58" cy="102" r="2"/>
+            <circle class="led d2" cx="46" cy="118" r="2"/><circle class="led" cx="58" cy="118" r="2"/>
+            <circle class="led d4" cx="138" cy="86" r="2"/><circle class="led" cx="150" cy="86" r="2"/>
+            <circle class="led d3" cx="138" cy="102" r="2"/><circle class="led d2" cx="150" cy="102" r="2"/>
+            <circle class="led" cx="230" cy="86" r="2"/><circle class="led d3" cx="242" cy="86" r="2"/>
+            <circle class="led d2" cx="230" cy="118" r="2"/><circle class="led d4" cx="242" cy="118" r="2"/>
+            <circle class="led d3" cx="322" cy="94" r="2"/><circle class="led" cx="334" cy="94" r="2"/>
+            <circle class="led d4" cx="322" cy="126" r="2"/><circle class="led d2" cx="334" cy="126" r="2"/>
+          </g>
+          <text x="200" y="240" text-anchor="middle" fill="rgba(125,255,158,.52)" font-family="monospace" font-size="9" letter-spacing="2">CASE-02</text>
+        </svg>
+        <div class="bay-label">ZONE 02 — CASE FILE 02</div>
+        <button class="hotspot" style="left:17%;top:44%" data-rec="z2r1" aria-label="기록 조회: 피해자의 마지막 메시지"><span class="hs-tag">MSG</span></button>
+        <button class="hotspot" style="left:39%;top:65%" data-rec="z2r2" aria-label="기록 조회: 친구의 사적 메모"><span class="hs-tag">MEMO</span></button>
+        <button class="hotspot" style="left:63%;top:40%" data-rec="z2r3" aria-label="기록 조회: 증거 보존 지침 7절"><span class="hs-tag">RULE</span></button>
+        <button class="hotspot" style="left:83%;top:59%" data-rec="z2r4" aria-label="기록 조회: 오염 경고 E-47"><span class="hs-tag">E-47</span></button>
+      </div>
+      <!-- BAY 3 · 냉각·압력 제어반 -->
+      <div class="bay">
+        <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><ellipse cx="200" cy="150" rx="175" ry="125" fill="rgba(140,220,255,.05)"/>
+          <rect x="0" y="58" width="400" height="24" fill="#0e1611" stroke="rgba(125,255,158,.22)"/>
+          <rect x="0" y="198" width="400" height="18" fill="#0e1611" stroke="rgba(125,255,158,.22)"/>
+          <circle cx="110" cy="70" r="24" fill="none" stroke="rgba(125,255,158,.50)" stroke-width="3"/>
+          <line x1="110" y1="48" x2="110" y2="92" stroke="rgba(125,255,158,.48)" stroke-width="3"/>
+          <line x1="88" y1="70" x2="132" y2="70" stroke="rgba(125,255,158,.48)" stroke-width="3"/>
+          <circle cx="110" cy="70" r="6" fill="#121b15" stroke="rgba(125,255,158,.48)"/>
+          <circle cx="300" cy="140" r="27" fill="#0b120d" stroke="rgba(255,176,0,.48)"/>
+          <line x1="300" y1="140" x2="314" y2="124" stroke="#ffb000" stroke-width="2" opacity=".7"/>
+          <circle class="led d2" cx="300" cy="140" r="3" fill="#ffb000"/>
+          <ellipse class="steam" cx="250" cy="196" rx="13" ry="22" fill="rgba(200,255,220,.10)"/>
+          <ellipse class="steam s2" cx="276" cy="196" rx="10" ry="18" fill="rgba(200,255,220,.08)"/>
+          <text x="200" y="246" text-anchor="middle" fill="rgba(125,255,158,.52)" font-family="monospace" font-size="9" letter-spacing="2">CASE-03</text>
+        </svg>
+        <div class="bay-label">ZONE 03 — CASE FILE 03</div>
+        <button class="hotspot" style="left:18%;top:49%" data-rec="z3r1" aria-label="기록 조회: 변화 이전의 인상"><span class="hs-tag">NOTE</span></button>
+        <button class="hotspot" style="left:40%;top:68%" data-rec="z3r2" aria-label="기록 조회: 비밀 요구가 나타난 대화"><span class="hs-tag">DM</span></button>
+        <button class="hotspot" style="left:63%;top:39%" data-rec="z3r3" aria-label="기록 조회: 통제 신호 판단 기준"><span class="hs-tag">RULE</span></button>
+        <button class="hotspot" style="left:82%;top:59%" data-rec="z3r4" aria-label="기록 조회: 정상화 왜곡 경고 P-12"><span class="hs-tag">P-12</span></button>
+      </div>
+      <!-- BAY 4 · 송신 제어 -->
+      <div class="bay">
+        <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><ellipse cx="200" cy="150" rx="175" ry="125" fill="rgba(125,255,158,.065)"/>
+          <rect x="228" y="46" width="146" height="96" fill="#050b12" stroke="rgba(125,255,158,.36)"/>
+          <path d="M252 118 Q300 60 348 118" fill="none" stroke="rgba(125,255,158,.42)" stroke-width="2"/>
+          <line x1="300" y1="84" x2="300" y2="118" stroke="rgba(125,255,158,.42)"/>
+          <circle class="led" cx="300" cy="80" r="3" fill="#7dff9e"/>
+          <polygon points="40,250 70,160 210,160 236,250" fill="#0c1410" stroke="rgba(125,255,158,.36)"/>
+          <rect x="82" y="172" width="52" height="34" fill="#072012" stroke="rgba(125,255,158,.48)"/>
+          <rect x="144" y="172" width="52" height="34" fill="#072012" stroke="rgba(125,255,158,.48)"/>
+          <text x="108" y="192" text-anchor="middle" fill="rgba(125,255,158,.5)" font-family="monospace" font-size="8">RESQ</text>
+          <text x="170" y="192" text-anchor="middle" fill="rgba(255,176,0,.5)" font-family="monospace" font-size="8">STBY</text>
+          <text x="200" y="246" text-anchor="middle" fill="rgba(125,255,158,.52)" font-family="monospace" font-size="9" letter-spacing="2">CASE-04</text>
+        </svg>
+        <div class="bay-label">ZONE 04 — CASE FILE 04</div>
+        <button class="hotspot" style="left:18%;top:45%" data-rec="z4r1" aria-label="기록 조회: 반송된 고백"><span class="hs-tag">VOICE</span></button>
+        <button class="hotspot" style="left:40%;top:66%" data-rec="z4r2" aria-label="기록 조회: 주변인의 사적 메모"><span class="hs-tag">MEMO</span></button>
+        <button class="hotspot" style="left:62%;top:40%" data-rec="z4r3" aria-label="기록 조회: 지원 연결 지침 11절"><span class="hs-tag">RULE</span></button>
+        <button class="hotspot" style="left:83%;top:58%" data-rec="z4r4" aria-label="기록 조회: 2차 피해 연결 경고 T-09"><span class="hs-tag">T-09</span></button>
+      </div>
+    </div>
+
+    <!-- 전경 레이어 (x1.15 패럴랙스 오클루더) -->
+    <div class="layer" id="layerFront">
+      <div class="bay"><svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><path d="M0 0 L54 0 L18 300 L0 300 Z" fill="rgba(2,5,3,.85)"/></svg></div>
+      <div class="bay"><svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><path d="M400 0 L346 0 L388 300 L400 300 Z" fill="rgba(2,5,3,.8)"/></svg></div>
+      <div class="bay"><svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><path d="M0 0 L40 0 L14 300 L0 300 Z" fill="rgba(2,5,3,.8)"/><path d="M400 20 L400 120 L360 300 L336 300 Z" fill="rgba(2,5,3,.7)"/></svg></div>
+      <div class="bay"><svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><path d="M400 0 L352 0 L392 300 L400 300 Z" fill="rgba(2,5,3,.82)"/></svg></div>
+      <div class="bay"><svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><path d="M0 0 L48 0 L16 300 L0 300 Z" fill="rgba(2,5,3,.85)"/><path d="M400 0 L372 0 L396 300 L400 300 Z" fill="rgba(2,5,3,.75)"/></svg></div>
+    </div>
+
+    <!-- 리드아웃 -->
+    <div id="readout">
+      <div id="roZone" data-g>SAFE-4 // 기록 미궁 입구</div>
+      <div id="roStatus" data-g>비상 OS 대기 중 — 터미널에 접속하라.</div>
+      <div id="roEvent"></div>
+      <div id="recProg"></div>
+      <button id="gateChip">제어반 접속 — 사건 복원</button>
+    </div>
+    <div id="scrollHint">SCROLL ▼<br>전방 구역으로 이동</div>
+  </div>
+</section>
+
+<!-- ============ 스크림 & 기록 뷰어 ============ -->
+<div id="scrim"></div>
+<dialog id="recD">
+  <div class="dlg-inner">
+    <span class="dlg-corner tl"></span><span class="dlg-corner tr"></span><span class="dlg-corner bl"></span><span class="dlg-corner br"></span>
+    <div class="dlg-head"><span class="tag" id="recTag"></span><span class="meta" id="recMeta"></span></div>
+    <div id="recBody"></div>
+    <div id="recFoot">
+      <span class="drain-note" id="recDrain">열람 중 전력 정지 // 천천히 읽어도 불이익 없음</span>
+      <button id="recClose" class="tbtn">기록 닫기</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="helpD">
+  <div class="dlg-inner">
+    <div class="dlg-head"><span class="tag">현실 도움 연결</span><span class="meta">게임보다 안전이 먼저</span></div>
+    <p class="help-lead">지금 폭력이 진행 중이거나 즉시 위험하다면 기록을 모으거나 퍼즐을 풀지 말고 <b>112</b>에 도움을 요청한다.</p>
+    <div class="help-grid">
+      <div class="help-row"><b>112</b>긴급 신고·출동·보호</div>
+      <div class="help-row"><b>1366</b>여성긴급전화 — 상담·보호·기관 연결</div>
+      <div class="help-row"><b>1388</b>청소년상담 — 24시간 상담·위기 지원</div>
+      <div class="help-row"><b>D4U</b>디지털성범죄피해자지원센터 — 삭제·상담 지원</div>
+    </div>
+    <p class="help-foot">증거가 없거나 확신이 없어도 도움을 요청할 수 있다. 본인 경험을 게임이나 수업에서 공개할 필요는 없다.</p>
+    <button class="tbtn help-close" id="helpClose">닫기</button>
+  </div>
+</dialog>
+
+<dialog id="reviewD">
+  <div class="dlg-inner">
+    <div class="dlg-head"><span class="tag">복원 사례 기록</span><span class="meta" id="reviewMeta">0/4 RECOVERED</span></div>
+    <p class="review-lead">해결 과정에서 결과까지 확인한 사례만 다시 열 수 있다. 미완료 기록은 이후 구역에서 복원된다.</p>
+    <div class="review-list" id="reviewList"></div>
+    <button class="tbtn review-close" id="reviewClose">기록 닫기</button>
+  </div>
+</dialog>
+
+<!-- ============ 제어 패널 ============ -->
+<dialog id="panel">
+  <div class="dlg-inner">
+    <span class="dlg-corner tl"></span><span class="dlg-corner tr"></span><span class="dlg-corner bl"></span><span class="dlg-corner br"></span>
+    <div class="dlg-head"><span class="tag" id="panelName"></span><span class="meta" id="panelAttempts"></span></div>
+    <div id="panelBody"></div>
+    <div class="panel-msg" id="panelMsg"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px">
+      <span class="drain-note" id="panelNote"></span>
+      <button id="panelClose">패널 닫기</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- ============ 경보 / 락다운 / 엔딩 / 토스트 ============ -->
+<div id="alarm"><div><div class="alarm-text">절차 위반 — RECORD DAMAGE</div><div class="alarm-sub">기록 보존도 하락 // 단말기 락다운 개시</div></div></div>
+<div id="lockdown">
+  <div class="lk-title">TERMINAL LOCKDOWN</div>
+  <div id="lockCount">8</div>
+  <div class="lk-sub">미궁 방어 회로 작동 — 모든 입력 차단</div>
+</div>
+<section id="caseReveal" role="dialog" aria-modal="true" aria-labelledby="caseTitle">
+  <article class="case-card">
+    <div class="case-kicker" id="caseKicker"></div>
+    <h2 class="case-title" id="caseTitle"></h2>
+    <p class="case-fact" id="caseFact"></p>
+    <p class="case-q" id="caseQ"></p>
+    <div class="case-options" id="caseOptions"></div>
+    <div class="case-feedback" id="caseFeedback" role="status" aria-live="polite"></div>
+    <div class="case-outcome" id="caseOutcome"><b>그 뒤 실제로 일어난 변화</b><p id="caseOutcomeText"></p></div>
+    <div class="case-actions">
+      <span class="case-source">실제 기사·공식자료 기반 // 피해자 신원 비공개</span>
+      <button id="caseContinue" hidden>다음 구역으로</button>
+    </div>
+  </article>
+</section>
+<div id="ending">
+  <div class="end-inner">
+    <div class="end-class" id="endClass"></div>
+    <div class="end-title" id="endTitle"></div>
+    <div class="end-body" id="endBody"></div>
+    <div class="end-sec">개념 적용 결과</div>
+    <div class="end-concept" id="endConcept"></div>
+    <div class="end-sec">도전 기록</div>
+    <div class="end-stats" id="endStats"></div>
+    <div class="end-note" id="endNote"></div>
+    <div class="end-actions">
+      <button class="tbtn" id="endReviewBtn">해결한 사례 다시 보기</button>
+      <button id="restartBtn">시스템 재부팅</button>
+    </div>
+  </div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- ============ 조명 & CRT 레이어 (최상단) ============ -->
+<div id="torch"></div>
+<div id="crt"></div>
+
+<script>
+/* ============================================================
+   MODULE 0 · 유틸
+   ============================================================ */
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const noanim=matchMedia('(prefers-reduced-motion: reduce)').matches||/noanim/.test(location.hash);
+function fmtTime(ms){const s=Math.floor(ms/1000);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+
+/* ============================================================
+   MODULE 1 · 오디오 합성 (Web Audio API, 외부 파일 0)
+   ============================================================ */
+const AudioSys={
+  ctx:null,master:null,on:true,
+  init(){
+    if(this.ctx)return;
+    const C=window.AudioContext||window.webkitAudioContext;
+    if(!C)return;
+    this.ctx=new C();
+    this.master=this.ctx.createGain();
+    this.master.gain.value=this.on?0.9:0.0001;
+    this.master.connect(this.ctx.destination);
+    this.startHum();
+  },
+  resume(){if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume();},
+  startHum(){
+    const t=this.ctx.currentTime;
+    const mk=(f,g0)=>{const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type='sine';o.frequency.value=f;g.gain.value=g0;o.connect(g);g.connect(this.master);o.start(t);return{o,g};};
+    const h1=mk(60,0.026), h2=mk(120,0.011);
+    const lfo=this.ctx.createOscillator(),lg=this.ctx.createGain();
+    lfo.type='sine';lfo.frequency.value=0.13;lg.gain.value=0.006;
+    lfo.connect(lg);lg.connect(h1.g.gain);lfo.start(t);
+  },
+  blip(freq,dur,type,gain){
+    if(!this.ctx)return;
+    const t=this.ctx.currentTime;
+    const o=this.ctx.createOscillator(),g=this.ctx.createGain();
+    o.type=type||'square';o.frequency.setValueAtTime(freq,t);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(gain||0.08,t+0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g);g.connect(this.master);
+    o.start(t);o.stop(t+dur+0.03);
+  },
+  relay(){this.blip(190,0.05,'square',0.11);setTimeout(()=>this.blip(118,0.045,'square',0.075),42);},
+  beep(){this.blip(880,0.07,'sine',0.07);},
+  warn(){this.blip(520,0.09,'square',0.08);setTimeout(()=>this.blip(392,0.11,'square',0.08),130);},
+  success(){[440,554,659].forEach((f,i)=>setTimeout(()=>this.blip(f,0.24,'sine',0.085),i*115));},
+  siren(){
+    if(!this.ctx)return;
+    const t0=this.ctx.currentTime;
+    const o=this.ctx.createOscillator(),g=this.ctx.createGain();
+    o.type='sawtooth';o.frequency.setValueAtTime(620,t0);
+    for(let i=0;i<6;i++){o.frequency.linearRampToValueAtTime(i%2?620:930,t0+0.34*(i+1));}
+    g.gain.setValueAtTime(0.0001,t0);
+    g.gain.linearRampToValueAtTime(0.13,t0+0.06);
+    g.gain.setValueAtTime(0.13,t0+2.05);
+    g.gain.linearRampToValueAtTime(0.0001,t0+2.35);
+    o.connect(g);g.connect(this.master);
+    o.start(t0);o.stop(t0+2.5);
+  },
+  doom(){
+    if(!this.ctx)return;
+    const t0=this.ctx.currentTime;
+    const o=this.ctx.createOscillator(),g=this.ctx.createGain();
+    o.type='sine';o.frequency.setValueAtTime(160,t0);
+    o.frequency.exponentialRampToValueAtTime(38,t0+3.2);
+    g.gain.setValueAtTime(0.15,t0);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+3.4);
+    o.connect(g);g.connect(this.master);
+    o.start(t0);o.stop(t0+3.5);
+  },
+  toggle(on){
+    this.on=on;
+    if(this.ctx&&this.master)this.master.gain.linearRampToValueAtTime(on?0.9:0.0001,this.ctx.currentTime+0.12);
+  }
+};
+
+/* ============================================================
+   MODULE 2 · 게임 데이터 (파편화 기록 / 구역 / 실패·엔딩 문구)
+   ============================================================ */
+const IMG_Z1='https://game-center-play.beefly1136.workers.dev/g/713a8f79-f61e-4777-91e6-5fbd6c5b9d3a/1/up/assets/activity-1b5724401590808e.webp';
+const IMG_Z2='https://game-center-play.beefly1136.workers.dev/g/713a8f79-f61e-4777-91e6-5fbd6c5b9d3a/1/up/assets/activity-8d42da8965d68005.webp';
+const IMG_Z3='https://game-center-play.beefly1136.workers.dev/g/713a8f79-f61e-4777-91e6-5fbd6c5b9d3a/1/up/assets/activity-b09cfb091df19b7d.webp';
+const RECORDS={
+  z1r1:{tag:'사적 메모',meta:'목격자 // 비공식',zone:0,img:'z1',
+    html:'겨울에 얇은 옷과 슬리퍼 차림의 아이를 또 봤다. 부모한테 먼저 알려야지. 남의 가정 일에 함부로 끼면 안 돼.\n\n조용히 돌려보내는 게 서로를 위하는 거다.\n\n[첨부 사진 01 — 우리 가게 CCTV 보관본]'},
+  z1r2:{tag:'감찰 일지 №41',meta:'사례 기록 // 정식',zone:0,
+    html:'익명 사례 기록: 목격자가 보호자에게 먼저 연락하자 아동이 다시 위험한 상황에 놓였다는 보고.\n\n보호자가 위험의 원인일 수 있으므로 직접 통보보다 112 신고와 기관 연결이 먼저다.'},
+  z1r3:{tag:'규정 파편 §4',meta:'아동보호 대응 지침 // 파손 사본',zone:0,
+    html:'의심 정황 발견 시 대응 순서:\n\n① 신호 확인(R · 보이는 상황과 위치) → ② <b>112 신고(K)</b> → ③ 안전한 거리에서 경찰 지시 따르기(S) → ④ 전문 지원 연결(M)\n\n§4-2 보호자가 위험의 원인일 수 있으므로 먼저 알리지 않는다. 현재 위험하면 기록을 더 모으느라 신고를 늦추지 않는다.'},
+  z1r4:{tag:'에러 로그 E-31',meta:'미궁 회로 자동 기록',zone:0,
+    html:'WARN: 지원 연결 회로(M)는 신고 회로(K) 미가동 시 잠금.\n\n순서 위반 투입 시 개입 회로 전체 차단.'},
+  z2r1:{tag:'훼손된 교신 로그',meta:'피해자 메시지 // 부분 복구',zone:1,img:'z2',
+    html:'…사진이 올라왔다는 연락을 받았어 … 화면 캡처는 해 뒀고 … 주소도 적었는데 <span class="corrupt">▓▓</span> 그다음을 모르겠어 <span class="corrupt">▓▓</span> 무서워\n\n[첨부 사진 02 — 삭제되기 전 게시물 화면]'},
+  z2r2:{tag:'사적 메모',meta:'친구 // 비공식',zone:1,
+    html:'일단 전부 지우라고 해. 계정도 탈퇴하고.\n\n퍼지기 전에 없애는 게 먼저 아니냐.'},
+  z2r3:{tag:'규정 파편 §7',meta:'디지털 증거 보존 지침 // 파손 사본',zone:1,
+    html:'증거 버스 재가동 절차: 보존 채널만 개방하라.\n\n보존 채널이란 기록의 원형을 남기는 행동이다 — 화면에 보이는 것을 남기는 것, 위치를 적어 두는 것, 원문을 그대로 두는 것, 공식 기관에 넘기는 것.\n\n<span class="corrupt">▓▓</span> 파손 <span class="corrupt">▓▓</span> 지우는 행동, 퍼뜨리는 행동, 가해자와 직접 접촉하는 행동은 전부 기록망을 오염시키고 2차 가해가 된다.'},
+  z2r4:{tag:'FAULT E-47',meta:'증거 버스 진단 모듈',zone:1,
+    html:'오염 채널이 1개라도 개방된 채 재가동되면 증거 버스 단절.\n\n단절 이력은 2차 가해 경로로 기록된다.'},
+  z3r1:{tag:'사적 메모',meta:'당사자 // 비공식',zone:2,
+    html:'고민을 잘 들어주는 사람이야. 선물도 주고.\n\n그냥 고마운 사람인데 다들 왜 걱정하는지 모르겠어.'},
+  z3r2:{tag:'훼손된 DM 로그',meta:'대화 기록 // 부분 복구',zone:2,img:'z3',
+    html:'…처음엔 고민 상담 … 선물이 오기 시작 … “우리만의 비밀이야” <span class="corrupt">▓▓</span> 사진 보낼 수 있지? <span class="corrupt">▓▓</span> 둘이만 만나자 <span class="corrupt">▓▓</span>\n\n[첨부 사진 03 — 전달받은 선물들]'},
+  z3r3:{tag:'규정 파편 §2',meta:'그루밍 경계 지표 // 파손 사본',zone:2,
+    html:'친밀한 관계에서도 <b>“아무에게도 말하지 마”라는 비밀 강요</b>, 사진·단독 만남 요구, 거절 뒤 압박은 통제 신호다.\n\n한 행동만으로 단정하지 말고 상대의 선택지가 좁아지는 흐름을 본다. 동의는 매번 새로 확인하며 언제든 철회할 수 있다.'},
+  z3r4:{tag:'에러 로그 P-12',meta:'인식 계기 진단 모듈',zone:2,
+    html:'판독 경고: “친절한 사람이니까 괜찮다”는 첫인상만으로 이후의 비밀 강요와 압박을 무시하면 위험 신호를 놓친다.\n\n대화의 변화와 상대의 선택권이 줄어드는 지점을 다시 대조하라.'},
+  z4r1:{tag:'훼손된 교신 로그',meta:'상담 기록 // 부분 복구',zone:3,
+    html:'…용기를 내서 말했는데 돌아온 말이 <span class="corrupt">▓▓</span> “네가 먼저 그런 거 아니야?” <span class="corrupt">▓▓</span> 그날로 연락이 끊겼다.\n\n다시 말할 수 있으려면 비난하지 않는 첫 반응과 당사자가 원하는 지원이 필요하다.'},
+  z4r2:{tag:'사적 메모',meta:'주변인 // 비공식',zone:3,
+    html:'급하면 112지. 번호 외우기도 쉽고.\n\n상담 번호까지 따로 필요해?'},
+  z4r3:{tag:'규정 파편 §11',meta:'지원 연결 규정 // 파손 사본',zone:3,
+    html:'상황별 지원 연결:\n\n• 지금 폭력이 진행 중이거나 즉시 위험함 → <b>112</b>\n• 안전한 장소에서 상담·보호·기관 연결을 원함 → <b>여성긴급전화 1366</b>\n\n첫 반응은 비난하지 않고 믿으며, 당사자가 원하는 도움을 함께 찾는다.'},
+  z4r4:{tag:'에러 로그 T-09',meta:'송신기 진단 모듈',zone:3,
+    html:'연결 경고: 공개 게시판은 지원 기관이 아니며 사건을 소문내거나 불특정 다수에게 공유하면 2차 피해가 생길 수 있다.\n\n기관을 연결하더라도 당사자에게 책임을 묻거나 대신 결정하는 첫 문장은 고백을 다시 막는다.'}
+};
+
+const PHOTOS={
+  z1:{src:IMG_Z1,cap:'게임용 익명 상황 이미지 — 계절에 맞지 않는 옷차림과 반복 신호',alt:'겨울밤 편의점 앞, 얇은 옷차림의 아이 뒷모습을 익명 재구성한 화면'},
+  z2:{src:IMG_Z2,cap:'첨부 사진 02 — 삭제되기 전 게시물 화면',alt:'삭제되기 전 게시물과 주소창이 보이는 화면 사진'},
+  z3:{src:IMG_Z3,cap:'첨부 사진 03 — 전달받은 선물들',alt:'점점 커지는 선물 상자들과 자물쇠, 하트가 가득한 대화 화면'}
+};
+const ZONES=[
+  {name:'구역 01 — 숨은 신호 「편의점의 아이」',status:'질문: 위험 신호를 발견했다면 무엇을 먼저 연결해야 하는가?',panel:'대처 순서 제어반',done:'112 신고와 보호 연결 완료 // 전방으로 진행하라.',story:'익명 사건 기록이다. 보호자에게 먼저 확인하자는 주장과 112 신고 원칙을 대조하라.'},
+  {name:'구역 02 — 지워지기 전 「합성된 사진」',status:'질문: 증거를 남기는 행동과 다시 퍼뜨리는 행동을 어떻게 구별할까?',panel:'증거 보존 제어반',done:'증거 보존·기관 전달 완료 // 전방으로 진행하라.',story:'삭제되기 전 게시물과 마지막 메시지가 남아 있다. 원본을 지키되 재유포 경로는 끊어야 한다.'},
+  {name:'구역 03 — 친절이라는 암호 「다정한 감옥」',status:'질문: 친밀함은 언제 비밀·압박·통제로 바뀌는가?',panel:'경계 판단 제어반',done:'통제 신호 판독·외부 도움 경로 개방 // 전방으로 진행하라.',story:'상담과 선물 뒤에 비밀·사진·단독 만남 요구가 이어졌다. 선택지가 좁아진 첫 지점을 찾아라.'},
+  {name:'구역 04 — 첫 문장 「반송된 고백」',status:'질문: 지금 필요한 기관과, 피해자에게 건넬 첫 문장은 무엇인가?',panel:'지원 연결 제어반',done:'지원 기관·첫 문장 연결 완료 // 미궁 출구로 이동하라.',story:'한 번의 책임 전가가 고백을 반송시켰다. 이번에는 상황에 맞는 기관과 지지 문장을 연결하라.'}
+];
+
+const CASE_FILES=[
+  {kicker:'CASE 01 // 실제 사건 · 게임 기록은 익명 재구성',title:'편의점 앞에서 멈춘 침묵',
+   fact:'2020년 5월 경남 창녕에서 9세 아동이 집을 탈출한 뒤 거리에서 시민에게 발견되어 경찰에 연결됐다.',
+   q:'변화를 시작하게 한 결정적 행동은 무엇이었을까?',
+   options:[{t:'보호자에게 먼저 연락해 사실인지 확인한다.',ok:false,fb:'보호자가 위험의 원인일 수 있다. 의심되는 상황에서는 먼저 알리지 말고 112에 연결한다.'},{t:'보이는 위험 신호와 위치를 112에 알린다.',ok:true},{t:'완벽한 증거가 모일 때까지 기다린다.',ok:false,fb:'확신이나 완벽한 증거는 신고의 조건이 아니다. 의심되는 신호를 설명하면 된다.'}],
+   outcome:'같은 해 8월 경찰청과 편의점 4사는 아동학대 신고 캠페인을 시작했다. 24시간 생활 공간이 아이의 신호를 발견하고 신고하는 안전 거점이 됐다.',
+   source:'https://www.hani.co.kr/arti/area/yeongnam/948890.html'},
+  {kicker:'CASE 02 // 실제 사건 · 피해자 신원 비공개',title:'사진 한 장이 범죄가 되기까지',
+   fact:'2024년 텔레그램 단체방에서 학생·교사의 얼굴을 합성한 성착취물이 유포됐고, 확인된 피해자 가운데 학생이 다수였다.',
+   q:'피해를 줄이면서 지원으로 이어지는 행동은 무엇일까?',
+   options:[{t:'화면·주소·원본을 보존하고 재전송 없이 기관에 전달한다.',ok:true},{t:'친구들에게 보내 사실인지 함께 확인한다.',ok:false,fb:'확인을 위한 공유도 재유포가 될 수 있다. 원본은 퍼뜨리지 않고 기관에 전달한다.'},{t:'흔적이 무서우니 계정과 자료를 모두 즉시 지운다.',ok:false,fb:'삭제 전에 화면·주소·원본을 안전하게 보존하면 삭제 지원과 수사 연결에 도움이 된다.'}],
+   outcome:'2024년 10월 개정법 시행으로 허위영상물의 소지·구입·저장·시청도 처벌 대상이 됐다. 만드는 행위뿐 아니라 소비와 확산도 피해를 키운다는 판단이다.',
+   source:'https://www.yna.co.kr/view/AKR20241010048600001'},
+  {kicker:'CASE 03 // 실제 사건에서 반복된 접근 방식',title:'친절이 비밀 강요로 바뀔 때',
+   fact:'텔레그램 성착취 사건들에서는 상담과 선물로 친밀감을 만든 뒤 비밀·사진·단독 만남을 요구하는 접근이 반복됐다.',
+   q:'관계가 통제로 바뀌었다고 판단할 첫 신호는 무엇일까?',
+   options:[{t:'상담을 들어 주었다.',ok:false,fb:'친절만으로 위험을 단정하지 않는다. 이후 상대의 선택을 좁히는 행동을 함께 본다.'},{t:'선물을 주었다.',ok:false,fb:'선물만으로 단정하지 않는다. 선물을 의무나 압박으로 바꾸는지를 살핀다.'},{t:'“우리만의 비밀”이라며 다른 사람에게 말하지 못하게 했다.',ok:true}],
+   outcome:'2021년 9월 온라인 그루밍 처벌과 위장수사의 법적 근거가 시행됐다. 신체적 피해가 생긴 뒤만이 아니라 착취 목적의 접근 과정에도 개입할 수 있게 됐다.',
+   source:'https://www.mogef.go.kr/nw/enw/nw_enw_s001d.do?mid=mda700&bbtSn=709125'},
+  {kicker:'CASE 04 // 실제 판결·지원 원칙 기반',title:'첫 반응이 두 번째 상처를 가른다',
+   fact:'피해를 말한 사람에게 책임을 돌리거나 사건을 소문내는 행동은 도움 요청을 끊고 회복을 방해한다.',
+   q:'고백을 지원으로 연결하는 첫 반응은 무엇일까?',
+   options:[{t:'“왜 이제야 말했어? 네 행동에도 문제가 있었던 것 아니야?”',ok:false,fb:'늦게 말한 이유나 행동을 따지는 반응은 피해자에게 책임을 돌리는 2차 가해가 될 수 있다.'},{t:'“일단 아무에게도 말하지 마. 내가 대신 결정할게.”',ok:false,fb:'비밀을 강요하거나 대신 결정하면 당사자의 선택권을 다시 빼앗을 수 있다.'},{t:'“네 잘못이 아니야. 네가 원하는 도움을 함께 찾자.”',ok:true}],
+   outcome:'피해자를 공개적으로 비난하고 소문낸 행위에 대해 대법원의 유죄 판단이 있었다. 이후에도 2차 가해를 더 분명히 막아야 한다는 논의가 이어지고 있다.',
+   source:'https://www.khan.co.kr/article/202201202021025'}
+];
+
+const FAIL_TEXT=[
+  '개입 회로 차단 — 투입 순서 위반. 사례와 지침을 대조하라.',
+  '기록망 오염 — 오염 채널이 개방된 채 재가동 시도됨.',
+  '경계 밸브 파손 — 개방 지점의 실제 위험도가 허가 구간 이탈.',
+  '고백 반송 — 기관 또는 첫 반응의 연결이 맞지 않았다.'
+];
+
+const ENDINGS={
+  A:{cls:'end-a',ec:'CLASS-A // 완전 연결',
+     title:'네 개의 신호가 모두 닿았다.\n미궁의 격벽이 열린다.',
+     body:'기록은 복원됐고, 지원은 연결됐다. 네 사건은 더 이상 침묵하지 않는다.\n안전망 복구팀의 임무가 완료됐다.'},
+  B:{cls:'end-b',ec:'CLASS-B // 부분 연결',
+     title:'신호는 닿았다.\n그러나 늦었다.',
+     body:'절차 위반으로 일부 기록은 영구히 손상됐다.\n도움은 연결됐지만 상처는 남았다. 절차는 결과를 바꾼다.'},
+  C:{cls:'end-c',ec:'SYSTEM CATASTROPHE // 신호 소실',
+     title:'격벽이 닫혔다.\n신호는 끝내 닿지 않았다.',
+     body:''}
+};
+const CATASTROPHE_BODY={
+  pwr:'단말기 전력 고갈. 미궁의 불이 하나씩 꺼지고,\n기록들은 다시 침묵 속으로 돌아간다.',
+  int:'기록 보존도 붕괴. 손상된 증거는 복원되지 않는다.\n사건들은 미궁 속에 남겨졌다.'
+};
+</script>
+
+<script>
+/* ============================================================
+   MODULE 3 · 상태 & 영속성
+   ============================================================ */
+const KEY='safe4-hardcore:v2.6';
+const S={pwr:100,int:100,failures:0,solved:[false,false,false,false],caseSeen:[false,false,false,false],recs:[],elapsed:0,over:false,overClass:'',booted:false,sound:true,attempts:[0,0,0,0],linked:[false,false,false,false],linkMiss:[0,0,0,0],execFails:[0,0,0,0],concept:['','','','']};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function load(){
+  try{
+    const r=JSON.parse(localStorage.getItem(KEY));
+    if(r&&typeof r==='object'){
+      Object.assign(S,r);
+      if(!Array.isArray(S.solved)||S.solved.length!==4)S.solved=[false,false,false,false];
+      if(!Array.isArray(S.attempts)||S.attempts.length!==4)S.attempts=[0,0,0,0];
+      if(!Array.isArray(S.recs))S.recs=[];
+      if(!Array.isArray(S.linked)||S.linked.length!==4)S.linked=[false,false,false,false];
+      if(!Array.isArray(S.linkMiss)||S.linkMiss.length!==4)S.linkMiss=[0,0,0,0];
+      if(!Array.isArray(S.execFails)||S.execFails.length!==4)S.execFails=[0,0,0,0];
+      if(!Array.isArray(S.concept)||S.concept.length!==4)S.concept=['','','',''];
+      if(!Array.isArray(S.caseSeen)||S.caseSeen.length!==4)S.caseSeen=[false,false,false,false];
+    }
+  }catch(e){}
+}
+
+/* ============================================================
+   MODULE 4 · HUD & 이��트 라인
+   ============================================================ */
+function setMeterCls(el,v){el.classList.toggle('crit',v<15);el.classList.toggle('warn',v>=15&&v<35);}
+function updateHUD(){
+  const pw=Math.max(0,S.pwr), it=Math.max(0,S.int);
+  $('#pwrBar').style.width=pw+'%'; $('#pwrVal').textContent=Math.round(pw)+'%';
+  $('#intBar').style.width=it+'%'; $('#intVal').textContent=Math.round(it)+'%';
+  setMeterCls($('#pwrBlock'),pw); setMeterCls($('#intBlock'),it);
+  $$('#pips b').forEach((b,i)=>b.classList.toggle('on',!!S.solved[i]));
+  const seen=S.caseSeen.filter(Boolean).length;
+  $('#reviewBtn').textContent='사례 확인 '+seen+'/4';
+  $('#reviewBtn').disabled=seen===0;
+  $('#endReviewBtn').disabled=seen===0;
+}
+let toastT=0;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);}
+function setEvent(m,al){const e=$('#roEvent');e.textContent=m;e.classList.toggle('alarm-line',!!al);}
+
+/* ============================================================
+   MODULE 5 · 자원 시뮬레이션 (비상 전력 / 시설 무결성)
+   ============================================================ */
+let boosting=false, recOpen=false, lockdownActive=false, inputBlocked=false;
+function spend(x){
+  if(S.over)return;
+  S.pwr=Math.max(0,S.pwr-x);
+  updateHUD();
+  if(S.pwr<=0)catastrophe('pwr');
+}
+let lastTick=performance.now();
+setInterval(()=>{
+  const now=performance.now();
+  const dt=(now-lastTick)/1000; lastTick=now;
+  if(!S.booted||S.over||document.hidden)return;
+  S.elapsed+=dt*1000;
+  let drain=0.02*dt;
+  if(boosting)drain+=0.5*dt;
+  if(lockdownActive)drain=0;
+  S.pwr=Math.max(0,S.pwr-drain);
+  updateHUD();
+  $('#clock').textContent=fmtTime(S.elapsed);
+  if(Math.floor(S.elapsed/8000)!==Math.floor((S.elapsed-dt*1000)/8000))save();
+  if(S.pwr<=0)catastrophe('pwr');
+},250);
+
+/* ============================================================
+   MODULE 6 · 스크롤 엔진 (v1.x 계열 구조 계승)
+   ============================================================ */
+const track=$('#track'), stage=$('#stage');
+const L1=$('#layerBack'), L2=$('#layerMid'), L3=$('#layerFront');
+const GATES=[0.245,0.44,0.635,0.83];
+let p=0, rafId=0, lastZone=-9, panelOpen=false, currentZone=-1, finalShown=false, caseActive=false, caseReviewMode=false, activeCase=-1;
+const ZONE_RECS=[[],[],[],[]];
+Object.keys(RECORDS).forEach(id=>{const z=RECORDS[id].zone;if(z>=0&&z<4)ZONE_RECS[z].push(id);});
+function recCount(z){let n=0;for(const id of ZONE_RECS[z])if(S.recs.indexOf(id)!==-1)n++;return n;}
+function recDone(z){return ZONE_RECS[z].length>0&&recCount(z)>=ZONE_RECS[z].length;}
+let gateBlockSig='';
+function gateBlock(i){
+  const c=recCount(i),total=ZONE_RECS[i].length,sig=i+':'+c;
+  if(sig!==gateBlockSig){
+    gateBlockSig=sig;
+    AudioSys.warn();
+    setEvent('제어반 잠금 — 미열람 기록 '+(total-c)+'건 // 구역 내 기록을 전수 확보하라. (미궁의 장치일 뿐, 현실의 도움 요청에는 조건이 없다)',true);
+    toast('제어반 잠금 — 이 구역의 기록 '+c+'/'+total+' 열람됨');
+  }
+}
+function maybeReleaseGate(){
+  if(!S.booted||panelOpen||S.over)return;
+  const rp=rawP();
+  for(let i=0;i<4;i++){
+    if(!S.solved[i]&&recDone(i)&&rp>=GATES[i]-0.0005){
+      toast('기록 전수 확보 — 제어반 잠금 해제');
+      setTimeout(()=>{if(!panelOpen&&!recOpen&&!S.over&&!S.solved[i])openPanel(i);},320);
+      break;
+    }
+  }
+}
+let recProgCache='';
+function updateRecProg(){
+  const el=$('#recProg');if(!el)return;
+  const z=zoneAt(rawP());
+  let txt='',cls='';
+  if(S.booted&&z>=0&&z<4&&!S.solved[z]){
+    const c=recCount(z),t=ZONE_RECS[z].length;
+    if(c>=t){txt='기록 전수 확보 '+t+'/'+t+' // 제어반 접속 가능';cls='ok';}
+    else{txt='기록 열람 '+c+'/'+t+' // 제어반 잠금';cls='lock';}
+  }
+  const sig=cls+'|'+txt;
+  if(sig!==recProgCache){recProgCache=sig;el.textContent=txt;el.className=cls;}
+  for(const h of spots){
+    const r=RECORDS[h.dataset.rec];
+    h.classList.toggle('needed',z>=0&&z<4&&!S.solved[z]&&!!r&&r.zone===z&&S.recs.indexOf(h.dataset.rec)===-1);
+  }
+}
+function rawP(){const r=track.getBoundingClientRect();const travel=track.offsetHeight-innerHeight;return clamp(-r.top/Math.max(1,travel),0,1);}
+function maxP(){for(let i=0;i<4;i++){if(!S.solved[i])return Math.min(1,GATES[i]+0.012);}return 1;}
+function scrollToP(pp){const travel=track.offsetHeight-innerHeight;window.scrollTo({top:track.offsetTop+pp*travel,behavior:'auto'});p=pp;}
+function zoneAt(pp){if(pp<0.08)return -1;if(pp<0.30)return 0;if(pp<0.50)return 1;if(pp<0.70)return 2;if(pp<0.90)return 3;return -2;}
+/* 카메라 앵커 — 각 게이트 지점에서 해당 구역 베이가 화면에 완전히 들어오도록
+   스크롤 진행도(p) → 중경 레이어 이동량(vw)을 구간 선형으로 매핑한다.
+   (기존 선형 매핑에서는 구역 2~4 베이의 우측이 스크롤 상한 안에서 화면에 들어오지 못해
+    일부 기록 포인트를 열 수 없었다.) */
+const CAM_STOPS=[[0,0],[GATES[0],100],[GATES[1],200],[GATES[2],300],[GATES[3],392],[1,400]];
+function camAt(pp){
+  if(pp<=0)return 0;
+  for(let i=1;i<CAM_STOPS.length;i++){
+    const a=CAM_STOPS[i-1],b=CAM_STOPS[i];
+    if(pp<=b[0]||i===CAM_STOPS.length-1){
+      const t=clamp((pp-a[0])/Math.max(1e-6,b[0]-a[0]),0,1);
+      return a[1]+(b[1]-a[1])*t;
+    }
+  }
+  return 400;
+}
+function applyCam(pp){
+  const c=camAt(pp);
+  L1.style.transform='translate3d('+(-c*0.88)+'vw,0,0)';
+  L2.style.transform='translate3d('+(-c)+'vw,0,0)';
+  L3.style.transform='translate3d('+(-c*1.15)+'vw,0,0)';
+}
+function renderReadout(z){
+  if(z===-1){
+    $('#roZone').textContent='SAFE-4 // 기록 미궁 입구';
+    $('#roStatus').textContent='소실된 지원 신호 4건 감지 // 각 구역의 사건을 복원하고 신호를 연결하라.';
+  }else if(z===-2){
+    $('#roZone').textContent='SAFE-4 // 미궁 출구';
+    $('#roStatus').textContent=S.solved.every(Boolean)
+      ?'네 개의 신호 연결 완료 // 미궁의 격벽이 열린다 — 출구로 이동하라.'
+      :'미복원 사건 잔존 // 후방으로 돌아가 기록을 복원하라.';
+    if(S.solved.every(Boolean))setEvent('복원된 사건 — №1 개입 연결 · №2 증거 확보 · №3 경계 확보 · №4 지원 연결');
+  }else{
+    $('#roZone').textContent=ZONES[z].name;
+    $('#roStatus').textContent=S.solved[z]?ZONES[z].done:ZONES[z].status;
+    setEvent(S.solved[z]?'':ZONES[z].story);
+  }
+}
+function update(){
+  rafId=0;
+  let rp=rawP();
+  const mp=maxP();
+  if(S.booted&&!panelOpen&&!S.over&&rp>mp+0.0005){scrollToP(mp);rp=mp;}
+  p=noanim?rp:lerp(p,rp,0.14);
+  if(Math.abs(p-rp)<0.0004)p=rp;
+  applyCam(p);
+  lightSpots();
+  const z=zoneAt(rp);
+  if(z!==lastZone){lastZone=z;renderReadout(z);}
+  if(S.booted&&!panelOpen&&!recOpen&&!caseActive&&!document.querySelector('dialog[open]')&&!S.over){
+    let blocked=false;
+    for(let i=0;i<4;i++){
+      if(!S.solved[i]&&rp>=GATES[i]-0.0005){
+        if(recDone(i))openPanel(i);else{gateBlock(i);blocked=true;}
+        break;
+      }
+    }
+    if(!blocked)gateBlockSig='';
+    if(!finalShown&&S.solved.every(Boolean)&&rp>=0.965){finalShown=true;showEnding(S.failures===0?'A':'B');}
+  }
+  updateRecProg();
+}
+function requestUpdate(){if(!rafId)rafId=requestAnimationFrame(update);}
+window.addEventListener('scroll',requestUpdate,{passive:true});
+window.addEventListener('resize',requestUpdate,{passive:true});
+function lockScroll(on){document.body.classList.toggle('locked',on);}
+
+/* ============================================================
+   MODULE 7 · 손전등 (동적 조명) & 핫스팟 조도
+   ============================================================ */
+const torch=$('#torch');
+let mxp=innerWidth/2, myp=innerHeight*0.42;
+window.addEventListener('pointermove',e=>{
+  mxp=e.clientX;myp=e.clientY;
+  torch.style.setProperty('--mx',mxp+'px');
+  torch.style.setProperty('--my',myp+'px');
+  lightSpots();
+},{passive:true});
+stage.addEventListener('pointerdown',e=>{
+  if(e.target.closest('button,input,dialog,a'))return;
+  boosting=true;torch.classList.add('boost');
+});
+window.addEventListener('pointerup',()=>{boosting=false;torch.classList.remove('boost');});
+const spots=$$('.hotspot');
+function lightSpots(){
+  for(const hs of spots){
+    const r=hs.getBoundingClientRect();
+    if(r.right<-60||r.left>innerWidth+60)continue;
+    const d=Math.hypot(r.left+r.width/2-mxp,r.top+r.height/2-myp);
+    hs.style.opacity=clamp(1-(d-120)/430,0.18,1).toFixed(2);
+  }
+}
+
+/* ============================================================
+   MODULE 8 · 글리치 FX
+   ============================================================ */
+setInterval(()=>{
+  if(noanim||document.hidden||S.over||!S.booted)return;
+  const els=$$('[data-g]');
+  if(!els.length)return;
+  const el=els[Math.floor(Math.random()*els.length)];
+  el.classList.add('glitching');
+  setTimeout(()=>el.classList.remove('glitching'),140+Math.random()*140);
+},2800);
+
+/* ============================================================
+   MODULE 9 · 기록 뷰어 (열람 중 전력 정지)
+   ============================================================ */
+function openModal(d){if(!d.open)d.show();$('#scrim').classList.add('on');lockScroll(true);}
+function closeModal(d){
+  if(d.open)d.close();
+  if(!document.querySelector('dialog[open]')){$('#scrim').classList.remove('on');lockScroll(false);}
+}
+function openRecord(id){
+  if(S.over||inputBlocked)return;
+  const rec=RECORDS[id];if(!rec)return;
+  if(!S.recs.includes(id))S.recs.push(id);
+  save();
+  AudioSys.beep();
+  $('#recTag').textContent=rec.tag;
+  $('#recMeta').textContent=rec.meta;
+  const ph=rec.img?PHOTOS[rec.img]:null;
+  $('#recBody').innerHTML=(ph?'<figure class="rec-photo"><img src="'+ph.src+'" alt="'+ph.alt+'"><figcaption>'+ph.cap+'</figcaption></figure>':'')+rec.html;
+  recOpen=true;
+  $('#recDrain').classList.add('live');
+  openModal($('#recD'));
+  const hs=document.querySelector('[data-rec="'+id+'"]');
+  if(hs)hs.classList.add('read');
+  $('#recClose').focus({preventScroll:true});
+}
+function closeRecord(){
+  recOpen=false;
+  $('#recDrain').classList.remove('live');
+  closeModal($('#recD'));
+  updateRecProg();
+  maybeReleaseGate();
+}
+</script>
+
+<script>
+/* ============================================================
+   MODULE 10 · 제어 패널 — 3단 구조 (근거 연결 → 조작 → 후속 기록)
+   ============================================================ */
+function panelMsg(m,cls){const e=$('#panelMsg');e.textContent=m;e.className='panel-msg '+(cls||'');}
+let PZ=-1, Z3CUR=null, Z4CUR=null;
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+const GIST={
+  z1r1:'"보호자에게 먼저 알려야 한다"는 목격자의 주장',
+  z1r2:'사례 41 — 먼저 알린 뒤 벌어진 보복성 학대',
+  z1r3:'지침 §4 — 대응 순서와 통보 금지 조건',
+  z1r4:'E-31 — 연결 잠금 조건 (회로 규격)',
+  z2r1:'피해자의 마지막 메시지 — 캡처 직후',
+  z2r2:'"일단 전부 지워" — 친구의 주장',
+  z2r3:'지침 §7 — 원형을 남기는 행동의 정의',
+  z2r4:'E-47 — 오염 채널 개방 시 단절 경고',
+  z3r1:'"고마운 사람" — 변화 이전의 인상',
+  z3r2:'DM 로그 — 비밀 요구가 등장하는 대화',
+  z3r3:'지침 §2 — 통제 신호의 판별 기준',
+  z3r4:'P-12 — 첫인상에 가려진 통제 신호 경고',
+  z4r1:'반송된 고백 — 2차 가해와 단절의 기록',
+  z4r2:'"급하면 112" — 주변인의 상식',
+  z4r3:'지침 §11 — 112·1366 구분과 첫 반응 원칙',
+  z4r4:'T-09 — 공개 공유·대신 결정하기 경고'
+};
+const LINKS=[
+  {q:'"보호자에게 먼저 연락"이 왜 아이를 더 위험하게 만들 수 있는가 — 판단의 근거가 되는 기록 두 건을 연결하라.',
+   need:['z1r2','z1r3'],
+   why:{z1r1:'목격자 메모는 "보호자에게 먼저"라는 주장 자체다 — 근거가 아니라 검증할 견해다.',
+        z1r4:'E-31은 회로 잠금 조건이다 — 왜 위험한지는 담고 있지 않다.'},
+   ok:'사례 41 × 지침 §4 — 보호자 통보보다 112 신고가 우선이라는 근거 확보.'},
+  {q:'어떤 행동이 증거를 지키고 어떤 행동이 새로운 피해를 만드는가 — 구별의 근거가 되는 기록 두 건을 연결하라.',
+   need:['z2r3','z2r4'],
+   why:{z2r1:'피해자의 메시지는 판별할 상황 그 자체다 — 판별 기준은 아니다.',
+        z2r2:'친구의 메모는 "일단 지우라"는 주장이다 — 근거가 아니라 검증할 견해다.'},
+   ok:'지침 §7 × E-47 — "원형을 남기는 행동만 개방"의 근거 확보.'},
+  {q:'친밀함이 어디에서 통제로 바뀌었는가 — 그 지점을 보여 주는 기록 두 건을 연결하라.',
+   need:['z3r2','z3r3'],
+   why:{z3r1:'"고마운 사람"이라는 인상은 변화 이전의 상태다 — 바뀐 지점이 아니다.',
+        z3r4:'P-12는 판독 조건(왜곡 경고)이다 — 관계에서 일어난 일 자체가 아니다.'},
+   ok:'DM 로그 × 지침 §2 — "비밀 요구 = 경계 신호"의 근거 확보.'},
+  {q:'이 상황에 어떤 연결이 필요한가 — 선택의 근거가 되는 기록 두 건을 연결하라.',
+   need:['z4r1','z4r3'],
+   why:{z4r2:'"급하면 112"는 익숙한 상식이다 — 이 상황이 어떤 도움을 필요로 하는지는 보여 주지 않는다.',
+        z4r4:'T-09는 피해야 할 행동을 알려 준다 — 현재 상황에 맞는 기관을 고르는 직접 근거는 아니다.'},
+   ok:'상담 기록 × 지침 §11 — "상황에 맞는 채널 선택"의 근거 확보.'}
+];
+const REAL_NOTE='현실 원칙 — 기록 전수 열람과 제어반 잠금은 게임 장치다. 지금 위험하다면 증거를 모으지 않아도 바로 112에 도움을 요청할 수 있다.';
+const FOLLOWUP=[
+  '후속 기록 — 지원 요청이 접수되었다. 아동보호전문기관이 사례를 확인한다. 연결은 시작이지 종결이 아니다.',
+  '후속 기록 — 증거 원본이 보존되고 접수 기록이 생성되었다. 삭제·차단 절차와 심리 지원이 이어진다.',
+  '후속 기록 — 당사자가 신뢰할 수 있는 어른에게 연결되었다. 관계를 정리하는 데는 시간이 걸린다.',
+  '후속 기록 — 지원망이 응답했다. 첫 상담이 잡혔다. 앞선 세 사건의 기록도 같은 선로로 전달되었다.'
+];
+
+function openPanel(i){
+  if(panelOpen||S.over||S.solved[i])return;
+  if(recOpen)return;
+  if(!recDone(i)){gateBlock(i);return;}
+  currentZone=i;PZ=i;panelOpen=true;
+  AudioSys.warn();
+  $('#panelName').textContent=ZONES[i].panel;
+  $('#panelAttempts').textContent='ATTEMPT '+S.attempts[i];
+  panelMsg('');
+  $('#panelNote').textContent='모든 조작은 전력을 소모한다 // 규정 외 조작은 기록을 영구 손상시킨다';
+  buildPanel(i);
+  openModal($('#panel'));
+  $('#panelClose').focus({preventScroll:true});
+}
+function closePanel(){
+  closeModal($('#panel'));
+  panelOpen=false;PZ=-1;
+  if(currentZone>=0&&!S.solved[currentZone]&&!S.over){
+    $('#gateChip').classList.add('show');
+    setEvent('제어반 접속 대기 — 칩을 눌러 사건 복원을 계속하라.');
+  }
+}
+function buildPanel(i){ if(S.linked[i])buildWork(i); else buildLinkPhase(i); }
+function buildWork(i){
+  const body=$('#panelBody');
+  if(i===0)buildBreakers(body);
+  else if(i===1)buildToggles(body);
+  else if(i===2)buildValves(body);
+  else buildPath(body);
+}
+
+/* ---------- 1단계 · 근거 연결 (전 구역 공통) ---------- */
+function buildLinkPhase(i){
+  const body=$('#panelBody');const L=LINKS[i];let sel=[];
+  body.innerHTML=
+    '<div class="phase-label">1단계 · 근거 연결 — 조작 전에 판단의 근거를 잇는다</div>'+
+    '<div class="link-q">'+L.q+'</div>'+
+    '<div class="chip-grid">'+shuffle(ZONE_RECS[i].slice()).map(id=>'<button class="chip" data-id="'+id+'"><b>'+RECORDS[id].tag+'</b><span>'+GIST[id]+'</span></button>').join('')+'</div>'+
+    '<div class="panel-msg" id="linkMsg"></div>'+
+    '<button class="exec-btn" id="linkGo" disabled>연결 확정</button>'+
+    '<div class="real-note">'+REAL_NOTE+'</div>';
+  const go=body.querySelector('#linkGo'), msg=body.querySelector('#linkMsg');
+  body.querySelectorAll('.chip').forEach(ch=>{
+    ch.addEventListener('click',()=>{
+      if(inputBlocked||S.over)return;
+      AudioSys.beep();
+      const id=ch.dataset.id;
+      const ix=sel.indexOf(id);
+      if(ix===-1){ if(sel.length>=2)return; sel.push(id); ch.classList.add('sel'); }
+      else{ sel.splice(ix,1); ch.classList.remove('sel'); }
+      go.disabled=sel.length!==2;
+      msg.textContent='';msg.className='panel-msg';
+    });
+  });
+  go.addEventListener('click',()=>{
+    if(inputBlocked||S.over||sel.length!==2)return;
+    spend(0.2);
+    const hit=L.need.every(id=>sel.indexOf(id)!==-1);
+    if(hit){
+      S.linked[i]=true;save();
+      AudioSys.success();
+      msg.textContent=L.ok+' 조작 단계 개방.';msg.className='panel-msg ok';
+      setTimeout(()=>{if(panelOpen&&!S.over)buildWork(i);},1000);
+    }else{
+      S.linkMiss[i]++;save();
+      AudioSys.warn();
+      const wrong=sel.filter(id=>L.need.indexOf(id)===-1);
+      msg.innerHTML=wrong.map(id=>L.why[id]||'이 기록은 이 판단의 근거가 아니다.').join('<br>');
+      msg.className='panel-msg err';
+      body.querySelectorAll('.chip').forEach(ch=>{
+        if(wrong.indexOf(ch.dataset.id)!==-1){ch.classList.add('wrong');setTimeout(()=>ch.classList.remove('wrong'),900);}
+      });
+    }
+  });
+}
+
+/* ---------- 퍼즐 1 · 차단기 순차 투입 (시도마다 자리 재배열) ---------- */
+function seqIssues(seq){
+  const pos={};seq.forEach((l,ix)=>pos[l]=ix);
+  const out=[];
+  if(pos['K']<pos['R'])out.push('기록의 위험 신호를 확인하기 전에 신고 회로 투입 — 상황·위치를 먼저 판독');
+  if(pos['S']<pos['K'])out.push('안전 조치를 이유로 112 신고가 뒤로 밀림 — 현재 위험하면 신고를 늦추지 않는다');
+  if(pos['M']<pos['K'])out.push('전문 지원 연결이 긴급 신고보다 앞섬 — 현재 위험 신고 후 이어서 연결');
+  if(pos['M']<pos['S'])out.push('현장 안전 지시를 따르기 전에 후속 기관 연결 — 신고자의 안전한 거리 유지가 먼저');
+  if(!out.length)out.push('투입 순서 위반 — 지침 §4와 사례 41을 다시 대조하라');
+  return out;
+}
+function buildBreakers(body){
+  const labels=shuffle([['K','112 신고'],['M','전문 지원 연결'],['R','위험 신호 확인'],['S','안전한 거리 유지']]);
+  let seq=[];
+  body.innerHTML=
+    '<div class="phase-label">2단계 · 조작 — 개입 단계 수동 투입</div>'+
+    '<div class="mono" style="font-size:11px;color:var(--ph-dim);letter-spacing:.08em">기록에서 위험을 확인했다면 112 신고를 늦추지 않는다 — 직접 접근 대신 안전한 거리에서 지시를 따른다</div>'+
+    '<div class="breaker-row">'+labels.map(l=>
+      '<button class="lever" data-lever="'+l[0]+'" aria-pressed="false" aria-label="개입 단계 '+l[1]+'">'+
+      '<span class="lever-lamp"></span><span class="lever-slot"><span class="lever-handle"></span></span>'+
+      '<span class="lever-label">'+l[0]+' · '+l[1]+'</span></button>').join('')+
+    '</div>'+
+    '<div class="seq-lamps">투입 순서&nbsp;<b>·</b><b>·</b><b>·</b><b>·</b></div>';
+  const lamps=body.querySelectorAll('.seq-lamps b');
+  body.querySelectorAll('.lever').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      if(inputBlocked||S.over)return;
+      AudioSys.relay();spend(0.25);
+      if(S.over)return;
+      btn.classList.add('on');btn.setAttribute('aria-pressed','true');btn.disabled=true;
+      seq.push(btn.dataset.lever);
+      const lamp=lamps[seq.length-1];lamp.textContent=btn.dataset.lever;lamp.classList.add('lit');
+      if(seq.length===4){
+        if(seq.join(',')==='R,K,S,M'){
+          solveZone(0,'대처 연결 완료 — 위험 신호 확인 → 112 신고 → 안전한 거리에서 지시 따르기 → 전문 지원 연결.\n보호자에게 먼저 알리는 위험한 경로를 차단했다.');
+        }else{
+          S.attempts[0]++;
+          const issues=seqIssues(seq);
+          fail(0,{
+            cause:issues,
+            dmg:'개입 지연 −10 · 절차 위반 −'+(5*issues.length),
+            damage:Math.min(28,10+5*issues.length),
+            chips:issues.map(t=>'재검토: '+t),
+            event:'개입 회로 차단 — 투입 순서 위반. 사례와 지침을 대조하라.'
+          });
+        }
+      }
+    });
+  });
+}
+
+/* ---------- 퍼즐 2 · 증거 채널 격리 (오염 채널 풀·자리 랜덤) ---------- */
+function buildToggles(body){
+  const KEEP=['화면 캡처','주소 기록','원문 보존','기관 전달'];
+  const POLL={'즉시 삭제':'원문 파기 — 입증 불가','단톡 공유':'2차 유포 경로 생성','직접 협상':'가해자에게 증거 인멸 기회','항의 재전송':'원문 재확산','계정 탈퇴':'접속 기록 소실','캡처만 지우기':'유일한 사본 소실'};
+  const KEEPMISS={'화면 캡처':'게시 화면 미확보','주소 기록':'위치 추적 불가','원문 보존':'삭제 후 대조 불가','기관 전달':'지원 접수 지연'};
+  const dis=shuffle(Object.keys(POLL)).slice(0,4);
+  const all=shuffle(KEEP.concat(dis));
+  let html='<div class="phase-label">2단계 · 조작 — 증거 채널 격리</div>'+
+    '<div class="mono" style="font-size:11px;color:var(--ph-dim);letter-spacing:.08em">원형을 남기는 행동만 올려라 — 지우거나 퍼뜨리는 연결은 끊는다</div><div class="toggle-grid">';
+  all.forEach((lb,ix)=>{
+    html+='<button class="tswitch" data-lb="'+lb+'" aria-pressed="false" aria-label="'+lb+' 토글"><span class="tsw-rail"><span class="tsw-cap"></span></span><span class="tsw-id">CH'+(ix+1)+'</span><span class="tsw-label">'+lb+'</span></button>';
+  });
+  html+='</div><button class="exec-btn" id="busExec">증거 버스 재가동</button>';
+  body.innerHTML=html;
+  body.querySelectorAll('.tswitch').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      if(inputBlocked||S.over)return;
+      const on=btn.getAttribute('aria-pressed')==='true';
+      btn.setAttribute('aria-pressed',String(!on));
+      AudioSys.relay();spend(0.2);
+    });
+  });
+  body.querySelector('#busExec').addEventListener('click',()=>{
+    if(inputBlocked||S.over)return;
+    spend(0.5);if(S.over)return;
+    const on=[];
+    body.querySelectorAll('.tswitch[aria-pressed="true"]').forEach(b=>on.push(b.dataset.lb));
+    const wrong=on.filter(l=>dis.indexOf(l)!==-1);
+    const missing=KEEP.filter(l=>on.indexOf(l)===-1);
+    if(!wrong.length&&!missing.length){
+      solveZone(1,'오염 채널 차단 · 보존 채널 개방 — 공개 확산 경로를 끊고 지원 접수 기록을 생성했다.');
+    }else{
+      S.attempts[1]++;
+      const cause=wrong.map(w=>'「'+w+'」 개방 — '+POLL[w]).concat(missing.map(m=>'「'+m+'」 미개방 — '+KEEPMISS[m]));
+      fail(1,{
+        cause:cause,
+        dmg:'오염 개방 '+wrong.length+'건 · 보존 누락 '+missing.length+'건',
+        damage:Math.min(30,8+4*wrong.length+4*missing.length),
+        chips:wrong.map(w=>'차단: '+w).concat(missing.map(m=>'재연결: '+m)),
+        event:'기록망 오염 — 살리면 안 되는 채널이 열렸다.'
+      });
+    }
+  });
+}
+
+/* ---------- 퍼즐 3 · 경계 밸브 — 통제 연결 판별 (수치 계산 폐기) ---------- */
+const Z3_POOL=[
+  {t:'"선물을 받았으니, 부탁 하나쯤은 들어줘야지."',cut:true,why:'선물은 의무를 만들지 않는다 — 응할 의무를 심는 연결은 차단한다.'},
+  {t:'"우리만의 비밀이야. 아무에게도 말하지 마."',cut:true,why:'비밀 강요는 외부 도움과의 연결을 끊는 대표적 통제 신호다.'},
+  {t:'"전에 괜찮다고 했잖아. 이번에도 괜찮지?"',cut:true,why:'이전의 동의는 지금의 동의를 대신할 수 없다 — 동의는 매번 새로 확인한다.'},
+  {t:'"사진 보낼 수 있지? 너만 믿는 거야."',cut:true,why:'신뢰를 압박으로 바꾸는 요구 — 경계 침범 신호다.'},
+  {t:'"싫다고 하면 언제든 멈출게."',cut:false,why:'거절을 존중하는 반응 — 남겨 둘 연결이다.'},
+  {t:'"힘들면 네가 믿는 어른에게 먼저 말해도 돼."',cut:false,why:'외부 연결을 열어 두는 반응 — 남겨 둘 연결이다.'}
+];
+function buildValves(body){
+  const cuts=shuffle(Z3_POOL.filter(l=>l.cut));
+  const keeps=shuffle(Z3_POOL.filter(l=>!l.cut));
+  const nCut=Math.random()<0.5?2:3;
+  const lines=shuffle(cuts.slice(0,nCut).concat(keeps.slice(0,4-nCut)));
+  Z3CUR=lines;
+  const state=new Array(4).fill('');
+  body.innerHTML=
+    '<div class="phase-label">2단계 · 조작 — 다정함 속의 통제 연결을 가려내라</div>'+
+    '<div class="mono" style="font-size:11px;color:var(--ph-dim);letter-spacing:.08em">복구된 대화 조각이다 — 끊어야 할 연결은 차단, 남길 연결은 유지</div>'+
+    '<div id="vWrap">'+lines.map((l,ix)=>{
+      const choices=shuffle([{v:'cut',t:'차단'},{v:'keep',t:'유지'}]);
+      return '<div class="valve-card"><div class="vc-q">'+l.t+'</div>'+
+      '<div class="vc-btns">'+choices.map(c=>'<button class="vc-btn" data-ix="'+ix+'" data-v="'+c.v+'">'+c.t+'</button>').join('')+'</div></div>';
+    }).join('')+
+    '</div>'+
+    '<button class="exec-btn" id="vExec">경계 확정</button>';
+  body.querySelectorAll('.vc-btn').forEach(b=>{
+    b.addEventListener('click',()=>{
+      if(inputBlocked||S.over)return;
+      const ix=+b.dataset.ix,v=b.dataset.v;
+      state[ix]=v;
+      AudioSys.relay();spend(0.1);
+      body.querySelectorAll('.vc-btn[data-ix="'+ix+'"]').forEach(x=>{
+        x.classList.toggle('on-cut',x.dataset.v==='cut'&&v==='cut');
+        x.classList.toggle('on-keep',x.dataset.v==='keep'&&v==='keep');
+      });
+    });
+  });
+  body.querySelector('#vExec').addEventListener('click',()=>{
+    if(inputBlocked||S.over)return;
+    spend(0.4);if(S.over)return;
+    if(state.some(s=>!s)){panelMsg('모든 연결의 차단·유지를 정하라.','err');return;}
+    const misj=[];
+    lines.forEach((l,ix)=>{ if((state[ix]==='cut')!==l.cut)misj.push(l); });
+    if(!misj.length){ buildTimeline(body); }
+    else{
+      S.attempts[2]++;
+      fail(2,{
+        cause:misj.map(l=>'「'+l.t+'」 — '+l.why),
+        dmg:'통제 방치·오판 '+misj.length+'건',
+        damage:Math.min(30,8+6*misj.length),
+        chips:misj.map(l=>(l.cut?'차단: ':'재연결: ')+l.t),
+        event:'경계 밸브 오조작 — 통제 연결이 방치되었다.'
+      });
+    }
+  });
+}
+function buildTimeline(body){
+  const opts=shuffle(['고민 상담을 시작했다','선물을 전달했다','“우리만의 비밀”을 요구했다','사진을 요구했다']);
+  body.innerHTML=
+    '<div class="phase-label">3단계 · 판독 — 친밀함이 통제로 바뀐 첫 지점을 지목하라</div>'+
+    '<div class="mono" style="font-size:11px;color:var(--ph-dim);letter-spacing:.08em">DM 로그의 시간 순서다 — 상대의 선택지가 좁아지기 시작한 지점</div>'+
+    opts.map(o=>'<button class="tl-opt" data-o="'+o+'">'+o+'</button>').join('')+
+    '<div class="panel-msg" id="tlMsg"></div>';
+  const msg=body.querySelector('#tlMsg');
+  body.querySelectorAll('.tl-opt').forEach(b=>{
+    b.addEventListener('click',()=>{
+      if(inputBlocked||S.over)return;
+      spend(0.15);
+      const o=b.dataset.o;
+      if(o==='“우리만의 비밀”을 요구했다'){
+        solveZone(2,'통제 연결 차단 · 외부 도움 경로 개방 — 친밀함이 통제로 바뀐 지점을 확보했다.');
+      }else{
+        S.linkMiss[2]++;save();AudioSys.warn();
+        msg.className='panel-msg err';
+        if(o==='선물을 전달했다')msg.textContent='선물만으로는 위험의 확정 증거가 아니다 — 이후 행동과 맥락을 함께 보라.';
+        else if(o==='사진을 요구했다')msg.textContent='사진 요구는 이미 통제가 진행된 뒤다 — 처음으로 선택이 좁아진 지점을 찾아라.';
+        else msg.textContent='그 시점은 아직 지지적 관계다 — 상대의 선택이 좁아지기 시작한 첫 지점을 찾아라.';
+      }
+    });
+  });
+}
+
+/* ---------- 퍼즐 4 · 경로 선택 + 송신 (상황 판단 우선) ---------- */
+const Z4_SCEN=[
+  {id:'counsel',txt:'수신된 기록 — 당사자는 지금 안전한 장소에 있다. 상담과 보호·지원기관 연결을 원한다.',path:'B',agency:'여성긴급전화 1366',desc:'상담·보호·지원기관 연결 (필요 시 112·119와 연계)'},
+  {id:'urgent',txt:'수신된 기록 — 지금 이 순간에도 폭력이 진행 중이다. 즉각적인 출동과 보호 조치가 필요하다.',path:'A',agency:'112',desc:'긴급 신고 — 즉시 출동·보호 조치'}
+];
+function buildPath(body){
+  const scen=Z4_SCEN[Math.floor(Math.random()*2)];
+  const paths=shuffle([
+    {p:'A',label:'경로 A',text:'긴급 신고 — 지금 당장 출동·보호가 필요할 때'},
+    {p:'B',label:'경로 B',text:'상담·지원 연결 — 상담·보호·기관 연결이 필요할 때'},
+    {p:'C',label:'경로 C',text:'공개 게시판에 도움 요청 — 빠르게 많은 사람에게'}
+  ]);
+  Z4CUR=scen;
+  body.innerHTML=
+    '<div class="phase-label">2단계 · 경로 판단 — 기록이 가리키는 상황에 맞는 연결을 고르라</div>'+
+    '<div class="scenario-card">'+scen.txt+'</div>'+
+    '<div class="path-row">'+paths.map(x=>'<button class="path-btn" data-p="'+x.p+'"><b>'+x.label+'</b>'+x.text+'</button>').join('')+'</div>';
+  body.querySelectorAll('.path-btn').forEach(b=>{
+    b.addEventListener('click',()=>{
+      if(inputBlocked||S.over)return;
+      spend(0.3);if(S.over)return;
+      const p=b.dataset.p;
+      if(p==='C'){
+        S.attempts[3]++;
+        fail(3,{
+          cause:['공개 게시판 연결 — 이 경로는 지원 기관이 아니다. 사건 기록이 불특정 다수에게 노출되어 2차 가해 경로가 된다.'],
+          dmg:'기록 공개 노출 −18',
+          damage:18,
+          chips:['차단: 공개 게시판 연결'],
+          event:'오연결 — 지원 신호가 공개 게시판으로 향했다.'
+        });
+      }else if(p!==scen.path){
+        S.attempts[3]++;
+        const causeLine=(scen.id==='counsel')
+          ?'긴급 신고 경로 선택 — 당사자는 안전한 장소에서 상담을 원한다. 당사자가 원하지 않는 개입은 신뢰를 깨고 다시 말하는 것을 막을 수 있다.'
+          :'상담 경로 선택 — 폭력이 진행 중이다. 상담 연결은 출동을 지연시킨다. 지금 필요한 것은 즉시 신고다.';
+        fail(3,{
+          cause:[causeLine],
+          dmg:'오경로 연결 −14',
+          damage:14,
+          chips:['차단: '+(p==='A'?'긴급 신고 경로':'상담·지원 연결 경로')],
+          event:'오연결 — 상황과 맞지 않는 경로로 연결했다.'
+        });
+      }else{
+        buildFreqStage(body,scen);
+      }
+    });
+  });
+}
+function buildFreqStage(body,scen){
+  const lines=[
+    {t:'네 잘못이 아니야.',ok:true},
+    {t:'네가 원하는 도움을 함께 찾자.',ok:true},
+    {t:'왜 이제야 말했어?',ok:false},
+    {t:'일단 아무에게도 말하지 마.',ok:false},
+    {t:'내가 대신 결정할게.',ok:false}
+  ];
+  const selected=[];
+  body.innerHTML=
+    '<div class="phase-label">3단계 · 첫 발신 조립 — 당사자의 선택권을 지키는 두 문장을 연결하라</div>'+
+    '<div class="scenario-card">연결 기관: <b>'+scen.agency+'</b><br>'+scen.desc+'</div>'+
+    '<div class="chip-grid">'+shuffle(lines.slice()).map((l,ix)=>'<button class="chip response-chip" data-text="'+l.t+'" data-ok="'+l.ok+'"><b>문장 조각 '+(ix+1)+'</b><span>'+l.t+'</span></button>').join('')+'</div>'+
+    '<div class="panel-msg" id="txMsg">두 문장을 선택하라. 비난·비밀 강요·대신 결정하기는 연결하지 않는다.</div>'+
+    '<button class="exec-btn transmit" id="txBtn" disabled>'+scen.agency+'에 지원 신호 보내기</button>';
+  const tx=body.querySelector('#txBtn'),msg=body.querySelector('#txMsg');
+  body.querySelectorAll('.response-chip').forEach(ch=>ch.addEventListener('click',()=>{
+    if(inputBlocked||S.over)return;
+    const t=ch.dataset.text,ix=selected.indexOf(t);
+    if(ix<0){if(selected.length>=2)return;selected.push(t);ch.classList.add('sel');}
+    else{selected.splice(ix,1);ch.classList.remove('sel');}
+    tx.disabled=selected.length!==2;msg.textContent='선택 '+selected.length+'/2';msg.className='panel-msg';
+    AudioSys.beep();
+  }));
+  body.querySelector('#txBtn').addEventListener('click',()=>{
+    if(inputBlocked||S.over)return;
+    spend(0.5);if(S.over)return;
+    const picked=Array.from(body.querySelectorAll('.response-chip.sel'));
+    if(picked.length===2&&picked.every(ch=>ch.dataset.ok==='true')){
+      solveZone(3,'지원 연결 완료 — '+scen.agency+'.\n첫 발신: “네 잘못이 아니야. 네가 원하는 도움을 함께 찾자.”\n앞선 세 구역의 신호·증거·경계 기록도 함께 전달했다.');
+    }else{
+      S.attempts[3]++;
+      fail(3,{
+        cause:['첫 반응에 비난·비밀 강요·대신 결정하기가 섞임 — 당사자의 선택권과 도움 요청을 막을 수 있다.'],
+        dmg:'지지 연결 오류 −10',
+        damage:10,
+        chips:['재연결: 비난 없이 믿기','재연결: 원하는 도움을 함께 찾기'],
+        event:'고백 반송 — 첫 문장이 지원 연결을 막았다.'
+      });
+    }
+  });
+}
+
+/* ============================================================
+   MODULE 11 · 해결 / 실패 → 복구 루프 (대기 대신 원인 복구)
+   ============================================================ */
+function solveZone(i,msg){
+  if(S.solved[i]||S.over)return;
+  S.solved[i]=true;
+  S.concept[i]=(S.execFails[i]===0&&S.linkMiss[i]===0)?'exact':'recheck';
+  save();AudioSys.success();updateHUD();
+  $('#panelBody').innerHTML='<div class="solve-box">'+msg+'</div><div class="follow-up">'+FOLLOWUP[i]+'</div>';
+  panelMsg('');
+  setEvent('사건 №'+(i+1)+' 복원 — '+FOLLOWUP[i]);
+  $('#gateChip').classList.remove('show');
+  setTimeout(()=>{
+    closeModal($('#panel'));panelOpen=false;PZ=-1;
+    showCaseReveal(i);
+  },900);
+}
+
+function showCaseReveal(i,reviewMode){
+  const c=CASE_FILES[i];if(!c||(S.over&&!reviewMode))return;
+  activeCase=i;caseActive=true;caseReviewMode=!!reviewMode;lockScroll(true);
+  $('#caseKicker').textContent=c.kicker;
+  $('#caseTitle').textContent=c.title;
+  $('#caseFact').textContent=c.fact;
+  $('#caseFeedback').textContent='';
+  $('#caseOutcomeText').textContent=c.outcome;
+  $('#caseOutcome').classList.remove('on');
+  $('#caseContinue').hidden=true;
+  if(caseReviewMode){
+    const correct=c.options.find(o=>o.ok);
+    $('#caseQ').textContent='복원 당시 확인한 결정적 행동';
+    $('#caseOptions').innerHTML='<div class="case-option good review-answer">'+correct.t+'</div>';
+    $('#caseFeedback').textContent='해결한 사례 기록 — 판단과 실제 결과를 함께 다시 확인한다.';
+    $('#caseOutcome').classList.add('on');
+    $('#caseContinue').hidden=false;
+    $('#caseContinue').textContent='기록 닫기';
+    $('#caseReveal').classList.add('on');
+    $('#caseContinue').focus({preventScroll:true});
+    return;
+  }
+  $('#caseQ').textContent=c.q;
+  $('#caseContinue').textContent=i===3?'최종 출구로':'다음 구역으로';
+  const shown=shuffle(c.options.map((o,ix)=>({o,ix})));
+  $('#caseOptions').innerHTML=shown.map(x=>'<button class="case-option" data-ix="'+x.ix+'">'+x.o.t+'</button>').join('');
+  $('#caseReveal').classList.add('on');
+  const opts=$$('#caseOptions .case-option');
+  opts.forEach(btn=>btn.addEventListener('click',()=>{
+    const o=c.options[+btn.dataset.ix];
+    opts.forEach(x=>x.classList.remove('bad'));
+    if(!o.ok){
+      btn.classList.add('bad');
+      $('#caseFeedback').textContent=o.fb;
+      AudioSys.warn();
+      return;
+    }
+    btn.classList.add('good');
+    opts.forEach(x=>x.disabled=true);
+    $('#caseFeedback').textContent='결정적 연결 확인 — 결과 기록이 복원됐다.';
+    $('#caseOutcome').classList.add('on');
+    $('#caseContinue').hidden=false;
+    AudioSys.success();
+    $('#caseContinue').focus({preventScroll:true});
+  }));
+}
+
+$('#caseContinue').addEventListener('click',()=>{
+  if(activeCase<0)return;
+  const wasReview=caseReviewMode;
+  if(!wasReview){S.caseSeen[activeCase]=true;save();updateHUD();}
+  $('#caseReveal').classList.remove('on');
+  caseActive=false;caseReviewMode=false;activeCase=-1;lockScroll(false);
+  renderReadout(zoneAt(rawP()));requestUpdate();
+  toast(wasReview?'사례 기록 닫힘':'실제 사례 결과 확인 완료 — 전방 구역으로 이동');
+});
+
+function openCaseReview(){
+  const seen=S.caseSeen.filter(Boolean).length;
+  if(!seen){toast('해결하고 결과까지 확인한 사례가 아직 없다.');return;}
+  $('#reviewMeta').textContent=seen+'/4 RECOVERED';
+  $('#reviewList').innerHTML=CASE_FILES.map((c,i)=>
+    '<button class="review-item" data-case="'+i+'" '+(S.caseSeen[i]?'':'disabled')+'>'+
+      '<span class="review-no">CASE '+String(i+1).padStart(2,'0')+'</span>'+
+      '<span class="review-title">'+c.title+'</span>'+
+      '<span class="review-state">'+(S.caseSeen[i]?'OPEN':'LOCKED')+'</span>'+
+    '</button>'
+  ).join('');
+  $('#reviewList').querySelectorAll('.review-item:not(:disabled)').forEach(btn=>btn.addEventListener('click',()=>{
+    const i=+btn.dataset.case;
+    closeModal($('#reviewD'));
+    showCaseReveal(i,true);
+  }));
+  const dlg=$('#reviewD');
+  if(!dlg.open)dlg.showModal();
+  lockScroll(true);
+  const first=$('#reviewList .review-item:not(:disabled)');if(first)first.focus({preventScroll:true});
+}
+function fail(zone,info){
+  if(S.over)return;
+  info=info||{cause:['규정 외 조작 — 기록이 손상되었다.'],dmg:'절차 위반 −16',damage:16,chips:['재검토: 조작 절차'],event:FAIL_TEXT[zone]};
+  S.failures++;S.execFails[zone]++;
+  S.int=Math.max(0,S.int-info.damage);
+  S.pwr=Math.max(0,S.pwr-10);
+  save();updateHUD();
+  AudioSys.siren();alarmGo();
+  setEvent(info.event,true);
+  startLockdown(3,function(){ if(!S.over&&panelOpen)showRecovery(zone,info); });
+  if(S.int<=0)setTimeout(()=>catastrophe('int'),2100);
+  else if(S.pwr<=0)setTimeout(()=>catastrophe('pwr'),2100);
+}
+function showRecovery(zone,info){
+  const body=$('#panelBody');
+  body.innerHTML=
+    '<div class="phase-label" style="color:var(--red)">복구 단계 — 원인을 확인하고 오염된 연결을 차단하라</div>'+
+    '<div class="diag-box">'+info.cause.map(c=>'<div class="diag-row">'+c+'</div>').join('')+'</div>'+
+    '<div class="dmg-line">기록 보존도 손상 내역 — '+info.dmg+' (합계 −'+info.damage+')</div>'+
+    '<div class="chip-grid" id="cutGrid">'+shuffle(info.chips.slice()).map((c,ix)=>'<button class="chip cut" data-ix="'+ix+'"><b>연결 '+(ix+1)+'</b><span>'+c+'</span></button>').join('')+'</div>'+
+    '<div class="panel-msg" id="recMsg">차단·재연결할 연결을 모두 눌러라.</div>'+
+    '<button class="exec-btn" id="recDone" disabled>조작 재개</button>';
+  let left=info.chips.length;
+  const done=body.querySelector('#recDone');
+  body.querySelectorAll('.chip.cut').forEach(ch=>{
+    ch.addEventListener('click',()=>{
+      if(ch.classList.contains('done')||inputBlocked||S.over)return;
+      ch.classList.add('done');AudioSys.relay();left--;
+      if(left<=0){done.disabled=false;const m=body.querySelector('#recMsg');m.textContent='오염 연결 정리 완료 — 조작을 재개할 수 있다.';m.className='panel-msg ok';}
+    });
+  });
+  done.addEventListener('click',()=>{
+    if(inputBlocked||S.over)return;
+    $('#panelAttempts').textContent='ATTEMPT '+S.attempts[zone];
+    buildWork(zone);
+  });
+}
+function alarmGo(){
+  const a=$('#alarm');
+  a.classList.remove('go');void a.offsetWidth;
+  a.classList.add('go');
+  setTimeout(()=>a.classList.remove('go'),2400);
+}
+function startLockdown(sec,cb){
+  lockdownActive=true;inputBlocked=true;
+  $('#lockdown').classList.add('on');
+  let rem=sec;
+  $('#lockCount').textContent=rem;
+  const iv=setInterval(()=>{
+    rem--;
+    if(rem<=0){
+      clearInterval(iv);
+      $('#lockdown').classList.remove('on');
+      lockdownActive=false;inputBlocked=false;
+      AudioSys.beep();
+      if(cb)cb();
+    }else{
+      $('#lockCount').textContent=rem;
+      if(rem<=3)AudioSys.warn();
+    }
+  },1000);
+}
+
+/* ============================================================
+   MODULE 12 · 엔딩 — 개념 적용 결과 / 도전 기록 분리 표기
+   ============================================================ */
+const CONCEPTS=['신호와 대처 연결','증거 보존과 재유포 구별','경계·동의 판별','상황에 맞는 연결 선택'];
+function catastrophe(reason){
+  if(S.over)return;
+  S.over=true;S.overClass='C';
+  try{localStorage.removeItem(KEY);}catch(e){}
+  AudioSys.doom();
+  const e=ENDINGS.C;
+  showEndingRaw(e.cls,e.ec,e.title,CATASTROPHE_BODY[reason]||CATASTROPHE_BODY.pwr);
+}
+function showEnding(cls){
+  S.over=true;S.overClass=cls;save();
+  const e=ENDINGS[cls];
+  if(cls==='A')AudioSys.success();
+  showEndingRaw(e.cls,e.ec,e.title,e.body);
+}
+function showEndingRaw(cls,ec,title,body){
+  closeModal($('#recD'));closeModal($('#panel'));
+  recOpen=false;panelOpen=false;PZ=-1;
+  $('#scrim').classList.remove('on');
+  lockScroll(false);
+  const ov=$('#ending');
+  ov.className='on '+cls;
+  $('#endClass').textContent=ec;
+  $('#endTitle').textContent=title;
+  $('#endBody').textContent=body;
+  $('#endConcept').innerHTML=CONCEPTS.map((c,i)=>{
+    let mk='미달',cl='no';
+    if(S.solved[i]&&S.concept[i]==='exact'){mk='정확';cl='ok';}
+    else if(S.solved[i]){mk='재확인';cl='mid';}
+    return '<div class="ec-row"><span>'+c+'</span><b class="'+cl+'">'+mk+'</b></div>';
+  }).join('');
+  const stats=[
+    [fmtTime(S.elapsed),'경과 시간'],
+    [S.recs.length+'/16','열람 기록'],
+    [Math.round(S.pwr)+'%','잔여 전력'],
+    [Math.round(S.int)+'%','기록 보존도'],
+    [String(S.failures),'절차 위반']
+  ];
+  $('#endStats').innerHTML=stats.map(s=>'<div class="end-stat"><b>'+s[0]+'</b><span>'+s[1]+'</span></div>').join('');
+  $('#endNote').textContent='현실에서는 — 긴급한 위험이 진행 중일 때 112, 상담·보호·지원기관 연결이 필요할 때 여성긴급전화 1366(112·119와 연계). 증거를 모으지 않아도 바로 도움을 요청할 수 있다.';
+}
+
+</script>
+
+<script>
+/* ============================================================
+   MODULE 13 · 부트 시퀀스 & 초기화
+   ============================================================ */
+const BOOT_LINES=[
+  ['SAFE-4 FIELD TERMINAL — v2.6  [SAFETY NET OFFLINE]',''],
+  ['역할 ............................. 학교 안전망 복구팀',''],
+  ['임무 ............................. 익명 사건 4건의 지원 경로 복원','amber-line'],
+  ['백업 배터리 ...................... 100.0% (비상)',''],
+  ['기록 보존도 ...................... 100.0%',''],
+  ['지원망 상태 ...................... 침묵','dim'],
+  ['> 신호를 찾고, 기록을 지키고, 경계를 확인해 도움에 연결하라.','dim'],
+  ['',''],
+  ['안전 안내: 실제 피해 장면을 재연하지 않으며 개인 경험을 말할 필요가 없다.','amber-line'],
+  ['현실에서 지금 위험하다면 퍼즐·증거 수집을 멈추고 112가 먼저다.','red-line']
+];
+function runBoot(){
+  const log=$('#bootLog');
+  const resumed=S.booted||S.elapsed>0||S.recs.length>0;
+  const lines=BOOT_LINES.slice();
+  if(resumed)lines.push(['> 이전 세션 데이터 검출 — 진행 상태 복원 준비','amber-line']);
+  let i=0;
+  (function step(){
+    if(i<lines.length){
+      const ln=lines[i];
+      const div=document.createElement('div');
+      if(ln[1])div.className=ln[1];
+      div.textContent=ln[0]||'\u00a0';
+      log.appendChild(div);
+      i++;
+      setTimeout(step,ln[0]===''?60:150);
+    }else{
+      $('#bootBtn').hidden=false;
+      if(resumed){
+        $('#bootReset').hidden=false;
+        $('#bootBtn').textContent='터미널 접속 — 세션 재개';
+      }
+    }
+  })();
+}
+
+/* ---------- 이벤트 배선 ---------- */
+$('#bootBtn').addEventListener('click',()=>{
+  AudioSys.init();AudioSys.resume();
+  S.booted=true;save();
+  $('#boot').hidden=true;
+  $('#hud').hidden=false;
+  lockScroll(false);
+  updateHUD();
+  $('#clock').textContent=fmtTime(S.elapsed);
+  renderReadout(zoneAt(rawP()));
+  requestUpdate();
+  if(S.over&&S.overClass){
+    const e=ENDINGS[S.overClass];
+    showEndingRaw(e.cls,e.ec,e.title,e.body);
+    return;
+  }
+  const unseen=S.solved.findIndex((v,i)=>v&&!S.caseSeen[i]);
+  if(unseen>=0)setTimeout(()=>showCaseReveal(unseen),250);
+  else toast('안전망 복구 임무 시작 — 스크롤하여 첫 사건의 기록을 조사하라');
+});
+$('#bootReset').addEventListener('click',()=>{
+  try{localStorage.removeItem(KEY);}catch(e){}
+  location.reload();
+});
+$('#restartBtn').addEventListener('click',()=>{
+  try{localStorage.removeItem(KEY);}catch(e){}
+  location.reload();
+});
+$('#sndBtn').addEventListener('click',()=>{
+  const on=!AudioSys.on;
+  AudioSys.toggle(on);
+  S.sound=on;save();
+  $('#sndBtn').textContent=on?'SND ON':'SND OFF';
+  $('#sndBtn').classList.toggle('on',on);
+});
+$('#helpBtn').addEventListener('click',()=>{openModal($('#helpD'));$('#helpClose').focus({preventScroll:true});});
+$('#helpClose').addEventListener('click',()=>closeModal($('#helpD')));
+$('#reviewBtn').addEventListener('click',openCaseReview);
+$('#endReviewBtn').addEventListener('click',openCaseReview);
+$('#reviewClose').addEventListener('click',()=>closeModal($('#reviewD')));
+$('#recClose').addEventListener('click',closeRecord);
+$('#panelClose').addEventListener('click',closePanel);
+$('#gateChip').addEventListener('click',()=>{
+  const z=currentZone>=0?currentZone:S.solved.findIndex(s=>!s);
+  if(z<0)return;
+  if(!recDone(z)){toast('제어반 잠금 — 이 구역의 기록 '+recCount(z)+'/'+ZONE_RECS[z].length+' 열람됨');return;}
+  $('#gateChip').classList.remove('show');
+  openPanel(z);
+});
+$$('.hotspot').forEach(h=>h.addEventListener('click',()=>openRecord(h.dataset.rec)));
+window.addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  if(caseActive&&caseReviewMode)$('#caseContinue').click();
+  else if($('#reviewD').open)closeModal($('#reviewD'));
+  else if($('#helpD').open)closeModal($('#helpD'));
+  else if(recOpen)closeRecord();
+  else if(panelOpen)closePanel();
+});
+document.addEventListener('visibilitychange',()=>{
+  if(!AudioSys.ctx)return;
+  if(document.hidden)AudioSys.ctx.suspend();
+  else AudioSys.ctx.resume();
+});
+
+/* ---------- 디버그 / QA 훅 (화면에 노출되지 않음) ---------- */
+window.SAFE4={
+  state:()=>JSON.parse(JSON.stringify(S)),
+  p:()=>p,
+  gotoZone:i=>scrollToP(GATES[i]+0.001),
+  goto:pp=>scrollToP(pp),
+  set:(k,v)=>{S[k]=v;updateHUD();},
+  openPanel:i=>openPanel(i),
+  solve:i=>solveZone(i,'debug'),
+  fail:i=>fail(typeof i==='number'?i:0),
+  rec:id=>openRecord(id),
+  end:c=>showEnding(c),
+  cat:r=>catastrophe(r||'pwr')
+};
+
+/* ---------- 초기화 ---------- */
+load();
+if(S.sound===false)AudioSys.on=false;
+$('#sndBtn').textContent=AudioSys.on?'SND ON':'SND OFF';
+$('#sndBtn').classList.toggle('on',AudioSys.on);
+S.recs.forEach(id=>{
+  const hs=document.querySelector('[data-rec="'+id+'"]');
+  if(hs)hs.classList.add('read');
+});
+updateHUD();
+applyCam(0);
+lockScroll(true);
+runBoot();
+requestUpdate();
+</script>
+<script>(()=>{let embedded=false;const apply=()=>{document.documentElement.classList.toggle('gc-fullscreen',embedded||!!document.fullscreenElement);dispatchEvent(new Event('resize'))};addEventListener('message',e=>{if(e.source===parent&&e.origin==='https://game-center-site.beefly1136.workers.dev'&&e.data?.type==='game-center:fullscreen'){embedded=!!e.data.active;apply()}});document.addEventListener('fullscreenchange',apply);apply()})();</script></body>
+</html>

@@ -1,0 +1,2664 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>청소년 성장 & 건강 라이프 시뮬레이션 | 2026 강화중 기술·가정</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-glass: rgba(255, 255, 255, 0.9);
+            --border-glass: rgba(255, 255, 255, 0.75);
+            --text-main: #0f172a;
+            --text-sub: #475569;
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --shadow-card: 0 25px 60px -15px rgba(0, 0, 0, 0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+        body {
+            background: linear-gradient(135deg, #0b0f19 0%, #1e1b4b 50%, #0b0f19 100%);
+            color: var(--text-main);
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            overflow-x: hidden;
+        }
+
+        #game-frame {
+            width: 100%;
+            max-width: 1100px;
+            height: 860px;
+            background: #111;
+            position: relative;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            border: 4px solid rgba(255, 255, 255, 0.25);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #bg-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center;
+            filter: brightness(1.08) contrast(1.05) saturate(1.1);
+            transition: background-image 1s ease-in-out;
+            z-index: 1;
+        }
+
+        #bg-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, rgba(0,0,0,0.01) 0%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.4) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        #top-nav {
+            position: relative;
+            z-index: 30;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chapter-pill {
+            background: linear-gradient(135deg, #4f46e5, #06b6d4);
+            color: #fff;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-icon {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            padding: 8px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .stats-dashboard {
+            position: relative;
+            z-index: 25;
+            margin: 12px 24px 0 24px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(16px);
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-glass);
+            display: flex;
+            justify-content: space-around;
+            gap: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .stat-item { flex: 1; position: relative; }
+        .stat-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 800;
+        }
+        .stat-meta .label { color: #1e293b; display: flex; align-items: center; gap: 6px; }
+        .stat-meta .value { color: #0f172a; font-weight: 900; }
+
+        .progress-track {
+            width: 100%;
+            height: 18px;
+            background: #cbd5e1;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.12);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 50%;
+            border-radius: 10px;
+            transition: width 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+
+        #bar-growth { background: linear-gradient(90deg, #38bdf8, #2563eb); }
+        #bar-health { background: linear-gradient(90deg, #4ade80, #16a34a); }
+
+        #stage-viewport {
+            position: relative;
+            z-index: 10;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 240px;
+            pointer-events: none;
+        }
+
+        #avatar-box { position: relative; transition: transform 0.4s ease; }
+        #avatar-img {
+            max-height: 410px;
+            width: auto;
+            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.4));
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .avatar-bounce { animation: bounceMotion 0.6s ease; }
+        .avatar-shake { animation: shakeMotion 0.5s ease; }
+
+        @keyframes bounceMotion {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-35px) scale(1.05); }
+        }
+        @keyframes shakeMotion {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-15px) rotate(-3deg); }
+            40% { transform: translateX(15px) rotate(3deg); }
+            60% { transform: translateX(-10px); }
+            80% { transform: translateX(10px); }
+        }
+
+        .stat-floating-bubble {
+            position: absolute;
+            font-size: 22px;
+            font-weight: 900;
+            pointer-events: none;
+            z-index: 100;
+            animation: floatUpAnim 1.4s forwards ease-out;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.35);
+        }
+        @keyframes floatUpAnim {
+            0% { opacity: 0; transform: translateY(10px) scale(0.8); }
+            20% { opacity: 1; transform: translateY(-10px) scale(1.2); }
+            80% { opacity: 1; transform: translateY(-40px) scale(1); }
+            100% { opacity: 0; transform: translateY(-60px) scale(0.9); }
+        }
+
+        #interaction-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 48px);
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(20px);
+            padding: 22px 28px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-glass);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+            z-index: 30;
+        }
+
+        #question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        #question-badge {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--primary);
+            background: #e0e7ff;
+            padding: 4px 12px;
+            border-radius: 12px;
+        }
+
+        #step-indicator {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-sub);
+        }
+
+        #question-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.45;
+            margin-bottom: 16px;
+        }
+
+        #options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .opt-btn {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e293b;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+        .opt-btn:hover:not([disabled]) {
+            border-color: var(--primary-light);
+            background: #f8fafc;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(67, 97, 238, 0.15);
+        }
+        .opt-btn:active:not([disabled]) { transform: scale(0.98); }
+        .opt-btn[disabled] {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .opt-btn.selected-opt {
+            border-color: var(--primary);
+            background: #eef2ff !important;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            opacity: 1 !important;
+        }
+        .opt-btn .num-tag {
+            background: #f1f5f9;
+            color: #64748b;
+            border-radius: 8px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+            font-weight: 800;
+        }
+
+        #feedback-toast {
+            position: absolute;
+            top: 95px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            width: 90%;
+            max-width: 680px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            border: 2px solid #38bdf8;
+            color: #fff;
+            padding: 16px 22px;
+            border-radius: var(--radius-md);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+        #feedback-toast.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+        #feedback-icon { font-size: 28px; }
+        #feedback-body { flex: 1; }
+        #feedback-title { font-size: 15px; font-weight: 800; color: #38bdf8; margin-bottom: 4px; }
+        #feedback-desc { font-size: 14px; line-height: 1.5; color: #e2e8f0; font-weight: 600; }
+
+        #transition-modal {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.82);
+            backdrop-filter: blur(16px);
+            z-index: 120;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+            transition: opacity 0.4s ease;
+        }
+        .trans-card {
+            background: rgba(255, 255, 255, 0.96);
+            padding: 44px 56px;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+            max-width: 640px;
+        }
+        .trans-card h2 { font-size: 17px; color: var(--primary); font-weight: 800; margin-bottom: 8px; letter-spacing: 1px; }
+        .trans-card h1 { font-size: 42px; color: #0f172a; font-weight: 900; margin-bottom: 16px; }
+        .trans-card p { font-size: 17px; color: #475569; font-weight: 600; line-height: 1.6; margin-bottom: 28px; }
+        .btn-start-stage {
+            padding: 14px 40px;
+            font-size: 18px;
+            font-weight: 900;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
+            transition: 0.2s;
+        }
+        .btn-start-stage:hover { background: var(--primary-light); transform: translateY(-2px); }
+
+        #minigame-modal {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(16px);
+            z-index: 150;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .minigame-container {
+            background: #ffffff;
+            width: 100%;
+            max-width: 800px;
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        .minigame-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+        }
+        .minigame-title { font-size: 21px; font-weight: 900; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+        .minigame-timer { font-size: 17px; font-weight: 900; color: var(--danger); background: #fee2e2; padding: 4px 14px; border-radius: 12px; }
+        .minigame-canvas-box {
+            width: 740px;
+            height: 400px;
+            background: #f8fafc;
+            border-radius: var(--radius-md);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #e2e8f0;
+        }
+        canvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
+        .minigame-footer {
+            margin-top: 14px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .minigame-desc { font-size: 14px; font-weight: 700; color: #64748b; }
+        .btn-start-game {
+            background: linear-gradient(135deg, #4361ee, #3b82f6);
+            color: #fff;
+            border: none;
+            padding: 11px 28px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 14px rgba(67, 97, 238, 0.35);
+        }
+        .btn-start-game:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(67, 97, 238, 0.45); }
+
+        #report-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(18px);
+            z-index: 200;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+        .report-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 820px;
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .report-header { text-align: center; margin-bottom: 24px; }
+        .report-badge {
+            display: inline-block;
+            background: #fef3c7;
+            color: #b45309;
+            font-size: 13px;
+            font-weight: 800;
+            padding: 4px 14px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+        }
+        .report-title { font-size: 34px; font-weight: 900; color: #0f172a; margin-bottom: 8px; }
+        .report-subtitle { font-size: 16px; color: #64748b; font-weight: 600; }
+        
+        .score-summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .score-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-md);
+            padding: 20px;
+            text-align: center;
+        }
+        .score-box-num { font-size: 40px; font-weight: 900; color: var(--primary); margin: 4px 0; }
+        .score-box-label { font-size: 14px; font-weight: 800; color: #64748b; }
+
+        .domain-breakdown {
+            background: #f1f5f9;
+            border-radius: var(--radius-md);
+            padding: 18px 24px;
+            margin-bottom: 24px;
+        }
+        .domain-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .report-advice {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #1e3a8a;
+            margin-bottom: 28px;
+            font-weight: 600;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+        }
+        .btn-primary-action {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 14px 32px;
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-primary-action:hover { background: var(--primary-light); transform: translateY(-2px); }
+        .btn-secondary-action {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            padding: 14px 24px;
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-secondary-action:hover { background: #e2e8f0; }
+
+        
+        #report-form-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(18px);
+            z-index: 190;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .form-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 820px;
+            border-radius: var(--radius-lg);
+            padding: 34px 40px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .form-header { text-align: center; margin-bottom: 22px; }
+        .form-badge {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #3730a3;
+            font-size: 13px;
+            font-weight: 800;
+            padding: 4px 14px;
+            border-radius: 20px;
+            margin-bottom: 6px;
+        }
+        .form-title { font-size: 28px; font-weight: 900; color: #0f172a; margin-bottom: 6px; }
+        .form-desc { font-size: 15px; color: #64748b; font-weight: 600; }
+        .student-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .form-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; text-align: left; }
+        .form-field label { font-size: 14px; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 6px; }
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            outline: none;
+            transition: 0.2s;
+        }
+        .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2); }
+        .form-textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: 0.2s;
+            resize: vertical;
+            line-height: 1.6;
+            min-height: 90px;
+        }
+        .form-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2); }
+
+        .printable-student-meta {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0 20px 0;
+        }
+        .printable-student-meta th, .printable-student-meta td {
+            border: 1px solid #cbd5e1;
+            padding: 10px 14px;
+            font-size: 14px;
+            text-align: left;
+        }
+        .printable-student-meta th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 800;
+            width: 25%;
+        }
+        .printable-student-meta td {
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .student-writing-block {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 18px 22px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .writing-header {
+            font-size: 15px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .writing-content {
+            font-size: 14.5px;
+            line-height: 1.7;
+            color: #334155;
+            white-space: pre-wrap;
+            background: #ffffff;
+            padding: 14px 18px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        @media print {
+            body {
+                background: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            #game-frame {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: auto !important;
+                min-height: auto !important;
+                overflow: visible !important;
+                border: none !important;
+                box-shadow: none !important;
+                background: transparent !important;
+                display: block !important;
+                position: static !important;
+            }
+            #bg-layer, #bg-overlay, #top-nav, .stats-dashboard, #stage-viewport, #interaction-panel, #feedback-toast, #transition-modal, #minigame-modal, #crisis-screen, #report-form-screen {
+                display: none !important;
+            }
+            #report-screen {
+                position: static !important;
+                width: 100% !important;
+                height: auto !important;
+                background: #ffffff !important;
+                backdrop-filter: none !important;
+                padding: 0 !important;
+                display: block !important;
+                box-shadow: none !important;
+            }
+            .report-card {
+                width: 100% !important;
+                max-width: 100% !important;
+                max-height: none !important;
+                overflow: visible !important;
+                padding: 10px !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            .report-actions {
+                display: none !important;
+            }
+        }
+
+        #crisis-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(185, 28, 28, 0.94);
+            backdrop-filter: blur(16px);
+            z-index: 250;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+        .crisis-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 600px;
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+        }
+        .crisis-icon { font-size: 64px; margin-bottom: 12px; }
+        .crisis-title { font-size: 32px; font-weight: 900; color: #b91c1c; margin-bottom: 12px; }
+        .crisis-desc { font-size: 16px; line-height: 1.6; color: #4b5563; margin-bottom: 24px; font-weight: 600; }
+
+        @media (max-width: 900px) {
+            #game-frame { height: 95vh; }
+            #options-grid { grid-template-columns: 1fr; }
+            .stats-dashboard { margin: 8px 16px 0 16px; padding: 10px 16px; }
+            #avatar-img { max-height: 300px; }
+            #stage-viewport { padding-bottom: 260px; }
+        }
+    </style>
+<link rel="preload" as="image" href="assets/fast-1fdc344037b90b69584083cd.webp" fetchpriority="high"><style id="gc-fullscreen-only">
+html.gc-fullscreen,html.gc-fullscreen body{width:100%;min-height:100%;min-height:100dvh;margin:0!important;padding:0!important;box-sizing:border-box}
+html.gc-fullscreen #app,html.gc-fullscreen #root{width:100%;min-height:100dvh}
+html.gc-fullscreen .wrapper,html.gc-fullscreen .dashboard,html.gc-fullscreen main{max-width:none}
+html.gc-fullscreen .room-container{max-width:none;max-height:none}
+html.gc-fullscreen .console-container{max-width:none;width:100%;min-height:100dvh;border-radius:0}
+html.gc-fullscreen #game-app-viewport{height:100dvh}
+html.gc-fullscreen #game-frame{width:100%;max-width:none;height:100dvh;min-height:0;border:0;border-radius:0}
+html.gc-fullscreen #stage-viewport{min-height:0;padding-bottom:var(--gc-panel-space,240px)}
+html.gc-fullscreen #avatar-img{max-height:min(410px,44dvh)}
+html.gc-fullscreen #interaction-panel{max-height:55dvh;overflow-y:auto}
+@media(max-width:900px){html.gc-fullscreen #game-frame{height:100dvh}html.gc-fullscreen #interaction-panel{bottom:8px;width:calc(100% - 16px);padding:12px}html.gc-fullscreen #top-nav{padding:8px;gap:8px;flex-wrap:wrap}}
+</style><link rel="preload" as="image" href="assets/fast-6eb8f9581efc731a4fd4a6b4.webp" fetchpriority="high"><script>/* Scene images start on demand. After play begins, warm one image at a time. */
+window.gcScenes = (() => {
+  const entries = new Map();
+  let playing = false, busy = false, timer;
+  function start(image, priority = 'high') {
+    const entry = entries.get(image);
+    if (!entry || entry.started) return image;
+    entry.started = true;
+    image.fetchPriority = priority;
+    image.src = entry.src;
+    return image;
+  }
+  function pump() {
+    if (!playing || busy || document.hidden) return;
+    const next = [...entries].find(([, entry]) => !entry.started);
+    if (!next) return;
+    busy = true;
+    const image = next[0];
+    const done = () => {
+      image.removeEventListener('load', done);
+      image.removeEventListener('error', done);
+      busy = false;
+      timer = setTimeout(pump, 700);
+    };
+    image.addEventListener('load', done);
+    image.addEventListener('error', done);
+    start(image, 'low');
+  }
+  function begin() {
+    if (playing) return;
+    playing = true;
+    timer = setTimeout(pump, 3000);
+  }
+  document.addEventListener('pointerdown', begin, { once: true, passive: true });
+  document.addEventListener('keydown', begin, { once: true });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && playing) { clearTimeout(timer); timer = setTimeout(pump, 700); } });
+  return {
+    image(src, onload) {
+      const image = new Image();
+      if (onload) image.onload = onload;
+      entries.set(image, { src, started: false });
+      return image;
+    },
+    need: start
+  };
+})();
+</script></head>
+<body>
+
+<div id="game-frame">
+    <div id="bg-layer"></div>
+    <div id="bg-overlay"></div>
+
+    <div id="top-nav">
+        <div class="chapter-pill" id="chapter-badge">
+            <span>🌅</span>
+            <span id="chapter-title">Chapter 1. 활기찬 아침</span>
+        </div>
+        <div class="header-controls">
+            <button class="btn-icon" id="btn-back" onclick="handleBack()" style="display: none;">
+                <span>◀</span> 되돌리기
+            </button>
+            <button class="btn-icon" id="btn-audio" onclick="toggleAudio()">
+                <span id="audio-icon">🔊</span> 사운드 ON
+            </button>
+        </div>
+    </div>
+
+    <div class="stats-dashboard">
+        <div class="stat-item">
+            <div class="stat-meta">
+                <span class="label">📈 청소년 성장 정도</span>
+                <span class="value" id="val-growth">50%</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-bar" id="bar-growth" style="width: 50%;"></div>
+            </div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-meta">
+                <span class="label">🥗 신체 면역·건강도</span>
+                <span class="value" id="val-health">50%</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-bar" id="bar-health" style="width: 50%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="stage-viewport">
+        <div id="avatar-box">
+            <img id="avatar-img" src="assets/fast-1fdc344037b90b69584083cd.webp" alt="성장 아바타">
+        </div>
+    </div>
+
+    <div id="interaction-panel">
+        <div id="question-header">
+            <div id="question-badge">청소년 생활습관 딜레마</div>
+            <div id="step-indicator">문제 1 / 20</div>
+        </div>
+        <div id="question-title">질문을 불러오는 중입니다...</div>
+        <div id="options-grid"></div>
+    </div>
+
+    <div id="feedback-toast">
+        <div id="feedback-icon">💡</div>
+        <div id="feedback-body">
+            <div id="feedback-title">선생님의 교과 쏙쏙 코멘트</div>
+            <div id="feedback-desc">해설 내용이 여기에 표시됩니다.</div>
+        </div>
+    </div>
+
+    <div id="transition-modal">
+        <div class="trans-card">
+            <h2 id="trans-tag">CHAPTER START</h2>
+            <h1 id="trans-title">활기찬 아침 시간</h1>
+            <p id="trans-desc">하루의 시작! 올바른 기상과 균형 잡힌 아침 식단으로 활기찬 하루를 열어보세요.</p>
+            <button class="btn-start-stage" onclick="startChapter()">🚀 게임 시작하기 ➔</button>
+        </div>
+    </div>
+
+    <div id="minigame-modal">
+        <div class="minigame-container">
+            <div class="minigame-header">
+                <div class="minigame-title" id="mg-title">🍱 [미니게임] 식품구성자전거 식판 채우기</div>
+                <div class="minigame-timer" id="mg-timer">남은시간: 20s</div>
+            </div>
+            <div class="minigame-canvas-box">
+                <canvas id="mg-canvas" width="740" height="400"></canvas>
+            </div>
+            <div class="minigame-footer">
+                <div class="minigame-desc" id="mg-desc">마우스를 좌우로 움직여 5대 영양소를 골고루 식판에 담으세요!</div>
+                <button class="btn-start-game" id="btn-mg-action" onclick="handleMiniGameAction()">게임 시작하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- [1단계] 학생 성찰 & 실천 계획 작성 화면 -->
+    <div id="report-form-screen">
+        <div class="form-card">
+            <div class="form-header">
+                <div class="form-badge">2026 강화중 1학년 1학기 기술·가정 수행 연계</div>
+                <h1 class="form-title">📝 나의 성장·건강 활동 보고서 작성</h1>
+                <p class="form-desc">오늘 20문항의 생활습관 딜레마를 모두 마쳤습니다! 느낀 점과 앞으로의 실천 다짐을 작성해 나만의 포트폴리오를 완성하세요.</p>
+            </div>
+
+            <div class="student-info-grid">
+                <div class="form-field">
+                    <label>🏫 학년 / 반 / 번호</label>
+                    <input type="text" id="inp-student-id" class="form-input" placeholder="예) 1학년 1반 15번" value="1학년 1반 ">
+                </div>
+                <div class="form-field">
+                    <label>👤 학생 성명</label>
+                    <input type="text" id="inp-student-name" class="form-input" placeholder="예) 김강화">
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label>💭 1. 오늘 시뮬레이션 게임을 진행하며 느낀 점 (성찰 기록)</label>
+                <textarea id="inp-reflection" class="form-textarea" placeholder="예) 평소 불규칙한 식습관과 늦은 수면이 성장에 얼마나 큰 영향을 미치는지 깨달았습니다."></textarea>
+            </div>
+
+            <div class="form-field">
+                <label>🎯 2. 청소년기 건강한 성장을 위한 나의 올바른 생활 실천 다짐</label>
+                <textarea id="inp-action-plan" class="form-textarea" placeholder="예) 아침밥 챙겨먹기, 하루 30분 줄넘기하기, 밤 11시 전 스마트폰 끄고 잠자리에 들기"></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 14px; margin-top: 10px;">
+                <button class="btn-primary-action" onclick="submitStudentReport()">🌟 나만의 맞춤형 활동 보고서 출력하기 ➔</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- [2단계] 학생 작성 내용이 반영된 최종 종합 보고서 화면 -->
+    <div id="report-screen">
+        <div class="report-card">
+            <div class="report-header">
+                <div class="report-badge">2026 강화중학교 1학년 1학기 기술·가정 교과 포트폴리오</div>
+                <h1 class="report-title" style="font-size: 28px; margin-top: 6px;">[청소년기 성장과 건강 라이프 시뮬레이션 종합 평가서]</h1>
+                <div style="margin: 10px 0;"><span id="rep-title" style="background: #e0f2fe; color: #0284c7; font-size: 17px; font-weight: 800; padding: 6px 18px; border-radius: 20px; border: 1px solid #bae6fd;">[완벽한 갓생 청소년의 정석]</span></div>
+                <p class="report-subtitle">청소년기 신체 발달 특성과 올바른 식습관·운동·수면 실천을 위한 종합 활동 결과물입니다.</p>
+            </div>
+
+            <!-- 학생 인적사항 테이블 -->
+            <table class="printable-student-meta">
+                <tr>
+                    <th>소속 / 학번</th>
+                    <td id="out-student-id">1학년 1반</td>
+                    <th>학생 성명</th>
+                    <td id="out-student-name">강화중 학생</td>
+                </tr>
+                <tr>
+                    <th>평가 일시</th>
+                    <td id="out-date">2026. 09. 22</td>
+                    <th>담당 교사 확인</th>
+                    <td>강화중학교 기술·가정과 (인)</td>
+                </tr>
+            </table>
+
+            <div class="score-summary-grid">
+                <div class="score-box">
+                    <div class="score-box-label">📈 최종 성장 발달 수치</div>
+                    <div class="score-box-num" id="rep-growth">95%</div>
+                </div>
+                <div class="score-box">
+                    <div class="score-box-label">🥗 최종 신체 면역·건강도</div>
+                    <div class="score-box-num" id="rep-health" style="color: var(--success);">90%</div>
+                </div>
+            </div>
+
+            <div class="domain-breakdown">
+                <div class="domain-row">
+                    <span>🍱 균형 식생활 영역 (식품구성자전거 밸런스)</span>
+                    <span id="rep-domain-diet" style="color: var(--primary);">우수 (92점)</span>
+                </div>
+                <div class="domain-row">
+                    <span>🏃 신체활동 & 바른자세 영역 (성장판 자극)</span>
+                    <span id="rep-domain-act" style="color: var(--success);">매우 우수 (96점)</span>
+                </div>
+                <div class="domain-row">
+                    <span>🌙 수면 & 디지털 디톡스 영역 (멜라토닌/수면환경)</span>
+                    <span id="rep-domain-sleep" style="color: #8b5cf6);">우수 (88점)</span>
+                </div>
+            </div>
+
+            <div class="report-advice" id="rep-advice">
+                균형 잡힌 영양 섭취와 규칙적인 수면 습관으로 청소년기 성장판과 뇌 발달에 최적의 컨디션을 유지하고 있습니다.
+            </div>
+
+            <!-- 학생 작성 내용 영역 -->
+            <div class="student-writing-block">
+                <div class="writing-header">💭 1. 시뮬레이션 활동을 통해 느낀 점 (성찰 기록)</div>
+                <div class="writing-content" id="out-reflection">작성한 내용이 없습니다.</div>
+            </div>
+
+            <div class="student-writing-block">
+                <div class="writing-header">🎯 2. 청소년기 건강한 성장을 위한 나의 올바른 생활 실천 다짐</div>
+                <div class="writing-content" id="out-action-plan">작성한 내용이 없습니다.</div>
+            </div>
+
+            <div class="report-actions">
+                <button class="btn-primary-action" style="background: #e11d48;" onclick="downloadReportPDF()">📄 보고서 PDF 다운로드</button>
+                <button class="btn-primary-action" onclick="window.print()">🖨️ 인쇄하기</button>
+                <button class="btn-secondary-action" onclick="editStudentReport()">✏️ 작성 내용 수정</button>
+                <button class="btn-secondary-action" onclick="location.reload()">🔄 다시 시작하기</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="crisis-screen">
+        <div class="crisis-card">
+            <div class="crisis-icon">⚠️</div>
+            <h1 class="crisis-title" id="crisis-reason">성장 발달 위기 발생!</h1>
+            <p class="crisis-desc" id="crisis-msg">
+                불균형한 식습관이나 수면 부족으로 인해 청소년기 신체 밸런스가 심각하게 무너졌습니다.
+            </p>
+            <div style="margin-bottom: 24px; font-weight: 800; color: #991b1b;" id="crisis-stat-info">
+                현재 성장도: 15% | 건강도: 10%
+            </div>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button class="btn-primary-action" onclick="reviveFromCrisis()">이전 선택으로 되돌아가기</button>
+                <button class="btn-secondary-action" onclick="location.reload()">처음부터 다시하기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+/* =========================================================
+   1. 오디오 신디사이저 엔진 (Web Audio API)
+========================================================= */
+class SoundEngine {
+    constructor() {
+        this.ctx = null;
+        this.enabled = true;
+        this.bgmPlaying = false;
+        this.bgmTimer = null;
+        this.bgmStep = 0;
+        this.melody = [
+            523.25, 659.25, 783.99, 659.25, 523.25, 783.99, 880.00, 783.99,
+            392.00, 493.88, 587.33, 493.88, 392.00, 587.33, 659.25, 587.33,
+            440.00, 523.25, 659.25, 523.25, 440.00, 659.25, 783.99, 659.25,
+            349.23, 440.00, 523.25, 440.00, 392.00, 523.25, 587.33, 523.25
+        ];
+        this.bass = [130.81, 98.00, 110.00, 87.31];
+    }
+    init() {
+        if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+    }
+    startBGM() {
+        if (!this.enabled || this.bgmPlaying) return;
+        try {
+            this.init();
+            if (!this.ctx) return;
+            this.bgmPlaying = true;
+            this.bgmStep = 0;
+            if (this.bgmTimer) clearInterval(this.bgmTimer);
+            this.bgmTimer = setInterval(() => {
+                if (!this.bgmPlaying || !this.enabled || !this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    const freq = this.melody[this.bgmStep];
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now);
+                    gain.gain.setValueAtTime(0.04, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+
+                    if (this.bgmStep % 8 === 0) {
+                        const bFreq = this.bass[Math.floor(this.bgmStep / 8)];
+                        const bOsc = this.ctx.createOscillator();
+                        const bGain = this.ctx.createGain();
+                        bOsc.type = 'sine';
+                        bOsc.frequency.setValueAtTime(bFreq, now);
+                        bGain.gain.setValueAtTime(0.05, now);
+                        bGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                        bOsc.connect(bGain);
+                        bGain.connect(this.ctx.destination);
+                        bOsc.start(now);
+                        bOsc.stop(now + 0.5);
+                    }
+                    this.bgmStep = (this.bgmStep + 1) % this.melody.length;
+                } catch(e) {}
+            }, 220);
+        } catch(e) {}
+    }
+    stopBGM() {
+        this.bgmPlaying = false;
+        if (this.bgmTimer) { clearInterval(this.bgmTimer); this.bgmTimer = null; }
+    }
+    playClick() {
+        if (!this.enabled) return;
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.08);
+    }
+    playPositive() {
+        if (!this.enabled) return;
+        this.init();
+        const notes = [523.25, 659.25, 783.99];
+        notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            const startTime = this.ctx.currentTime + (idx * 0.07);
+            gain.gain.setValueAtTime(0.15, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.2);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(startTime);
+            osc.stop(startTime + 0.2);
+        });
+    }
+    playNegative() {
+        if (!this.enabled) return;
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(110, this.ctx.currentTime + 0.25);
+        gain.gain.setValueAtTime(0.16, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.25);
+    }
+    playJump() {
+        if (!this.enabled) return;
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(750, this.ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.12);
+    }
+    playPop() {
+        if (!this.enabled) return;
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime + 0.06);
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.06);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.06);
+    }
+    playFanfare() {
+        if (!this.enabled) return;
+        this.init();
+        const chord = [523.25, 659.25, 783.99, 1046.50];
+        chord.forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            const t = this.ctx.currentTime + (i * 0.1);
+            gain.gain.setValueAtTime(0.2, t);
+            gain.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.5);
+        });
+    }
+}
+const sound = new SoundEngine();
+
+function toggleAudio() {
+    sound.enabled = !sound.enabled;
+    if (sound.enabled) sound.startBGM(); else sound.stopBGM();
+    document.getElementById('audio-icon').innerText = sound.enabled ? '🔊' : '🔇';
+    document.getElementById('btn-audio').innerHTML = `<span id="audio-icon">${sound.enabled ? '🔊' : '🔇'}</span> 사운드 ${sound.enabled ? 'ON' : 'OFF'}`;
+}
+
+/* =========================================================
+   2. 미니게임용 그래픽 에셋 및 실시간 누끼(투명화) 엔진
+========================================================= */
+const bgCafeteria = gcScenes.image("assets/fast-3ffc2ddb82d815ff951db240.webp");
+const bgPlayground = gcScenes.image("assets/fast-8ce743c808e3b1a6f63bd0cb.webp");
+const bgBedroom = gcScenes.image("assets/fast-5d9e39e748205766cf4f51a0.webp");
+
+const rawPlate = new Image(); rawPlate.src = "assets/fast-80a21a1fcbf36dbaaeb67b40.webp";
+const rawBed = new Image(); rawBed.src = "assets/fast-be593a09e8a366fbc19684bf.webp";
+const assetPhone = new Image(); assetPhone.src = "assets/fast-98bf1d14398252d2f328b257.webp";
+const rawRopeKid = new Image(); rawRopeKid.src = "assets/fast-59084770c3d9a8ee9aa1c93e.webp";
+let transparentRopeKid = null;
+
+// 캐릭터 아바타 이미지들 (투명 PNG)
+const avatarNormal = new Image(); avatarNormal.src = "assets/fast-1fdc344037b90b69584083cd.webp";
+const avatarPerfect = new Image(); avatarPerfect.src = "assets/fast-88dfcc508cc47dc94a3516c7.webp";
+
+// 실시간 흰색 배경 투명화(누끼) 캔버스 캐시
+let transparentPlate = null;
+let transparentBed = null;
+
+function createTransparentCanvas(img, threshold = 230) {
+    if (!img || !img.complete || img.naturalWidth === 0) return null;
+    const c = document.createElement('canvas');
+    const w = img.naturalWidth;
+    const h = img.naturalHeight;
+    c.width = w;
+    c.height = h;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    try {
+        const imgData = ctx.getImageData(0, 0, w, h);
+        const d = imgData.data;
+        const totalPixels = w * h;
+        const visited = new Uint8Array(totalPixels);
+        const queue = new Int32Array(totalPixels);
+        let qHead = 0, qTail = 0;
+
+        function isBg(idx) {
+            const pi = idx * 4;
+            return (d[pi] > threshold && d[pi+1] > threshold && d[pi+2] > threshold) || d[pi+3] < 20;
+        }
+
+        for (let x = 0; x < w; x++) {
+            const top = x;
+            const btm = (h - 1) * w + x;
+            if (!visited[top] && isBg(top)) { visited[top] = 1; queue[qTail++] = top; }
+            if (!visited[btm] && isBg(btm)) { visited[btm] = 1; queue[qTail++] = btm; }
+        }
+        for (let y = 0; y < h; y++) {
+            const lft = y * w;
+            const rgt = y * w + (w - 1);
+            if (!visited[lft] && isBg(lft)) { visited[lft] = 1; queue[qTail++] = lft; }
+            if (!visited[rgt] && isBg(rgt)) { visited[rgt] = 1; queue[qTail++] = rgt; }
+        }
+
+        const checkY = Math.floor(h * 0.15);
+        const checkX = Math.floor(w * 0.5);
+        const midIdx = checkY * w + checkX;
+        if (!visited[midIdx] && isBg(midIdx)) {
+            visited[midIdx] = 1;
+            queue[qTail++] = midIdx;
+        }
+
+        while (qHead < qTail) {
+            const pos = queue[qHead++];
+            const cx = pos % w;
+            const cy = (pos / w) | 0;
+            d[pos * 4 + 3] = 0;
+
+            if (cx + 1 < w) {
+                const np = pos + 1;
+                if (!visited[np] && isBg(np)) { visited[np] = 1; queue[qTail++] = np; }
+            }
+            if (cx - 1 >= 0) {
+                const np = pos - 1;
+                if (!visited[np] && isBg(np)) { visited[np] = 1; queue[qTail++] = np; }
+            }
+            if (cy + 1 < h) {
+                const np = pos + w;
+                if (!visited[np] && isBg(np)) { visited[np] = 1; queue[qTail++] = np; }
+            }
+            if (cy - 1 >= 0) {
+                const np = pos - w;
+                if (!visited[np] && isBg(np)) { visited[np] = 1; queue[qTail++] = np; }
+            }
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+        return c;
+    } catch(e) {
+        return img;
+    }
+}
+
+rawPlate.onload = () => { transparentPlate = createTransparentCanvas(rawPlate, 230); };
+rawBed.onload = () => { transparentBed = createTransparentCanvas(rawBed, 230); };
+rawRopeKid.onload = () => { transparentRopeKid = createTransparentCanvas(rawRopeKid, 232); };
+
+/* =========================================================
+   3. 20문항 상세 데이터셋 (기술·가정 교과 연계 4개 챕터)
+========================================================= */
+const chapters = [
+    {
+        id: 0,
+        title: "Chapter 1. 활기찬 아침 (07:00 ~ 08:30)",
+        tag: "🌅 CHAPTER 1",
+        bg: "assets/fast-6eb8f9581efc731a4fd4a6b4.webp",
+        desc: "상쾌한 아침의 시작! 올바른 기상 습관, 영양 만점 식단, 날씨에 맞는 의생활로 하루를 준비해 보세요.",
+        questions: [
+            {
+                q: "1. 띠링띠링! 아침 7시 기상 알람이 울립니다. 어떻게 일어날까요?",
+                opts: [
+                    { text: "알람 소리에 기지개를 켜며 가볍게 스트레칭 후 일어난다.", g: 10, h: 10, cat: "act", tip: "기상 직후 스트레칭은 굳어있던 척추와 관절을 부드럽게 이완시키고 혈액순환을 촉진합니다!" },
+                    { text: "5분만 더... 스누즈 알람을 3번 누르며 침대에서 뒹군다.", g: 0, h: -5, cat: "sleep", tip: "반복적인 스누즈는 '수면 관성'을 유발하여 뇌가 완전히 깨어나지 못해 오전 내내 멍해집니다." },
+                    { text: "일어나자마자 스마트폰 숏폼 영상을 30분간 누워서 본다.", g: -10, h: -15, cat: "sleep", tip: "기상 직후 스마트폰 시청은 뇌에 도파민 피로를 축적하고 아침 시간을 허비하게 만듭니다." },
+                    { text: "일어나 미온수 한 잔을 마시며 상쾌하게 몸을 깨운다.", g: 15, h: 15, cat: "diet", tip: "공복의 따뜻한 물은 밤새 빠져나간 수분을 채우고 장운동과 신진대사를 깨워줍니다!" }
+                ]
+            },
+            {
+                q: "2. 오늘 아침 식사는 어떻게 챙겨 먹을까요?",
+                opts: [
+                    { text: "현미밥, 된장국, 달걀말이, 채소 반찬의 균형 잡힌 한식", g: 15, h: 15, cat: "diet", tip: "복합 탄수화물과 양질의 단백질, 비타민은 오전 수업 집중력과 키 성장의 핵심입니다!" },
+                    { text: "시간이 없으니 사과 한 쪽과 따뜻한 우유 한 컵", g: 10, h: 10, cat: "diet", tip: "가벼운 과일과 우유도 뇌에 포도당과 칼슘을 공급하여 빈속 등교보다 훨씬 훌륭합니다." },
+                    { text: "잠을 더 자기 위해 아침을 굶고 등교한다.", g: -15, h: -20, cat: "diet", tip: "아침을 결식하면 뇌 활성화가 저하되고, 점심 폭식을 유발해 소아청소년 비만 위험이 커집니다." },
+                    { text: "등굣길 편의점에서 매운 컵라면과 에너지 드링크 흡입", g: -10, h: -25, cat: "diet", tip: "나트륨과 고카페인 폭탄! 칼슘 흡수를 방해하고 심장에 무리를 주어 성장에 악영향을 줍니다." }
+                ]
+            },
+            {
+                q: "3. 환절기 일교차가 큰 오늘, 어떤 옷차림으로 등교할까요?",
+                opts: [
+                    { text: "얇은 옷을 여러 겹 겹쳐 입고 겉옷(가디건/패딩)을 챙긴다.", g: 10, h: 10, cat: "act", tip: "체온 조절 능력이 미숙한 청소년기에는 레이어드 룩이 면역력을 지키는 최고의 의생활입니다." },
+                    { text: "유행을 위해 추운 날씨에도 얇은 발목양말과 얇은 옷만 입는다.", g: -5, h: -15, cat: "act", tip: "한기 노출은 혈관을 수축시키고 근육을 긴장시켜 감기 등 호흡기 질환에 취약해집니다." },
+                    { text: "어제 세탁하여 건조된 깨끗하고 통풍 잘되는 교복을 착용한다.", g: 10, h: 5, cat: "act", tip: "청결한 의복 착용은 청소년기 땀샘 분비물로 인한 피부 질환을 예방하고 자신감을 줍니다." },
+                    { text: "땀 냄새가 밴 어제 입었던 체육복을 그대로 입고 나선다.", g: -10, h: -10, cat: "act", tip: "땀과 세균이 번식한 옷은 피부 트러블과 불쾌한 냄새의 원인이 됩니다." }
+                ]
+            },
+            {
+                q: "4. 학교까지 거리는 약 1.2km입니다. 어떻게 등교할까요?",
+                opts: [
+                    { text: "친구와 도란도란 이야기하며 15분간 빠른 걸음으로 걷기", g: 15, h: 15, cat: "act", tip: "아침 유산소 걷기 운동은 성장판을 자극하고 기분을 좋게 하는 세로토닌을 분비합니다!" },
+                    { text: "부모님 차 뒷좌석에 누워 교문 바로 앞까지 편하게 이동", g: 0, h: 0, cat: "act", tip: "편리하지만 하루 기초 신체 활동량이 부족해질 수 있으니 계단 이용 등으로 보충해 보세요." },
+                    { text: "지각할 것 같아 무거운 가방을 메고 숨이 턱까지 차도록 질주", g: -5, h: -5, cat: "act", tip: "준비운동 없는 갑작스러운 전력 질주는 발목 염좌와 관절 부상 위험이 있습니다." },
+                    { text: "안전모를 착용하고 안전 수칙을 지키며 자전거로 이동", g: 15, h: 15, cat: "act", tip: "자전거 타기는 훌륭한 하체 근력 운동입니다. 헬멧 등 보호장구 착용은 필수 안전 수칙입니다!" }
+                ]
+            },
+            {
+                q: "5. 등교 시 책가방 메는 방법과 척추 건강 관리법은?",
+                opts: [
+                    { text: "불필요한 책은 사물함에 두고, 양쪽 어깨끈 길이를 맞춰 메기", g: 15, h: 10, cat: "act", tip: "가방 무게는 체중의 10% 이내가 적당하며, 양쪽으로 메야 척추측만증을 예방할 수 있습니다!" },
+                    { text: "멋있어 보이려고 무거운 가방을 한쪽 어깨로만 비스듬히 메기", g: -15, h: -15, cat: "act", tip: "한쪽 어깨에 하중이 집중되면 어깨 비대칭, 척추 변형, 만성 근육통이 유발됩니다." },
+                    { text: "가방 끈을 너무 길게 늘어뜨려 엉덩이 아래까지 처지게 메기", g: -10, h: -10, cat: "act", tip: "무게중심이 뒤로 쏠려 보상작용으로 목과 허리가 앞으로 굽어져 거북목을 유발합니다." },
+                    { text: "가방을 등에 최대한 밀착시키고 가슴 버클을 채워 하중 분산", g: 15, h: 15, cat: "act", tip: "가방이 등에 밀착될수록 척추에 가해지는 부담이 줄어들어 바른 자세 형성에 좋습니다." }
+                ]
+            }
+        ],
+        hasMiniGame: true,
+        miniGameId: "diet"
+    },
+    {
+        id: 1,
+        title: "Chapter 2. 점심과 학교생활 (12:00 ~ 13:30)",
+        tag: "🏫 CHAPTER 2",
+        bg: "assets/fast-429dae3814f1599ea91aa504.webp",
+        desc: "친구들과 함께하는 즐거운 학교생활! 균형 급식, 올바른 식사 예절, 성장판을 자극하는 점심시간 신체활동을 실천해 보세요.",
+        questions: [
+            {
+                q: "6. 기다리던 급식 시간! 배식대 앞에서 당신의 선택은?",
+                opts: [
+                    { text: "조리사님께 인사하고 고기, 채소, 국을 골고루 배식받는다.", g: 15, h: 15, cat: "diet", tip: "식품구성자전거의 5대 식품군을 골고루 섭취해야 균형 잡힌 세포 성장과 면역력이 유지됩니다!" },
+                    { text: "좋아하는 소시지/고기 반찬만 산더미로 받고 나물은 건너뛴다.", g: -10, h: -15, cat: "diet", tip: "가공육 과다는 포화지방과 나트륨 섭취를 늘리고, 무기질과 식이섬유 결핍을 부릅니다." },
+                    { text: "다이어트한다고 밥은 2숟가락만 뜨고 국물만 마신다.", g: -15, h: -15, cat: "diet", tip: "성장기 무리한 절식은 뼈 밀도를 낮추고 호르몬 불균형을 초래해 키 성장을 방해합니다." },
+                    { text: "적정량을 배식받아 음식물 쓰레기를 남기지 않도록 노력한다.", g: 15, h: 10, cat: "diet", tip: "환경을 생각하는 식습관과 감사하는 태도는 성숙한 청소년의 올바른 식생활 가치관입니다." }
+                ]
+            },
+            {
+                q: "7. 친구들과 점심 식사를 할 때 식사 속도와 예절은?",
+                opts: [
+                    { text: "친구들과 대화하며 한 입에 20번 이상 꼭꼭 씹어 20분간 식사", g: 15, h: 15, cat: "diet", tip: "충분히 씹으면 소화효소 분비가 늘고, 뇌의 포만중추가 작동하여 소화 흡수율이 극대화됩니다!" },
+                    { text: "체육 활동 시간을 늘리기 위해 국에 밥을 말아 5분 만에 마시듯 삼킨다.", g: -10, h: -20, cat: "diet", tip: "음식을 씹지 않고 삼키면 위장에 심한 부담을 주어 만성 소화불량과 위염의 원인이 됩니다." },
+                    { text: "식사 중 한 손으로 스마트폰 웹툰만 보며 기계적으로 숟가락질", g: -5, h: -10, cat: "diet", tip: "주의가 분산되면 음식 맛을 느끼지 못하고 과식을 인지하지 못해 소화장애를 겪기 쉽습니다." },
+                    { text: "식사 중간에 입안에 음식물이 보이지 않게 조심하며 정돈된 자세 유지", g: 10, h: 10, cat: "diet", tip: "식사 예절을 지키는 것은 타인을 배려하는 공동체 의식과 안정적인 소화에 도움을 줍니다." }
+                ]
+            },
+            {
+                q: "8. 식사 후 친구들이 매점으로 향합니다. 당신의 선택은?",
+                opts: [
+                    { text: "시원한 물 한 잔을 마시고 화장실에서 꼼꼼히 3분간 양치질", g: 10, h: 15, cat: "diet", tip: "식후 즉시 양치질은 충치와 치주염을 예방하고 입안을 상쾌하게 해 오후 졸음을 쫓아줍니다!" },
+                    { text: "매점에서 초콜릿, 탄산음료, 젤리를 사서 후식으로 폭풍 섭취", g: -15, h: -20, cat: "diet", tip: "급격한 단순당 과다 섭취는 혈당 스파이크를 일으켜 5교시 극심한 식곤증과 무기력증을 부릅니다." },
+                    { text: "학교 우유 급식을 챙겨 마셔 부족한 칼슘을 보충한다.", g: 15, h: 15, cat: "diet", tip: "우유의 칼슘과 비타민D는 청소년기 최대 골질량(뼈 밀도)을 형성하는 최적의 영양소입니다!" },
+                    { text: "친구의 고카페인 캔커피를 호기심에 마셔본다.", g: -10, h: -15, cat: "diet", tip: "청소년기 카페인은 이뇨작용으로 칼슘을 배출시키고 신경계를 과민하게 만들어 키 성장에 해롭습니다." }
+                ]
+            },
+            {
+                q: "9. 점심시간 40분의 자유시간! 어떻게 보낼까요?",
+                opts: [
+                    { text: "운동장에서 따스한 햇볕을 쬐며 친구들과 배드민턴/축구하기", g: 20, h: 15, cat: "act", tip: "햇빛은 뼈 성장의 핵심인 비타민D를 합성하고, 점프 운동은 성장판 연골세포 분열을 촉진합니다!" },
+                    { text: "어두운 교실 구석에서 엎드려 모바일 게임 삼매경", g: -10, h: -15, cat: "act", tip: "밀폐된 공간에서 장시간 구부정한 자세로 화면을 응시하면 거북목과 안구건조증을 유발합니다." },
+                    { text: "교정 산책로를 걸으며 친구와 오순도순 속마음 대화 나누기", g: 10, h: 15, cat: "act", tip: "가벼운 보행은 혈당 조절에 탁월하며, 대화를 통한 공감대는 학업 스트레스를 해소해 줍니다." },
+                    { text: "복도에서 친구들과 거칠게 몸싸움 장난치기", g: -15, h: -20, cat: "act", tip: "미끄러운 실내 복도에서의 장난은 골절 및 관절 인대 손상 등 큰 사고로 이어질 수 있습니다." }
+                ]
+            },
+            {
+                q: "10. 5교시 체육 수업 후 땀이 흠뻑 났습니다. 당신의 행동은?",
+                opts: [
+                    { text: "땀을 마른 수건으로 닦고 통풍되는 옷으로 환복 후 미온수 마시기", g: 15, h: 15, cat: "act", tip: "운동 후 젖은 옷을 갈아입지 않으면 체온이 급격히 떨어지고 땀띠와 피부염이 생기기 쉽습니다." },
+                    { text: "땀에 흠뻑 젖은 체육복 그대로 입고 선풍기 바람 맞기", g: -10, h: -15, cat: "act", tip: "급격한 체온 저하로 여름에도 냉방병과 감기에 걸릴 수 있으며 세균이 번식해 악취가 납니다." },
+                    { text: "갈증 난다고 얼음 탄산음료를 단숨에 원샷하기", g: -5, h: -15, cat: "diet", tip: "운동 직후 찬 음료 폭음은 위경련을 유발할 수 있으므로 미온수를 천천히 나누어 마셔야 합니다." },
+                    { text: "흐르는 물에 비누로 손을 깨끗이 씻고 세안하기", g: 10, h: 15, cat: "act", tip: "올바른 손 씻기는 감염병의 70% 이상을 예방하는 청소년기 최고의 셀프 건강 백신입니다." }
+                ]
+            }
+        ],
+        hasMiniGame: true,
+        miniGameId: "jump"
+    },
+    {
+        id: 2,
+        title: "Chapter 3. 방과 후와 저녁 (17:00 ~ 20:00)",
+        tag: "🌆 CHAPTER 3",
+        bg: "assets/fast-dba64b0da322bdd96675b3b4.webp",
+        desc: "하교 후 마주하는 간식의 유혹과 공부 시간! 바른 학습 자세와 스트레스 해소로 알찬 저녁을 만들어보세요.",
+        questions: [
+            {
+                q: "11. 하교 후 친구들이 '마라탕 3단계 + 탕후루' 코스로 가자고 조릅니다!",
+                opts: [
+                    { text: "오늘은 집밥 먹을래! 집에 가서 바나나와 견과류 간식 섭취", g: 15, h: 15, cat: "diet", tip: "자연식품 간식은 건강한 에너지원이 되어 저녁 식사 전 폭식을 막고 위장을 편안하게 지켜줍니다!" },
+                    { text: "친구들과 함께 극강의 매운 마라탕과 설탕 코팅 탕후루 연속 섭취", g: -20, h: -25, cat: "diet", tip: "과도한 캡사이신과 단순당 폭탄은 위 점막을 손상시키고 소아청소년 대사증후군 위험을 높입니다." },
+                    { text: "간식 대신 굶다가 밤늦게 야식으로 폭식하기로 결심", g: -15, h: -20, cat: "diet", tip: "불규칙한 단식과 야식은 체지방 축적률을 급상승시키고 소화기 장애를 초래합니다." },
+                    { text: "친구들과 어울리되 마라탕 1단계로 순하게 먹고 물을 충분히 섭취", g: 5, h: 0, cat: "diet", tip: "피할 수 없다면 염분과 맵기를 조절하고 채소를 많이 넣어 건강 타협점을 찾는 지혜가 필요합니다." }
+                ]
+            },
+            {
+                q: "12. 책상에 앉아 과제와 공부를 할 때 당신의 자세는?",
+                opts: [
+                    { text: "엉덩이를 등받이에 밀착하고 허리를 펴며 모니터 눈높이 맞추기", g: 15, h: 15, cat: "act", tip: "바른 척추 정렬은 척추측만증과 일자목을 예방하고 뇌 혈류량을 늘려 학습 집중력을 높입니다!" },
+                    { text: "의자 끝에 엉덩이를 걸치고 반쯤 누운 자세로 스마트폰 보기", g: -15, h: -20, cat: "act", tip: "요추에 가해지는 하중이 서 있을 때의 2배 이상 증가하여 청소년기 허리 디스크를 유발합니다." },
+                    { text: "턱을 괴고 짝다리를 꼰 채 문제집 풀기", g: -10, h: -15, cat: "act", tip: "골반이 틀어지고 턱관절 장애 및 안면 비대칭의 직접적인 원인이 됩니다." },
+                    { text: "50분 집중 공부 후 10분간 일어나 전신 기지개와 스트레칭", g: 15, h: 15, cat: "act", tip: "주기적인 전신 스트레칭은 근육 긴장을 해소하고 성장판을 유연하게 자극해 피로를 풀어줍니다." }
+                ]
+            },
+            {
+                q: "13. 저녁 공부 중 졸음이 쏟아집니다. 어떤 음료를 고를까요?",
+                opts: [
+                    { text: "시원한 생수 한 잔을 마시고 찬물로 가볍게 세안하기", g: 10, h: 15, cat: "diet", tip: "수분 보충과 찬물 세안은 교감신경을 부드럽게 자극하여 부작용 없이 뇌를 맑게 깨워줍니다!" },
+                    { text: "고카페인 핫식스/몬스터 에너지 드링크 2캔 연속 섭취", g: -20, h: -25, cat: "diet", tip: "청소년 하루 카페인 권고량을 초과하여 가슴 두근거림, 불안증, 야간 수면장애를 초래합니다." },
+                    { text: "달콤한 초코 우유나 과일 주스로 당분 충전", g: 5, h: 5, cat: "diet", tip: "일시적인 당분 공급은 도움이 되나, 과도하면 슈가 크래시로 더 큰 졸음이 올 수 있으니 주의하세요." },
+                    { text: "따뜻한 캐모마일이나 보리차를 천천히 음미하며 마시기", g: 10, h: 10, cat: "diet", tip: "따뜻한 무카페인 차는 혈액순환을 돕고 긴장된 신경을 이완시켜 집중력을 안정시켜 줍니다." }
+                ]
+            },
+            {
+                q: "14. 하루 동안 쌓인 학업 스트레스, 어떻게 해소할까요?",
+                opts: [
+                    { text: "좋아하는 음악을 들으며 가볍게 동네 조깅이나 줄넘기", g: 20, h: 15, cat: "act", tip: "유산소 신체활동은 행복 호르몬인 엔도르핀을 생성해 스트레스를 가장 건강하게 승화시킵니다!" },
+                    { text: "불닭라면을 끓여 땀 뻘뻘 흘리며 자극적인 매운맛으로 풀기", g: -10, h: -20, cat: "diet", tip: "매운맛은 통각 자극일 뿐, 위 점막을 손상시켜 위경련과 소화불량을 유발합니다." },
+                    { text: "방 안에서 불 끄고 새벽까지 자극적인 숏폼/게임에 몰두", g: -15, h: -15, cat: "sleep", tip: "뇌가 도파민 과부하로 쉬지 못해 다음 날 더 깊은 무기력증과 피로에 빠지게 됩니다." },
+                    { text: "가족이나 친구에게 오늘 있었던 고민을 솔직하게 털어놓기", g: 15, h: 10, cat: "act", tip: "정서적 교감과 대화는 마음의 부담을 덜어주고 청소년기 자아존중감을 단단하게 세워줍니다." }
+                ]
+            },
+            {
+                q: "15. 귀가 후 청결 관리와 세안 습관은?",
+                opts: [
+                    { text: "미온수와 클렌저로 피지와 미세먼지를 깨끗이 씻고 보습제 바르기", g: 10, h: 15, cat: "act", tip: "청소년기는 안드로겐 호르몬으로 피지 분비가 왕성하므로 청결한 세안이 여드름 예방의 첫걸음입니다!" },
+                    { text: "귀찮다고 씻지도 않고 교복을 입은 채 침대에 눕기", g: -15, h: -20, cat: "act", tip: "외부 세균과 오염물질이 침구류를 오염시키고 모공을 막아 피부 트러블이 폭발합니다." },
+                    { text: "얼굴에 난 뾰루지를 손톱으로 힘껏 쥐어짜기", g: -10, h: -15, cat: "act", tip: "손톱 세균으로 인한 2차 감염으로 깊은 흉터와 영구적인 피부 손상을 남길 수 있습니다." },
+                    { text: "샤워 후 쾌적한 면소재 실내복으로 갈아입고 편안히 휴식", g: 15, h: 15, cat: "act", tip: "피부 호흡과 쾌적한 체온 유지를 도와 숙면을 위한 완벽한 신체 환경을 조성합니다." }
+                ]
+            }
+        ],
+        hasMiniGame: true,
+        miniGameId: "defense"
+    },
+    {
+        id: 3,
+        title: "Chapter 4. 깊은 밤과 수면 (22:00 ~ 24:00)",
+        tag: "🌙 CHAPTER 4",
+        bg: "assets/fast-86c0ac2ca71b3a4d7519cc3d.webp",
+        desc: "키 성장의 황금 열쇠, 성장호르몬 분비의 시간! 야식 유혹을 이겨내고 쾌적한 암막 환경에서 꿀잠에 빠져보세요.",
+        questions: [
+            {
+                q: "16. 밤 10시 30분이 되었습니다. 취침 시간은 언제가 좋을까요?",
+                opts: [
+                    { text: "밤 11시 전에 잠자리에 들어 7~8시간 충분한 숙면 취하기", g: 20, h: 15, cat: "sleep", tip: "밤 10시~새벽 2시는 성장호르몬이 가장 왕성하게 쏟아지는 골든타임입니다. 일찍 자는 것이 최고의 보약!" },
+                    { text: "시험 기간이라며 새벽 2시 30분까지 졸면서 버티기", g: -15, h: -15, cat: "sleep", tip: "수면 부족은 뇌의 해마 기능을 떨어뜨려 다음 날 암기력과 시험 성적을 오히려 떨어뜨립니다." },
+                    { text: "새벽 3시 30분까지 스마트폰 게임 레이드를 뛰다가 쓰러져 자기", g: -25, h: -25, cat: "sleep", tip: "생체 리듬이 파괴되고 면역 세포 생성이 중단되어 키 성장과 두뇌 발달에 치명타를 입힙니다." },
+                    { text: "잠이 잘 오지 않아도 눈을 감고 편안한 복식호흡 유지하기", g: 10, h: 10, cat: "sleep", tip: "누워서 눈을 감고 몸을 이완하는 것만으로도 뇌파가 안정되어 80% 이상의 휴식 효과가 있습니다." }
+                ]
+            },
+            {
+                q: "17. 출출한 밤 11시, 코를 찌르는 맛있는 냄새가 유혹합니다!",
+                opts: [
+                    { text: "따뜻한 데운 우유 반 컵을 마시며 공복감 달래기", g: 15, h: 10, cat: "diet", tip: "우유 속 트립토판 아미노산은 수면 유도 호르몬인 멜라토닌 합성을 도와 편안한 잠을 부릅니다!" },
+                    { text: "야식의 제왕 매콤한 라면을 끓여 국물에 밥까지 말아먹기", g: -20, h: -25, cat: "diet", tip: "취침 전 고염분·고열량은 역류성 식도염을 일으키고 수면 중 소화기관을 혹사시켜 아침에 붓게 됩니다." },
+                    { text: "배달 어플로 치킨을 시켜 먹고 배부른 상태로 바로 눕기", g: -25, h: -25, cat: "diet", tip: "지방 소화는 4시간 이상 걸립니다. 위장 장애와 더불어 성장호르몬 분비가 현저히 억제됩니다." },
+                    { text: "미온수 한 모금을 마시고 내일 아침 맛있는 식사를 기대하며 참기", g: 15, h: 15, cat: "diet", tip: "야식을 참아낸 의지는 밤사이 위장의 완전한 휴식을 보장해 최고의 아침 컨디션을 선물합니다!" }
+                ]
+            },
+            {
+                q: "18. 침대에 누웠는데 스마트폰 알림이 울립니다. 어떻게 할까요?",
+                opts: [
+                    { text: "알림을 끄고 충전기에 꽂아 침대에서 2m 이상 멀리 두기", g: 15, h: 15, cat: "sleep", tip: "스마트폰을 시야에서 격리하면 블루라이트가 차단되어 멜라토닌 분비가 원활해집니다!" },
+                    { text: "불 끈 방에서 눈앞 10cm로 숏폼 영상을 1시간 이상 시청", g: -20, h: -25, cat: "sleep", tip: "암흑 속 블루라이트는 시신경을 자극하고 뇌를 낮으로 착각하게 만들어 심각한 불면증을 유발합니다." },
+                    { text: "딱 10분만 확인하려다 새벽까지 무한 스크롤", g: -15, h: -20, cat: "sleep", tip: "알고리즘의 자극적 도파민은 뇌의 보상회로를 흥분시켜 깊은 렘수면 진입을 가로막습니다." },
+                    { text: "내일 아침 기상 알람만 설정하고 방해금지 모드로 전환", g: 15, h: 15, cat: "sleep", tip: "야간 디지털 소음과 진동을 차단하여 수면 중 뇌파가 깨어나는 것을 방지할 수 있습니다." }
+                ]
+            },
+            {
+                q: "19. 쾌적한 주거 수면 환경을 위한 침실 온·습도 설정은?",
+                opts: [
+                    { text: "실내 온도 18~22℃, 습도 50~60%로 쾌적하게 유지하기", g: 15, h: 15, cat: "act", tip: "중1 기술가정 주거 환경 단원의 핵심! 체온 조절과 호흡기 점막 보호에 최적화된 온·습도 기준입니다." },
+                    { text: "방이 덥다고 한겨울에 창문을 활짝 열어둔 채 자기", g: -10, h: -20, cat: "act", tip: "새벽 저체온증과 근육 수축을 유발해 목 결림이나 급성 몸살감기에 걸리기 쉽습니다." },
+                    { text: "보일러를 28도로 펄펄 끓여 땀을 뻘뻘 흘리며 자기", g: -10, h: -15, cat: "act", tip: "지나치게 더운 환경은 깊은 수면을 방해하고 탈수와 피부 건조증을 유발합니다." },
+                    { text: "잠들기 전 5분간 맞통풍 환기하여 방 안 공기를 정화하기", g: 15, h: 15, cat: "act", tip: "방 안의 이산화탄소 농도를 낮추어 수면 중 뇌에 신선한 산소를 공급해 두통을 예방합니다." }
+                ]
+            },
+            {
+                q: "20. 마지막으로 잠들기 전 조명과 마음가짐은 어떻게 정돈할까요?",
+                opts: [
+                    { text: "암막 커튼을 치고 모든 불을 끈 완전 소등 상태 만들기", g: 15, h: 15, cat: "sleep", tip: "빛이 100% 차단될 때 뇌의 송과체에서 수면 호르몬인 멜라토닌이 가장 활발하게 분비됩니다!" },
+                    { text: "어두운 게 무서워 천장 형광등을 대낮처럼 켜놓고 자기", g: -15, h: -15, cat: "sleep", tip: "빛 자극이 눈꺼풀을 뚫고 들어가 수면의 질을 떨어뜨리고 피로 회복을 방해합니다." },
+                    { text: "TV나 유튜브 소리를 ASMR 삼아 밤새 켜두기", g: -15, h: -20, cat: "sleep", tip: "청각 피질이 밤새 깨어 있어 아침에 일어났을 때 극심한 피로감과 두통을 호소하게 됩니다." },
+                    { text: "오늘 하루 최선을 다한 나를 칭찬하고 긍정적인 마음으로 눈감기", g: 20, h: 15, cat: "act", tip: "긍정적인 정서는 스트레스 호르몬(코르티솔)을 낮추고 면역 체계를 강화하여 깊은 잠을 이끕니다." }
+                ]
+            }
+        ],
+        hasMiniGame: false
+    }
+];
+
+/* =========================================================
+   4. 게임 상태 관리 및 진행 컨트롤러
+========================================================= */
+let growth = 50;
+let health = 50;
+let chapterIdx = 0;
+let questionIdx = 0;
+let historyStack = [];
+let scores = { diet: 0, act: 0, sleep: 0, dietTotal: 0, actTotal: 0, sleepTotal: 0 };
+let isAnswering = false;
+
+function updateDashboard() {
+    growth = Math.max(0, Math.min(100, growth));
+    health = Math.max(0, Math.min(100, health));
+
+    document.getElementById('val-growth').innerText = growth + "%";
+    document.getElementById('bar-growth').style.width = growth + "%";
+    document.getElementById('val-health').innerText = health + "%";
+    document.getElementById('bar-health').style.width = health + "%";
+
+    updateAvatarVisual();
+    document.getElementById('btn-back').style.display = historyStack.length > 0 ? 'flex' : 'none';
+}
+
+function updateAvatarVisual() {
+    const img = document.getElementById('avatar-img');
+    let src = "assets/fast-1fdc344037b90b69584083cd.webp";
+
+    if (growth >= 80 && health >= 80) {
+        src = "assets/fast-88dfcc508cc47dc94a3516c7.webp";
+    } else if (growth < 25 || health < 25) {
+        src = "assets/fast-f77732693d0c3a6c6045d3ae.webp";
+    } else if (growth < 40 && health < 40) {
+        src = "assets/fast-f77732693d0c3a6c6045d3ae.webp";
+    } else if (health < 40) {
+        src = "assets/fast-16891303fdf7b57a8a63fe1b.webp";
+    } else if (growth < 40) {
+        src = "assets/fast-02a613b1a0aa4bb1eb8d2168.webp";
+    } else {
+        src = "assets/fast-1fdc344037b90b69584083cd.webp";
+    }
+
+    img.src = src;
+}
+
+function showFloatingBubble(text, isPositive) {
+    const bubble = document.createElement('div');
+    bubble.className = 'stat-floating-bubble';
+    bubble.innerText = text;
+    bubble.style.color = isPositive ? '#10b981' : '#ef4444';
+    bubble.style.left = (window.innerWidth / 2 + (Math.random() * 80 - 40)) + 'px';
+    bubble.style.top = '120px';
+    document.body.appendChild(bubble);
+    setTimeout(() => bubble.remove(), 1400);
+}
+
+const chapterSceneImages = chapters.map(chapter=>gcScenes.image(chapter.bg));
+function loadQuestion() {
+    gcScenes.need(chapterSceneImages[chapterIdx]);
+    isAnswering = false;
+    const curCh = chapters[chapterIdx];
+    const qData = curCh.questions[questionIdx];
+    const totalStep = chapterIdx * 5 + questionIdx + 1;
+
+    document.getElementById('chapter-title').innerText = curCh.title;
+    document.getElementById('step-indicator').innerText = `문제 ${totalStep} / 20`;
+    document.getElementById('question-title').innerText = qData.q;
+
+    const bgLayer = document.getElementById('bg-layer');
+    bgLayer.style.backgroundImage = `url('${curCh.bg}')`;
+
+    const shuffledOpts = [...qData.opts].sort(() => Math.random() - 0.5);
+
+    const container = document.getElementById('options-grid');
+    container.innerHTML = "";
+    shuffledOpts.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.innerHTML = `<span class="num-tag">${idx + 1}</span> <span>${opt.text}</span>`;
+        btn.onclick = () => handleSelectOption(opt, btn);
+        container.appendChild(btn);
+    });
+
+    updateDashboard();
+}
+
+function handleSelectOption(opt, clickedBtn) {
+    if (isAnswering) return;
+    isAnswering = true;
+
+    sound.playClick();
+
+    const allBtns = document.querySelectorAll('.opt-btn');
+    allBtns.forEach(b => {
+        b.disabled = true;
+        b.style.pointerEvents = 'none';
+        b.style.opacity = '0.55';
+    });
+    clickedBtn.classList.add('selected-opt');
+
+    historyStack.push({
+        growth, health, chapterIdx, questionIdx,
+        scores: JSON.parse(JSON.stringify(scores))
+    });
+
+    growth += opt.g;
+    health += opt.h;
+    if (opt.cat) {
+        scores[opt.cat] += (opt.g + opt.h);
+        scores[opt.cat + 'Total'] += 30;
+    }
+
+    const avatar = document.getElementById('avatar-img');
+    const isPositive = (opt.g + opt.h) >= 0;
+    if (isPositive) {
+        sound.playPositive();
+        avatar.className = 'avatar-bounce';
+        showFloatingBubble(`+${opt.g + opt.h} 🌟`, true);
+    } else {
+        sound.playNegative();
+        avatar.className = 'avatar-shake';
+        showFloatingBubble(`${opt.g + opt.h} ⚠️`, false);
+    }
+    setTimeout(() => { avatar.className = ''; }, 600);
+
+    showFeedbackToast(opt.tip);
+    updateDashboard();
+
+    if (growth < 20 || health < 20) {
+        setTimeout(() => triggerCrisis(), 800);
+        return;
+    }
+
+    setTimeout(() => {
+        questionIdx++;
+        if (questionIdx < 5) {
+            loadQuestion();
+        } else {
+            const curCh = chapters[chapterIdx];
+            if (curCh.hasMiniGame) {
+                openMiniGame(curCh.miniGameId);
+            } else {
+                proceedNextChapter();
+            }
+        }
+    }, 1200);
+}
+
+function showFeedbackToast(tip) {
+    const toast = document.getElementById('feedback-toast');
+    document.getElementById('feedback-desc').innerText = tip;
+    toast.classList.add('show');
+    setTimeout(() => { toast.classList.remove('show'); }, 3000);
+}
+
+function proceedNextChapter() {
+    chapterIdx++;
+    questionIdx = 0;
+    if (chapterIdx < chapters.length) {
+        const nextCh = chapters[chapterIdx];
+        document.getElementById('trans-tag').innerText = nextCh.tag;
+        document.getElementById('trans-title').innerText = nextCh.title.split('.')[1] || nextCh.title;
+        document.getElementById('trans-desc').innerText = nextCh.desc;
+        document.getElementById('transition-modal').style.display = 'flex';
+    } else {
+        openReportForm();
+    }
+}
+
+function startChapter() {
+    try { sound.playClick(); } catch(e) {}
+    try { sound.startBGM(); } catch(e) {}
+    const modal = document.getElementById('transition-modal');
+    if (modal) modal.style.display = 'none';
+    try { loadQuestion(); } catch(e) { console.error('Error loading question:', e); }
+}
+
+function handleBack() {
+    if (historyStack.length === 0) return;
+    sound.playClick();
+    const prev = historyStack.pop();
+    growth = prev.growth;
+    health = prev.health;
+    chapterIdx = prev.chapterIdx;
+    questionIdx = prev.questionIdx;
+    scores = prev.scores;
+    loadQuestion();
+}
+
+function triggerCrisis() {
+    sound.playNegative();
+    const reason = growth < 20 ? "📉 성장 발달 위기 발생!" : "🥗 신체 면역 밸런스 붕괴!";
+    const msg = growth < 20 ? 
+        "불규칙한 영양 결핍과 운동 부족으로 성장판이 닫힐 위기에 처했습니다. 생활습관을 즉각 개선해야 합니다!" :
+        "야식, 카페인, 수면 부족으로 인해 신체 면역 체계가 무너졌습니다. 건강 관리가 시급합니다!";
+    
+    document.getElementById('crisis-reason').innerText = reason;
+    document.getElementById('crisis-msg').innerText = msg;
+    document.getElementById('crisis-stat-info').innerText = `현재 성장도: ${growth}% | 건강도: ${health}%`;
+    document.getElementById('crisis-screen').style.display = 'flex';
+}
+
+function reviveFromCrisis() {
+    sound.playClick();
+    document.getElementById('crisis-screen').style.display = 'none';
+    handleBack();
+}
+
+/* =========================================================
+   5. 미니게임 엔진 (3대 피드백 완벽 반영)
+========================================================= */
+let mgType = null;
+let mgTimer = null;
+let mgAnim = null;
+let mgScore = 0;
+let mgTimeLeft = 22;
+let mgActive = false;
+let mgParticles = [];
+let mgFloatingTexts = [];
+
+function addParticle(x, y, color, count = 8) {
+    for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 4 + 2;
+        mgParticles.push({
+            x, y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            radius: Math.random() * 4 + 2,
+            color,
+            alpha: 1,
+            life: 25
+        });
+    }
+}
+
+function addFloatingText(x, y, text, color) {
+    mgFloatingTexts.push({ x, y, text, color, alpha: 1, vy: -1.8 });
+}
+
+function renderEffects(ctx) {
+    for (let i = mgParticles.length - 1; i >= 0; i--) {
+        const p = mgParticles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= 0.04;
+        p.radius *= 0.96;
+
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.alpha);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        if (p.alpha <= 0) mgParticles.splice(i, 1);
+    }
+
+    for (let i = mgFloatingTexts.length - 1; i >= 0; i--) {
+        const ft = mgFloatingTexts[i];
+        ft.y += ft.vy;
+        ft.alpha -= 0.025;
+
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, ft.alpha);
+        ctx.fillStyle = ft.color;
+        ctx.font = "bold 20px sans-serif";
+        ctx.shadowColor = "rgba(0,0,0,0.6)";
+        ctx.shadowBlur = 6;
+        ctx.fillText(ft.text, ft.x, ft.y);
+        ctx.restore();
+
+        if (ft.alpha <= 0) mgFloatingTexts.splice(i, 1);
+    }
+}
+
+function openMiniGame(type) {
+    mgType = type;
+    mgActive = false;
+    mgParticles = [];
+    mgFloatingTexts = [];
+    document.getElementById('minigame-modal').style.display = 'flex';
+    const canvas = document.getElementById('mg-canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (type === 'diet') {
+        document.getElementById('mg-title').innerHTML = "🍱 [미니게임 1] 식품구성자전거 식판 채우기";
+        document.getElementById('mg-desc').innerText = "마우스로 식판을 좌우로 조작해 5대 영양 식품을 담으세요! (목표: 50점 달성)";
+        renderDietStartScreen(ctx);
+    } else if (type === 'jump') {
+        document.getElementById('mg-title').innerHTML = "🏃 [미니게임 2] 성장판 팡팡! 밸런스 줄넘기";
+        document.getElementById('mg-desc').innerText = "바늘이 중앙 초록색 [성장판 존]에 왔을 때 스페이스바 또는 화면 탭! (4회 이상 성공 목표)";
+        renderJumpStartScreen(ctx);
+    } else if (type === 'defense') {
+        document.getElementById('mg-title').innerHTML = "📱 [미니게임 3] 꿀잠을 지켜라! 스마트폰 유혹 디펜스";
+        document.getElementById('mg-desc').innerText = "침대로 다가오는 스마트폰 알림 버블들을 클릭/탭하여 터뜨리세요! (목표: 50점 달성)";
+        renderDefenseStartScreen(ctx);
+    }
+    document.getElementById('btn-mg-action').innerText = "게임 시작하기";
+}
+
+function handleMiniGameAction() {
+    if (!mgActive) {
+        startMiniGameLoop();
+    }
+}
+
+/* =========================================================
+   [미니게임 1: 식판 채우기]
+   - 1. 배경 사진(급식실배경.jpg) 적용
+   - 2. 식판 흰색 테두리 삭제 -> 실시간 투명화(누끼) 식판 적용!
+   - 3. 내려오는 아이콘 선명한 고대비 컬러 일러스트 카드로 100% 가독성 출력!
+========================================================= */
+let basketX = 290;
+let foodItems = [];
+let dietCombo = 0;
+const foods = [
+    { name: "밥", label: "통곡물밥", type: "good", bg: "#f59e0b", icon: "🍚" },
+    { name: "고기", label: "살코기", type: "good", bg: "#ef4444", icon: "🥩" },
+    { name: "채소", label: "비타민채소", type: "good", bg: "#10b981", icon: "🥦" },
+    { name: "과일", label: "생과일", type: "good", bg: "#ec4899", icon: "🍎" },
+    { name: "우유", label: "신선우유", type: "good", bg: "#3b82f6", icon: "🥛" },
+    { name: "라면", label: "라면(감점)", type: "bad", bg: "#78350f", icon: "🍜" },
+    { name: "탄산", label: "탄산(감점)", type: "bad", bg: "#991b1b", icon: "🥤" }
+];
+
+function initDietGame() {
+    basketX = 290;
+    foodItems = [];
+    mgScore = 0;
+    dietCombo = 0;
+    mgTimeLeft = 24;
+    const canvas = document.getElementById('mg-canvas');
+    canvas.onmousemove = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        basketX = e.clientX - rect.left - 70;
+        basketX = Math.max(10, Math.min(canvas.width - 160, basketX));
+    };
+}
+
+function updateDietGame(ctx, canvas) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 1. [요구사항 1] 급식실 배경 사진 적용
+    if (gcScenes.need(bgCafeteria).complete && bgCafeteria.naturalWidth > 0) {
+        ctx.drawImage(bgCafeteria, 0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "rgba(15, 23, 42, 0.25)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else {
+        ctx.fillStyle = "#f8fafc";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // 2. 음식 스폰
+    if (Math.random() < 0.075) {
+        const f = foods[Math.floor(Math.random() * foods.length)];
+        foodItems.push({
+            ...f,
+            x: Math.random() * (canvas.width - 90) + 45,
+            y: -35,
+            speed: Math.random() * 2 + 2.3
+        });
+    }
+
+    // 3. [요구사항 1] 내려오는 아이콘 검정색 문제 해결 -> 선명한 컬러풀 뱃지 + 흰색 텍스트 & 아이콘 확실한 렌더링
+    for (let i = foodItems.length - 1; i >= 0; i--) {
+        const item = foodItems[i];
+        item.y += item.speed;
+
+        ctx.save();
+        ctx.translate(item.x, item.y);
+
+        // 원형 후광 카드
+        ctx.fillStyle = item.bg;
+        ctx.shadowColor = "rgba(0,0,0,0.4)";
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(0, 0, 27, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 테두리
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // 이모지 + 한글 이름 병기 (어떤 OS에서도 100% 검정색 안 됨)
+        ctx.shadowBlur = 0;
+        ctx.font = "24px 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(item.icon, 0, 4);
+
+        // 하단 미니 라벨
+        ctx.font = "bold 10px 'Pretendard', sans-serif";
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText(item.name, 0, 19);
+
+        ctx.restore();
+
+        // 4. 식판 충돌 판정
+        if (item.y >= 310 && item.y <= 360 && item.x >= basketX - 15 && item.x <= basketX + 165) {
+            if (item.type === 'good') {
+                dietCombo++;
+                const bonus = dietCombo >= 3 ? 15 : 10;
+                mgScore += bonus;
+                sound.playPositive();
+                addParticle(item.x, item.y, item.bg, 14);
+                addFloatingText(item.x - 20, item.y - 15, `+${bonus} ${item.label}!`, "#10b981");
+            } else {
+                dietCombo = 0;
+                mgScore = Math.max(0, mgScore - 15);
+                sound.playNegative();
+                addParticle(item.x, item.y, "#ef4444", 16);
+                addFloatingText(item.x - 20, item.y - 15, "-15점 불량식품!", "#ef4444");
+            }
+            foodItems.splice(i, 1);
+            continue;
+        }
+
+        if (item.y > canvas.height + 40) {
+            foodItems.splice(i, 1);
+        }
+    }
+
+    // 5. [요구사항 1] 식판 흰색 배경(테두리) 삭제 -> 투명화된 식판 캔버스 렌더링
+    if (!transparentPlate && rawPlate.complete) {
+        transparentPlate = createTransparentCanvas(rawPlate);
+    }
+
+    if (transparentPlate) {
+        ctx.save();
+        ctx.shadowColor = "rgba(0,0,0,0.5)";
+        ctx.shadowBlur = 14;
+        ctx.shadowOffsetY = 6;
+        ctx.drawImage(transparentPlate, basketX, 290, 150, 85);
+        ctx.restore();
+    } else {
+        // 대체 벡터 식판
+        ctx.fillStyle = "#e2e8f0";
+        ctx.roundRect(basketX, 320, 140, 45, 12);
+        ctx.fill();
+    }
+
+    // 6. 이펙트 렌더링
+    renderEffects(ctx);
+
+    // 7. 상단 프로그레스 HUD
+    ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+    ctx.beginPath();
+    ctx.roundRect(16, 14, 300, 48, 12);
+    ctx.fill();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 17px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(`영양 점수: ${mgScore} / 50점`, 32, 44);
+
+    if (dietCombo >= 2) {
+        ctx.fillStyle = "#fbbf24";
+        ctx.font = "bold 16px sans-serif";
+        ctx.fillText(`🔥 ${dietCombo} COMBO!`, 220, 44);
+    }
+}
+
+/* =========================================================
+   [미니게임 2: 밸런스 줄넘기]
+   - 1. 배경 사진(운동장배경.jpg) 적용
+   - 2. 캐릭터는 게임의 본편 아바타(평균.png / 몸짱.png)로 교체 (흰 테두리 완전 삭제!)
+   - 3. 줄 돌아가는 애니메이션 자연스럽게 수정
+   - 4. 바늘 속도 적절하게 쾌적화 (3.6)
+========================================================= */
+let needleX = 140;
+let needleDir = 1;
+let perfectCount = 0;
+let jumpSuccessCount = 0;
+let jumpTries = 10;
+let canJump = true;
+let jumpPhysOffset = 0;
+let jumpJudgeText = "";
+let jumpJudgeColor = "#10b981";
+let jumpJudgeTimer = 0;
+
+function initJumpGame() {
+    needleX = 140;
+    needleDir = 1;
+    perfectCount = 0;
+    jumpSuccessCount = 0;
+    jumpTries = 10;
+    mgScore = 0;
+    mgTimeLeft = 35;
+    jumpPhysOffset = 0;
+    jumpJudgeText = "";
+    document.getElementById('mg-timer').innerText = "남은시간: 35s";
+    document.getElementById('mg-desc').innerText = "바늘이 중앙 골드 [PERFECT 존]에 도달했을 때 스페이스바 또는 화면 탭! (퍼펙트 3회 성공 시 클리어!)";
+
+    const canvas = document.getElementById('mg-canvas');
+    canvas.onclick = triggerJump;
+    canvas.ontouchstart = (e) => { triggerJump(); e.preventDefault(); };
+    window.onkeydown = (e) => {
+        if (e.code === 'Space') {
+            if (e.repeat) return;
+            triggerJump();
+            e.preventDefault();
+        }
+    };
+}
+
+function triggerJump() {
+    if (!mgActive || !canJump || jumpTries <= 0) return;
+    canJump = false;
+    jumpTries--;
+
+    if (needleX >= 320 && needleX <= 400) {
+        perfectCount++;
+        jumpSuccessCount++;
+        mgScore += 25;
+        jumpPhysOffset = -36;
+        sound.playJump();
+        addParticle(370, 160, "#fbbf24", 30);
+
+        if (perfectCount >= 3) {
+            jumpJudgeText = "🌟 PERFECT 3회 달성! 대성공 클리어!";
+            jumpJudgeColor = "#fbbf24";
+            jumpJudgeTimer = 50;
+            sound.playFanfare();
+            setTimeout(() => {
+                if (mgActive) finishMiniGame(true);
+            }, 700);
+            return;
+        } else {
+            jumpJudgeText = "⭐ PERFECT! (" + perfectCount + "/3회 달성)";
+            jumpJudgeColor = "#fbbf24";
+            jumpJudgeTimer = 35;
+        }
+    } else if (needleX >= 260 && needleX <= 460) {
+        jumpSuccessCount++;
+        mgScore += 10;
+        jumpJudgeText = "✨ GOOD! (골드 퍼펙트를 노려보세요!)";
+        jumpJudgeColor = "#10b981";
+        jumpJudgeTimer = 30;
+        jumpPhysOffset = -25;
+        sound.playJump();
+        addParticle(370, 160, "#10b981", 16);
+    } else {
+        jumpJudgeText = "⚠️ MISS!";
+        jumpJudgeColor = "#ef4444";
+        jumpJudgeTimer = 25;
+        jumpPhysOffset = 6;
+        sound.playNegative();
+        addParticle(needleX, 290, "#ef4444", 12);
+    }
+
+    if (jumpTries <= 0) {
+        setTimeout(() => {
+            if (mgActive) finishMiniGame(perfectCount >= 3);
+        }, 700);
+        return;
+    }
+
+    setTimeout(() => { canJump = true; }, 240);
+}
+
+function updateJumpGame(ctx, canvas) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (gcScenes.need(bgPlayground).complete && bgPlayground.naturalWidth > 0) {
+        ctx.drawImage(bgPlayground, 0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "rgba(15, 23, 42, 0.2)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else {
+        ctx.fillStyle = "#f1f5f9";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    jumpPhysOffset *= 0.86;
+    if (Math.abs(jumpPhysOffset) < 0.3) jumpPhysOffset = 0;
+
+    const idleBounce = Math.sin(Date.now() / 140) * 3.5;
+    const finalOffset = jumpPhysOffset + idleBounce;
+
+    const shadowScale = Math.max(0.55, 1 + finalOffset / 70);
+    const shadowAlpha = Math.max(0.12, 0.32 + finalOffset / 110);
+    ctx.save();
+    ctx.fillStyle = "rgba(15, 23, 42, " + shadowAlpha.toFixed(2) + ")";
+    ctx.beginPath();
+    ctx.ellipse(370, 274, 58 * shadowScale, 14 * shadowScale, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    if (!transparentRopeKid && rawRopeKid.complete) {
+        transparentRopeKid = createTransparentCanvas(rawRopeKid, 232);
+    }
+    const kidImg = transparentRopeKid || rawRopeKid;
+
+    if (kidImg && kidImg.complete) {
+        ctx.save();
+        ctx.shadowColor = "rgba(0,0,0,0.35)";
+        ctx.shadowBlur = 12;
+        ctx.shadowOffsetY = 6;
+        const charW = 265;
+        const charH = 265;
+        const charX = (canvas.width - charW) / 2;
+        const charY = 16 + finalOffset;
+        ctx.drawImage(kidImg, charX, charY, charW, charH);
+        ctx.restore();
+    } else {
+        const currentAvatarImg = (growth >= 80 && health >= 80) ? avatarPerfect : avatarNormal;
+        ctx.drawImage(currentAvatarImg, 300, 45 + finalOffset, 140, 200);
+    }
+
+    if (jumpJudgeTimer > 0) {
+        jumpJudgeTimer--;
+        ctx.save();
+        ctx.font = "900 28px sans-serif";
+        ctx.fillStyle = jumpJudgeColor;
+        ctx.textAlign = "center";
+        ctx.shadowColor = "rgba(0,0,0,0.6)";
+        ctx.shadowBlur = 10;
+        ctx.fillText(jumpJudgeText, 370, 75);
+        ctx.restore();
+    }
+
+    ctx.fillStyle = "rgba(15, 23, 42, 0.88)";
+    ctx.beginPath();
+    ctx.roundRect(110, 285, 520, 36, 12);
+    ctx.fill();
+
+    ctx.fillStyle = "#10b981";
+    ctx.fillRect(260, 285, 200, 36);
+    ctx.fillStyle = "#fbbf24";
+    ctx.fillRect(320, 285, 80, 36);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 13px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("PERFECT", 360, 308);
+    ctx.textAlign = "left";
+
+    const curSpeed = 5.6 + (perfectCount * 0.4);
+    needleX += needleDir * curSpeed;
+    if (needleX <= 120) {
+        needleX = 120;
+        needleDir = 1;
+    } else if (needleX >= 620) {
+        needleX = 620;
+        needleDir = -1;
+    }
+
+    ctx.fillStyle = "#ef4444";
+    ctx.beginPath();
+    ctx.moveTo(needleX, 265);
+    ctx.lineTo(needleX - 10, 285);
+    ctx.lineTo(needleX + 10, 285);
+    ctx.closePath();
+    ctx.fill();
+
+    renderEffects(ctx);
+
+    ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+    ctx.beginPath();
+    ctx.roundRect(16, 14, 370, 48, 12);
+    ctx.fill();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 16px sans-serif";
+    ctx.fillText(`⭐ 퍼펙트: ${perfectCount} / 3회 목표 (남은 기회: ${jumpTries})`, 26, 44);
+}
+
+/* =========================================================
+   [미니게임 3: 스마트폰 유혹 디펜스]
+   - 1. 밤 침실 배경(침실배경.jpg) 복원
+   - 2. 침대 이미지 흰색 테두리 완전 삭제 (실시간 투명화 누끼 침대.png)
+========================================================= */
+let bubbles = [];
+let shieldPulse = 0;
+
+function initDefenseGame() {
+    bubbles = [];
+    mgScore = 0;
+    mgTimeLeft = 22;
+    shieldPulse = 0;
+    const canvas = document.getElementById('mg-canvas');
+    canvas.onclick = (e) => {
+        if (!mgActive) return;
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+
+        for (let i = bubbles.length - 1; i >= 0; i--) {
+            const b = bubbles[i];
+            const dist = Math.hypot(b.x - mx, b.y - my);
+            if (dist <= b.radius + 18) {
+                bubbles.splice(i, 1);
+                mgScore += 10;
+                sound.playPop();
+                addParticle(b.x, b.y, "#38bdf8", 16);
+                addParticle(b.x, b.y, "#f43f5e", 10);
+                addFloatingText(b.x - 20, b.y - 10, "💥 POP! +10", "#38bdf8");
+                break;
+            }
+        }
+    };
+}
+
+function updateDefenseGame(ctx, canvas) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 1. [요구사항 3] 밤 침실 배경 사진 복원
+    if (gcScenes.need(bgBedroom).complete && bgBedroom.naturalWidth > 0) {
+        ctx.drawImage(bgBedroom, 0, 0, canvas.width, canvas.height);
+        // 은은한 야간 필터
+        ctx.fillStyle = "rgba(11, 15, 25, 0.4)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else {
+        ctx.fillStyle = "#0b0f19";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // 2. 침대 주위 멜라토닌 수면 보호막
+    shieldPulse += 0.05;
+    const shieldR = 75 + Math.sin(shieldPulse) * 5;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(370, 205, shieldR, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(56, 189, 248, 0.18)";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(56, 189, 248, 0.75)";
+    ctx.lineWidth = 3;
+    ctx.shadowColor = "#38bdf8";
+    ctx.shadowBlur = 14;
+    ctx.stroke();
+    ctx.restore();
+
+    // 3. [요구사항 3] 침대 이미지 흰색 테두리 완전 삭제 (투명 캔버스 캐시 렌더링)
+    if (!transparentBed && rawBed.complete) {
+        transparentBed = createTransparentCanvas(rawBed);
+    }
+
+    if (transparentBed) {
+        ctx.save();
+        ctx.shadowColor = "rgba(0,0,0,0.5)";
+        ctx.shadowBlur = 14;
+        ctx.shadowOffsetY = 6;
+        ctx.drawImage(transparentBed, 305, 140, 130, 130);
+        ctx.restore();
+    } else {
+        ctx.font = "62px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("🛏️", 370, 230);
+    }
+
+    // 4. 버블 스폰
+    if (Math.random() < 0.065) {
+        const labels = ["숏폼", "게임", "유튜브", "DM", "알림"];
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 360;
+        bubbles.push({
+            x: 370 + Math.cos(angle) * dist,
+            y: 205 + Math.sin(angle) * dist,
+            label: labels[Math.floor(Math.random() * labels.length)],
+            radius: 46,
+            speed: Math.random() * 1.1 + 0.95
+        });
+    }
+
+    // 5. 버블 이동 및 렌더링
+    for (let i = bubbles.length - 1; i >= 0; i--) {
+        const b = bubbles[i];
+        const dx = 370 - b.x;
+        const dy = 205 - b.y;
+        const dist = Math.hypot(dx, dy);
+
+        b.x += (dx / dist) * b.speed;
+        b.y += (dy / dist) * b.speed;
+
+        if (assetPhone.complete) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+            ctx.clip();
+            ctx.drawImage(assetPhone, b.x - b.radius, b.y - b.radius, b.radius * 2, b.radius * 2);
+            ctx.restore();
+
+            ctx.strokeStyle = "#38bdf8";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+            ctx.stroke();
+        } else {
+            ctx.fillStyle = "rgba(239, 68, 68, 0.85)";
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 13px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(b.label, b.x, b.y + 4);
+
+        if (dist < shieldR - 5) {
+            bubbles.splice(i, 1);
+            mgScore = Math.max(0, mgScore - 5);
+            sound.playNegative();
+            addParticle(370, 205, "#ef4444", 15);
+            addFloatingText(340, 175, "-5점 방해!", "#ef4444");
+        }
+    }
+
+    renderEffects(ctx);
+
+    ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+    ctx.beginPath();
+    ctx.roundRect(16, 14, 300, 48, 12);
+    ctx.fill();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 17px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(`퇴치 점수: ${mgScore} / 50점`, 32, 44);
+}
+
+function startMiniGameLoop() {
+    mgActive = true;
+    document.getElementById('btn-mg-action').style.display = 'none';
+
+    if (mgType === 'diet') {
+        mgTimeLeft = 25;
+        initDietGame();
+    } else if (mgType === 'jump') {
+        mgTimeLeft = 35;
+        initJumpGame();
+    } else if (mgType === 'defense') {
+        mgTimeLeft = 25;
+        initDefenseGame();
+    }
+
+    document.getElementById('mg-timer').innerText = `남은시간: ${mgTimeLeft}s`;
+
+    const canvas = document.getElementById('mg-canvas');
+    const ctx = canvas.getContext('2d');
+
+    if (mgTimer) clearInterval(mgTimer);
+    mgTimer = setInterval(() => {
+        if (!mgActive) return;
+        mgTimeLeft--;
+        document.getElementById('mg-timer').innerText = `남은시간: ${mgTimeLeft}s`;
+        if (mgTimeLeft <= 0) {
+            finishMiniGame(mgType === 'jump' ? (perfectCount >= 3) : false);
+        }
+    }, 1000);
+
+    function loop() {
+        if (!mgActive) return;
+        if (mgType === 'diet') updateDietGame(ctx, canvas);
+        else if (mgType === 'jump') updateJumpGame(ctx, canvas);
+        else if (mgType === 'defense') updateDefenseGame(ctx, canvas);
+        mgAnim = requestAnimationFrame(loop);
+    }
+    loop();
+}
+
+function finishMiniGame() {
+    mgActive = false;
+    clearInterval(mgTimer);
+    cancelAnimationFrame(mgAnim);
+    window.onkeydown = null;
+
+    let isSuccess = false;
+    let changeG = 0;
+    let changeH = 0;
+    let resultMsg = "";
+
+    if (mgType === 'diet') {
+        isSuccess = mgScore >= 50;
+        if (isSuccess) {
+            changeG = 15; changeH = 15;
+            resultMsg = "🎉 영양 식판 완성 성공!\\n[보너스 획득] 성장도 +15%, 건강도 +15%";
+        } else {
+            changeG = -10; changeH = -10;
+            resultMsg = "❌ 영양 불균형 발생 (50점 미달)!\\n[페널티 적용] 성장도 -10%, 건강도 -10%";
+        }
+    } else if (mgType === 'jump') {
+        isSuccess = jumpSuccessCount >= 4;
+        if (isSuccess) {
+            changeG = 20; changeH = 10;
+            resultMsg = "🎉 성장판 자극 줄넘기 성공!\\n[보너스 획득] 성장도 +20%, 건강도 +10%";
+        } else {
+            changeG = -10; changeH = -5;
+            resultMsg = "❌ 성장판 자극 부족 (4회 미만)!\\n[페널티 적용] 성장도 -10%, 건강도 -5%";
+        }
+    } else if (mgType === 'defense') {
+        isSuccess = mgScore >= 50;
+        if (isSuccess) {
+            changeG = 10; changeH = 20;
+            resultMsg = "🎉 스마트폰 유혹 차단 꿀잠 성공!\\n[보너스 획득] 성장도 +10%, 건강도 +20%";
+        } else {
+            changeG = -10; changeH = -15;
+            resultMsg = "❌ 야간 블루라이트 피폭!\\n[페널티 적용] 성장도 -10%, 건강도 -15%";
+        }
+    }
+
+    if (isSuccess) {
+        sound.playFanfare();
+    } else {
+        sound.playNegative();
+    }
+
+    growth = Math.max(0, Math.min(100, growth + changeG));
+    health = Math.max(0, Math.min(100, health + changeH));
+    updateDashboard();
+
+    alert(resultMsg);
+    document.getElementById('minigame-modal').style.display = 'none';
+    document.getElementById('btn-mg-action').style.display = 'block';
+
+    if (growth < 20 || health < 20) {
+        triggerCrisis();
+        return;
+    }
+
+    proceedNextChapter();
+}
+
+function renderDietStartScreen(ctx) {
+    if (gcScenes.need(bgCafeteria).complete && bgCafeteria.naturalWidth > 0) {
+        ctx.drawImage(bgCafeteria, 0, 0, 740, 400);
+        ctx.fillStyle = "rgba(15, 23, 42, 0.6)";
+        ctx.fillRect(0, 0, 740, 400);
+    } else {
+        ctx.fillStyle = "#f8fafc";
+        ctx.fillRect(0, 0, 740, 400);
+    }
+    if (transparentPlate) {
+        ctx.drawImage(transparentPlate, 295, 45, 150, 90);
+    }
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 24px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("🍱 5대 영양소 식판 채우기 아케이드", 370, 185);
+    ctx.font = "16px sans-serif";
+    ctx.fillStyle = "#e2e8f0";
+    ctx.fillText("식판으로 통곡물밥, 살코기, 채소, 과일, 우유를 담으세요! (목표: 50점 이상)", 370, 220);
+    ctx.fillStyle = "#f87171";
+    ctx.font = "bold 15px sans-serif";
+    ctx.fillText("⚠️ 실패 시 성장도/건강도가 -10%씩 감소합니다!", 370, 252);
+    ctx.textAlign = "left";
+}
+function renderJumpStartScreen(ctx) {
+    if (gcScenes.need(bgPlayground).complete && bgPlayground.naturalWidth > 0) {
+        ctx.drawImage(bgPlayground, 0, 0, 740, 400);
+        ctx.fillStyle = "rgba(15, 23, 42, 0.6)";
+        ctx.fillRect(0, 0, 740, 400);
+    } else {
+        ctx.fillStyle = "#f8fafc";
+        ctx.fillRect(0, 0, 740, 400);
+    }
+    if (avatarNormal.complete) {
+        ctx.drawImage(avatarNormal, 315, 30, 110, 150);
+    }
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 24px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("🏃 성장판 자극 줄넘기 리듬 탭", 370, 210);
+    ctx.font = "16px sans-serif";
+    ctx.fillStyle = "#e2e8f0";
+    ctx.fillText("초록색 '성장판 자극 존'에 바늘이 올 때 스페이스바 또는 탭! (4회 이상)", 370, 245);
+    ctx.fillStyle = "#f87171";
+    ctx.font = "bold 15px sans-serif";
+    ctx.fillText("⚠️ 실패 시 성장도가 -10% 감소합니다!", 370, 275);
+    ctx.textAlign = "left";
+}
+function renderDefenseStartScreen(ctx) {
+    if (gcScenes.need(bgBedroom).complete && bgBedroom.naturalWidth > 0) {
+        ctx.drawImage(bgBedroom, 0, 0, 740, 400);
+        ctx.fillStyle = "rgba(11, 15, 25, 0.65)";
+        ctx.fillRect(0, 0, 740, 400);
+    } else {
+        ctx.fillStyle = "#0b0f19";
+        ctx.fillRect(0, 0, 740, 400);
+    }
+    if (transparentBed) {
+        ctx.drawImage(transparentBed, 320, 35, 100, 100);
+    }
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 24px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("📱 스마트폰 유혹 디펜스 아케이드", 370, 185);
+    ctx.font = "16px sans-serif";
+    ctx.fillStyle = "#94a3b8";
+    ctx.fillText("침대로 다가오는 스마트폰 알림들을 빠르게 터뜨려 꿀잠을 지키세요! (목표: 50점)", 370, 220);
+    ctx.fillStyle = "#f87171";
+    ctx.font = "bold 15px sans-serif";
+    ctx.fillText("⚠️ 실패 시 건강도가 -15% 감소합니다!", 370, 252);
+    ctx.textAlign = "left";
+}
+
+/* =========================================================
+   6. 최종 결과 리포트 카드 생성
+========================================================= */
+function setText(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = val;
+}
+
+function openReportForm() {
+    if (chapterIdx < chapters.length) return;
+    try { sound.playFanfare(); } catch(e) {}
+    const formScreen = document.getElementById('report-form-screen');
+    if (formScreen) formScreen.style.display = 'flex';
+}
+
+function submitStudentReport() {
+    try { sound.playClick(); } catch(e) {}
+    const sId = (document.getElementById('inp-student-id') && document.getElementById('inp-student-id').value.trim()) || "1학년 1반";
+    const sName = (document.getElementById('inp-student-name') && document.getElementById('inp-student-name').value.trim()) || "강화중 학생";
+    const sRef = (document.getElementById('inp-reflection') && document.getElementById('inp-reflection').value.trim()) || "평소 불규칙한 식습관과 늦은 수면이 성장에 얼마나 큰 영향을 미치는지 깨달았습니다.";
+    const sAct = (document.getElementById('inp-action-plan') && document.getElementById('inp-action-plan').value.trim()) || "아침밥 챙겨먹기, 하루 30분 줄넘기하기, 밤 11시 전 스마트폰 끄고 잠자리에 들기";
+
+    setText('out-student-id', sId);
+    setText('out-student-name', sName);
+    setText('out-reflection', sRef);
+    setText('out-action-plan', sAct);
+
+    const now = new Date();
+    const dateStr = now.getFullYear() + ". " + String(now.getMonth() + 1).padStart(2, '0') + ". " + String(now.getDate()).padStart(2, '0');
+    setText('out-date', dateStr);
+
+    const formScreen = document.getElementById('report-form-screen');
+    if (formScreen) formScreen.style.display = 'none';
+    showFinalReport();
+}
+
+function editStudentReport() {
+    try { sound.playClick(); } catch(e) {}
+    const repScreen = document.getElementById('report-screen');
+    if (repScreen) repScreen.style.display = 'none';
+    const formScreen = document.getElementById('report-form-screen');
+    if (formScreen) formScreen.style.display = 'flex';
+}
+
+function downloadReportPDF() {
+    try { sound.playClick(); } catch(e) {}
+    const sName = (document.getElementById('out-student-name') && document.getElementById('out-student-name').innerText.trim()) || "학생";
+    const sId = (document.getElementById('out-student-id') && document.getElementById('out-student-id').innerText.trim()) || "1학년";
+    const card = document.querySelector('#report-screen .report-card');
+    const actions = document.querySelector('.report-actions');
+
+    if (typeof html2pdf !== 'undefined' && card) {
+        if (actions) actions.style.display = 'none';
+        const opt = {
+            margin: [10, 10, 10, 10],
+            filename: "2026_강화중_성장건강_활동보고서_" + sId + "_" + sName + ".pdf",
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(card).save().then(() => {
+            if (actions) actions.style.display = 'flex';
+        }).catch(err => {
+            if (actions) actions.style.display = 'flex';
+            window.print();
+        });
+    } else {
+        window.print();
+    }
+}
+
+function showFinalReport() {
+    try { sound.playFanfare(); } catch(e) {}
+    const avg = Math.round((growth + health) / 2);
+
+    let title = "성장판이 열려있는 새내기";
+    let advice = "오늘 하루 동안 수고 많았습니다! 사소한 식습관과 수면 시간부터 하나씩 고쳐나간다면 더 멋지게 성장할 수 있어요.";
+
+    if (avg >= 90) {
+        title = "완벽한 갓생 청소년의 정석";
+        advice = "완벽합니다! 영양 밸런스, 규칙적인 신체활동, 스마트폰 절제와 골든타임 수면까지 조화를 이룬 청소년 생활습관의 최고 모범입니다!";
+    } else if (avg >= 80) {
+        title = "빛나는 성장돌! 모범 청소년";
+        advice = "매우 우수한 하루를 보냈습니다. 작은 유혹들을 조금만 더 이겨낸다면 키 성장과 건강 두 마리 토끼를 완벽하게 잡을 수 있습니다.";
+    } else if (health >= 75) {
+        title = "에너지 넘치는 강철 체력왕";
+        advice = "신체 건강도가 매우 높습니다! 야간 수면 환경과 스마트폰 디톡스에 조금만 더 신경을 쓴다면 더욱 쑥쑥 자라날 것입니다.";
+    } else if (growth >= 75) {
+        title = "키 쑥쑥! 미래의 모델 유망주";
+        advice = "성장 발달 수치가 뛰어납니다. 기름진 음식과 인스턴트 식품 섭취를 줄여 속 건강도 함께 챙겨보세요.";
+    }
+
+    setText('rep-title', "[" + title + "]");
+    setText('rep-growth', growth + "%");
+    setText('rep-health', health + "%");
+    setText('rep-advice', advice);
+
+    const sDiet = (scores && scores.diet) ? scores.diet : 0;
+    const sAct = (scores && scores.act) ? scores.act : 0;
+    const sSleep = (scores && scores.sleep) ? scores.sleep : 0;
+
+    const dScore = Math.min(100, Math.max(50, Math.round(50 + sDiet)));
+    const aScore = Math.min(100, Math.max(50, Math.round(50 + sAct)));
+    const sScore = Math.min(100, Math.max(50, Math.round(50 + sSleep)));
+
+    setText('rep-domain-diet', (dScore >= 80 ? '최우수' : '보통') + " (" + dScore + "점)");
+    setText('rep-domain-act', (aScore >= 80 ? '매우 우수' : '보통') + " (" + aScore + "점)");
+    setText('rep-domain-sleep', (sScore >= 80 ? '최우수' : '보통') + " (" + sScore + "점)");
+
+    const screen = document.getElementById('report-screen');
+    if (screen) screen.style.display = 'flex';
+}
+
+window.onload = () => {
+    loadQuestion();
+    document.getElementById('transition-modal').style.display = 'flex';
+};
+</script>
+<script>(()=>{const panel=document.getElementById('interaction-panel'),frame=document.getElementById('game-frame');const fit=()=>{frame.style.setProperty('--gc-panel-space',(panel.getBoundingClientRect().height+28)+'px')};new ResizeObserver(fit).observe(panel);window.addEventListener('resize',fit);fit()})();</script><script>(()=>{let embedded=false;const apply=()=>{document.documentElement.classList.toggle('gc-fullscreen',embedded||!!document.fullscreenElement);dispatchEvent(new Event('resize'))};addEventListener('message',e=>{if(e.source===parent&&e.origin==='https://game-center-site.beefly1136.workers.dev'&&e.data?.type==='game-center:fullscreen'){embedded=!!e.data.active;apply()}});document.addEventListener('fullscreenchange',apply);apply()})();</script></body>
+</html>

@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="100%" height="100%">
+  <defs>
+    <linearGradient id="cardGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <filter id="cyanNeon">
+      <feGaussianBlur stdDeviation="3" result="glow"/>
+      <feMerge>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="760" height="420" rx="18" fill="#090e1b" stroke="#38bdf8" stroke-width="2" />
+
+  <!-- Header -->
+  <rect x="230" y="14" width="300" height="30" rx="15" fill="rgba(15, 23, 42, 0.9)" stroke="#00f0ff" stroke-width="1.5" />
+  <text x="380" y="34" fill="#00f0ff" font-family="'Orbitron', monospace, sans-serif" font-size="12" font-weight="bold" text-anchor="middle">
+    MATERIALS DATABASE &amp; PROPERTIES
+  </text>
+
+  <!-- Row 1: 합금 (황동, 청동, 두랄루민) -->
+  <g transform="translate(30, 60)">
+    <!-- 황동 -->
+    <g transform="translate(0, 0)">
+      <rect width="220" height="150" rx="10" fill="url(#cardGrad2)" stroke="#f59e0b" stroke-width="1.5" />
+      <circle cx="35" cy="35" r="18" fill="#78350f" stroke="#f59e0b" stroke-width="1.5" />
+      <text x="35" y="41" fill="#fef08a" font-size="14" font-weight="bold" text-anchor="middle">Cu+Zn</text>
+      <text x="65" y="32" fill="#fbbf24" font-family="sans-serif" font-size="13" font-weight="bold">황동 (Brass)</text>
+      <text x="65" y="48" fill="#94a3b8" font-family="sans-serif" font-size="11">구리 + 아연 합금</text>
+      <rect x="12" y="65" width="196" height="72" rx="6" fill="#0f172a" />
+      <text x="20" y="85" fill="#e2e8f0" font-family="sans-serif" font-size="11">• 금빛의 아름다운 색상</text>
+      <text x="20" y="103" fill="#e2e8f0" font-family="sans-serif" font-size="11">• 전·연성 및 가공성 우수</text>
+      <text x="20" y="122" fill="#38bdf8" font-family="sans-serif" font-size="11" font-weight="bold">👉 타워 내부 정밀 배관재</text>
+    </g>
+
+    <!-- 청동 -->
+    <g transform="translate(240, 0)">
+      <rect width="220" height="150" rx="10" fill="url(#cardGrad2)" stroke="#d97706" stroke-width="1.5" />
+      <circle cx="35" cy="35" r="18" fill="#451a03" stroke="#d97706" stroke-width="1.5" />
+      <text x="35" y="41" fill="#fed7aa" font-size="14" font-weight="bold" text-anchor="middle">Cu+Sn</text>
+      <text x="65" y="32" fill="#f97316" font-family="sans-serif" font-size="13" font-weight="bold">청동 (Bronze)</text>
+      <text x="65" y="48" fill="#94a3b8" font-family="sans-serif" font-size="11">구리 + 주석 합금</text>
+      <rect x="12" y="65" width="196" height="72" rx="6" fill="#0f172a" />
+      <text x="20" y="85" fill="#e2e8f0" font-family="sans-serif" font-size="11">• 마찰에 견디는 경도 우수</text>
+      <text x="20" y="103" fill="#e2e8f0" font-family="sans-serif" font-size="11">• 마모에 매우 강함</text>
+      <text x="20" y="122" fill="#38bdf8" font-family="sans-serif" font-size="11" font-weight="bold">👉 고속 회전 기계 부품</text>
+    </g>
+
+    <!-- 두랄루민 -->
+    <g transform="translate(480, 0)">
+      <rect width="220" height="150" rx="10" fill="url(#cardGrad2)" stroke="#00f0ff" stroke-width="1.5" />
+      <circle cx="35" cy="35" r="18" fill="#083344" stroke="#00f0ff" stroke-width="1.5" />
+      <text x="35" y="41" fill="#67e8f9" font-size="13" font-weight="bold" text-anchor="middle">Al+Cu</text>
+      <text x="65" y="32" fill="#38bdf8" font-family="sans-serif" font-size="13" font-weight="bold">두랄루민 (Duralumin)</text>
+      <text x="65" y="48" fill="#94a3b8" font-family="sans-serif" font-size="11">알루미늄+구리+마그네슘</text>
+      <rect x="12" y="65" width="196" height="72" rx="6" fill="#0f172a" />
+      <text x="20" y="85" fill="#e2e8f0" font-family="sans-serif" font-size="11">• 알루미늄처럼 가벼움</text>
+      <text x="20" y="103" fill="#e2e8f0" font-family="sans-serif" font-size="11">• 강철 수준의 높은 강도</text>
+      <text x="20" y="122" fill="#38bdf8" font-family="sans-serif" font-size="11" font-weight="bold">👉 타워 고층 초경량 외벽재</text>
+    </g>
+  </g>
+
+  <!-- Row 2: 신소재 (에어로겔, 발포 알루미늄, 탄소 나노튜브) -->
+  <g transform="translate(30, 230)">
+    <!-- 에어로겔 -->
+    <g transform="translate(0, 0)">
+      <rect width="220" height="150" rx="10" fill="url(#cardGrad2)" stroke="#10b981" stroke-width="1.5" />
+      <circle cx="35" cy="35" r="18" fill="#064e3b" stroke="#10b981" stroke-width="1.5" />
+      <text x="35" y="41" fill="#a7f3d0" font-size="14" font-weight="bold" text-anchor="middle">99%</text>
+      <text x="65" y="32" fill="#34d399" font-family="sans-serif" font-size="13" font-weight="bold">에어로겔 (Aerogel)</text>
+      <text x="65" y="48" fill="#94a3b8" font-family="sans-serif" font-size="11">내부 99% 이상이 공기</text>
+      <rect x="12" y="65" width="196" height="72" rx="6" fill="#0f172a" />
+      <text x="20" y="85" fill="#e2e8f0" font-family="sans-serif" font-size="11">• 현존 최강의 초단열성</text>
+      <text x="20" y="103" fill="#e2e8f0" font-family="sans-serif" font-size="11">• 초경량 고체 신소재</text>
+      <text x="20" y="122" fill="#10b981" font-family="sans-serif" font-size="11" font-weight="bold">👉 엔진룸/우주급 단열벽</text>
+    </g>
+
+    <!-- 발포 알루미늄 -->
+    <g transform="translate(240, 0)">
+      <rect width="220" height="150" rx="10" fill="url(#cardGrad2)" stroke="#a855f7" stroke-width="1.5" />
+      <circle cx="35" cy="35" r="18" fill="#581c87" stroke="#a855f7" stroke-width="1.5" />
+      <text x="35" y="41" fill="#f3e8ff" font-size="14" font-weight="bold" text-anchor="middle">10x</text>
+      <text x="65" y="32" fill="#c084fc" font-family="sans-serif" font-size="13" font-weight="bold">발포 알루미늄</text>
+      <text x="65" y="48" fill="#94a3b8" font-family="sans-serif" font-size="11">스펀지처럼 부풀린 알루미늄</text>
+      <rect x="12" y="65" width="196" height="72" rx="6" fill="#0f172a" />
+      <text x="20" y="85" fill="#e2e8f0" font-family="sans-serif" font-size="11">• 뛰어난 충격 에너지 흡수</text>
+      <text x="20" y="103" fill="#e2e8f0" font-family="sans-serif" font-size="11">• 탁월한 흡음 및 차음성</text>
+      <text x="20" y="122" fill="#a855f7" font-family="sans-serif" font-size="11" font-weight="bold">👉 타워 충돌 방지 범퍼재</text>
+    </g>
+
+    <!-- 탄소 나노튜브 -->
+    <g transform="translate(480, 0)">
+      <rect width="220" height="150" rx="10" fill="url(#cardGrad2)" stroke="#ec4899" stroke-width="1.5" />
+      <circle cx="35" cy="35" r="18" fill="#831843" stroke="#ec4899" stroke-width="1.5" />
+      <text x="35" y="41" fill="#fce7f3" font-size="14" font-weight="bold" text-anchor="middle">CNT</text>
+      <text x="65" y="32" fill="#f472b6" font-family="sans-serif" font-size="13" font-weight="bold">탄소 나노튜브</text>
+      <text x="65" y="48" fill="#94a3b8" font-family="sans-serif" font-size="11">원통형 탄소 분자 결합</text>
+      <rect x="12" y="65" width="196" height="72" rx="6" fill="#0f172a" />
+      <text x="20" y="85" fill="#e2e8f0" font-family="sans-serif" font-size="11">• 강철의 100배 인장 강도</text>
+      <text x="20" y="103" fill="#e2e8f0" font-family="sans-serif" font-size="11">• 전기 및 열 전도성 우수</text>
+      <text x="20" y="122" fill="#ec4899" font-family="sans-serif" font-size="11" font-weight="bold">👉 초고층 타워 지지 케이블</text>
+    </g>
+  </g>
+</svg>

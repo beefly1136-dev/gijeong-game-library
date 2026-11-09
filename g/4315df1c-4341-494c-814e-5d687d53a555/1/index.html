@@ -1,0 +1,3993 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>바느질 시뮬레이터 - 중학교 기술·가정</title>
+  <style>
+    :root {
+      --primary: #e11d48;
+      --primary-hover: #be123c;
+      --primary-soft: #ffe4e6;
+      --blue: #2563eb;
+      --blue-soft: #dbeafe;
+      --amber: #d97706;
+      --emerald: #059669;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', 'Malgun Gothic', -apple-system, BlinkMacSystemFont, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background: linear-gradient(180deg, #fffaf5 0%, #f1f5f9 100%);
+      color: var(--slate-900);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 상단 헤더 */
+    header {
+      background: #ffffff;
+      border-bottom: 2px solid #fed7aa;
+      padding: 10px 24px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mascot {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 3px solid #fb7185;
+      object-fit: cover;
+      box-shadow: 0 3px 10px rgba(225, 29, 72, 0.2);
+      background: #fff1f2;
+    }
+
+    .brand-title {
+      font-size: 1.28rem;
+      font-weight: 900;
+      color: var(--slate-900);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-grade {
+      font-size: 0.73rem;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: #ffe4e6;
+      color: #be123c;
+      border: 1px solid #fecdd3;
+    }
+
+    .brand-sub {
+      font-size: 0.78rem;
+      color: var(--slate-500);
+      margin-top: 2px;
+      font-weight: 600;
+    }
+
+    /* 네비게이션 탭 */
+    .nav-tabs {
+      display: flex;
+      background: #f1f5f9;
+      padding: 5px;
+      border-radius: 14px;
+      border: 1px solid #e2e8f0;
+      gap: 4px;
+    }
+
+    .nav-tab-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--slate-600);
+      font-size: 0.86rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-tab-btn:hover {
+      color: var(--slate-900);
+      background: rgba(255,255,255,0.6);
+    }
+
+    .nav-tab-btn.active {
+      background: #ffffff;
+      color: #e11d48;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ctrl-pill-btn {
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      padding: 7px 12px;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--slate-700);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s;
+    }
+
+    .ctrl-pill-btn:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+    }
+
+    /* 메인 영역 */
+    main {
+      flex: 1;
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 14px 20px 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* 기법 선택 바 */
+    .tech-selector-bar {
+      background: #ffffff;
+      border: 1.5px solid #fed7aa;
+      border-radius: 18px;
+      padding: 9px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(251, 146, 60, 0.06);
+    }
+
+    .tech-btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tech-btn {
+      padding: 9px 17px;
+      border-radius: 12px;
+      border: 2px solid #e2e8f0;
+      background: #f8fafc;
+      color: var(--slate-700);
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .tech-btn:hover {
+      border-color: #fdba74;
+      background: #fff7ed;
+      color: #c2410c;
+    }
+
+    .tech-btn.active {
+      background: linear-gradient(135deg, #e11d48 0%, #f43f5e 100%);
+      color: #ffffff;
+      border-color: #be123c;
+      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25);
+    }
+
+    /* 학습 진행 단계 스텝퍼 ([STEP 1: 설명 듣기] -> [STEP 2: 작업대 실습하기]) */
+    .learning-flow-stepper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f8fafc;
+      padding: 4px 6px;
+      border-radius: 12px;
+      border: 1.5px solid #cbd5e1;
+    }
+
+    .flow-step-btn {
+      padding: 7px 14px;
+      border-radius: 9px;
+      border: none;
+      font-size: 0.8rem;
+      font-weight: 900;
+      cursor: pointer;
+      background: transparent;
+      color: var(--slate-600);
+      transition: all 0.18s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .flow-step-btn.active-flow {
+      background: #0f172a;
+      color: #facc15;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
+    }
+
+    /* ============================================================== */
+    /* [STEP 1 화면] 기법 시작 전 핵심 설명 & 앞·옆·위 완성 모습 브리핑 뷰 */
+    /* ============================================================== */
+    .intro-briefing-card {
+      background: #ffffff;
+      border: 2.5px solid #fb923c;
+      border-radius: 24px;
+      padding: 24px 28px;
+      box-shadow: 0 12px 32px rgba(234, 88, 12, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .intro-top-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      border-bottom: 2px dashed #fed7aa;
+      padding-bottom: 16px;
+    }
+
+    .intro-title-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .intro-mascot-avatar {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      border: 3px solid #fb923c;
+      object-fit: cover;
+      background: #fff7ed;
+    }
+
+    /* 핵심 1~2문장 설명 카드 그리드 */
+    .intro-summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 860px) {
+      .intro-summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .summary-keyword-box {
+      background: #fffbeb;
+      border: 2px solid #fde68a;
+      border-radius: 18px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .summary-keyword-box.how-box {
+      background: #fff1f2;
+      border-color: #fecdd3;
+    }
+
+    .summary-label {
+      font-size: 0.8rem;
+      font-weight: 900;
+      color: #b45309;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .summary-keyword-box.how-box .summary-label {
+      color: #be123c;
+    }
+
+    .summary-sentence {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--slate-900);
+      line-height: 1.5;
+      word-break: keep-all;
+    }
+
+    .kw-highlight {
+      background: #fef08a;
+      color: #9a3412;
+      padding: 1px 6px;
+      border-radius: 6px;
+      font-weight: 900;
+    }
+
+    .kw-highlight-red {
+      background: #ffe4e6;
+      color: #be123c;
+      padding: 1px 6px;
+      border-radius: 6px;
+      font-weight: 900;
+    }
+
+    /* 앞·옆·위 완성된 모습 3종 시각 자료 그리드 */
+    .completed-views-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.35fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    @media (max-width: 1080px) {
+      .completed-views-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .view-preview-card {
+      background: #f8fafc;
+      border: 2px solid #cbd5e1;
+      border-radius: 18px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .view-preview-header {
+      background: #f1f5f9;
+      padding: 9px 14px;
+      font-size: 0.82rem;
+      font-weight: 900;
+      color: var(--slate-800);
+      border-bottom: 1.5px solid #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .view-preview-body {
+      flex: 1;
+      background: #ffffff;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .view-preview-body img {
+      width: 100%;
+      height: 175px;
+      object-fit: contain;
+      border-radius: 10px;
+    }
+
+    .view-preview-body img.cover-photo {
+      object-fit: cover;
+      border: 1.5px solid #e2e8f0;
+    }
+
+    .view-preview-caption {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--slate-600);
+      text-align: center;
+    }
+
+    .start-practice-cta-btn {
+      background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+      color: #ffffff;
+      border: none;
+      padding: 15px 28px;
+      border-radius: 16px;
+      font-size: 1.08rem;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 6px 20px rgba(225, 29, 72, 0.32);
+      transition: transform 0.15s;
+    }
+
+    .start-practice-cta-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    /* ============================================================== */
+    /* [STEP 2 화면] 작업대에서 순서 클릭하며 방법 확인하기 뷰 */
+    /* ============================================================== */
+    .workspace-container {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .top-info-banner {
+      background: linear-gradient(135deg, #fffbeb 0%, #ffedd5 100%);
+      border: 2px solid #fcd34d;
+      border-radius: 18px;
+      padding: 11px 16px;
+      display: grid;
+      grid-template-columns: 1fr auto 340px;
+      align-items: center;
+      gap: 14px;
+    }
+
+    @media (max-width: 1200px) {
+      .top-info-banner {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .banner-desc-col {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .banner-badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .cat-pill {
+      background: #ea580c;
+      color: #ffffff;
+      font-size: 0.73rem;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 7px;
+    }
+
+    .diff-pill {
+      background: #ffffff;
+      color: #b45309;
+      border: 1px solid #fcd34d;
+      font-size: 0.73rem;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 7px;
+    }
+
+    .banner-tech-title {
+      font-size: 1.18rem;
+      font-weight: 900;
+      color: var(--slate-900);
+    }
+
+    .banner-tech-usage {
+      font-size: 0.84rem;
+      color: #431407;
+      line-height: 1.4;
+      font-weight: 700;
+    }
+
+    .reference-thumbs-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      padding: 6px 10px;
+      border-radius: 12px;
+      border: 1.5px solid #fde68a;
+    }
+
+    .thumb-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .thumb-item img {
+      height: 58px;
+      width: 98px;
+      object-fit: cover;
+      border-radius: 7px;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+    }
+
+    .thumb-item span {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--slate-700);
+    }
+
+    .current-mission-box {
+      background: #ffffff;
+      border: 2.5px solid #e11d48;
+      border-radius: 14px;
+      padding: 10px 14px;
+      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .mission-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-weight: 900;
+      color: #e11d48;
+    }
+
+    .mission-body {
+      font-size: 0.86rem;
+      font-weight: 800;
+      color: var(--slate-900);
+      line-height: 1.38;
+    }
+
+    .workspace-layout {
+      display: grid;
+      grid-template-columns: 1fr 315px;
+      gap: 14px;
+      align-items: start;
+    }
+
+    @media (max-width: 1080px) {
+      .workspace-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .dual-stage-card {
+      background: #ffffff;
+      border: 2px solid #cbd5e1;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stage-bar {
+      background: #f8fafc;
+      padding: 8px 16px;
+      border-bottom: 1.5px solid #e2e8f0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .stage-bar-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      font-weight: 900;
+      color: var(--slate-900);
+    }
+
+    .stage-badge {
+      background: #ffe4e6;
+      color: #be123c;
+      font-size: 0.73rem;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid #fecdd3;
+    }
+
+    .stage-legend {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--slate-600);
+    }
+
+    .legend-chip {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .surface-toggle-group {
+      display: flex;
+      background: #e2e8f0;
+      padding: 3px;
+      border-radius: 10px;
+      gap: 4px;
+    }
+
+    .surface-toggle-btn {
+      padding: 5px 11px;
+      border-radius: 8px;
+      border: none;
+      font-size: 0.76rem;
+      font-weight: 800;
+      cursor: pointer;
+      background: transparent;
+      color: var(--slate-700);
+      transition: all 0.15s;
+    }
+
+    .surface-toggle-btn.active-top {
+      background: #e11d48;
+      color: #ffffff;
+    }
+
+    .surface-toggle-btn.active-bottom {
+      background: #2563eb;
+      color: #ffffff;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      width: 100%;
+      background: #fbf7ee;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    canvas.interactive-canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      cursor: pointer;
+    }
+
+    .motion-bridge-bar {
+      background: linear-gradient(90deg, #1e293b 0%, #334155 100%);
+      color: #ffffff;
+      padding: 8px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .motion-phase-steps {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.76rem;
+      font-weight: 800;
+    }
+
+    .phase-pill {
+      padding: 4px 9px;
+      border-radius: 7px;
+      background: rgba(255,255,255,0.12);
+      color: #cbd5e1;
+    }
+
+    .phase-pill.active {
+      background: #f59e0b;
+      color: #0f172a;
+    }
+
+    .big-stitch-trigger-btn {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border: 2px solid #a7f3d0;
+      padding: 7px 16px;
+      border-radius: 10px;
+      font-size: 0.83rem;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .side-caption-bar {
+      background: #f8fafc;
+      border-top: 1.5px solid #e2e8f0;
+      padding: 8px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--slate-700);
+    }
+
+    .side-guide-col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .mascot-coach-card {
+      background: #ffffff;
+      border: 2px solid #fed7aa;
+      border-radius: 18px;
+      padding: 12px;
+    }
+
+    .mascot-coach-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mascot-coach-img {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 3px solid #fb923c;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .mascot-coach-bubble {
+      background: #fff7ed;
+      border: 1.5px solid #fed7aa;
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #9a3412;
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .formula-card {
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .formula-card h3 {
+      font-size: 0.86rem;
+      font-weight: 900;
+      color: var(--slate-900);
+      padding-bottom: 5px;
+      border-bottom: 1.5px solid #f1f5f9;
+    }
+
+    .formula-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 0.78rem;
+      color: var(--slate-700);
+      line-height: 1.4;
+    }
+
+    .progress-widget {
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 11px;
+      padding: 8px 10px;
+    }
+
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .progress-bar-bg {
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #f59e0b 0%, #e11d48 100%);
+      transition: width 0.3s;
+    }
+
+    .complete-celebration {
+      display: none;
+      background: #ecfdf5;
+      border: 2px solid #34d399;
+      border-radius: 14px;
+      padding: 11px;
+      text-align: center;
+    }
+
+    .complete-celebration h4 {
+      color: #065f46;
+      font-size: 0.88rem;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .complete-real-photo {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 9px;
+      border: 2px solid #10b981;
+      margin: 6px 0;
+    }
+
+    .btn-next-stage {
+      width: 100%;
+      background: #059669;
+      color: #ffffff;
+      border: none;
+      padding: 8px;
+      border-radius: 9px;
+      font-size: 0.79rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-demo {
+      background: #f59e0b;
+      color: #ffffff;
+      border: none;
+      padding: 7px 12px;
+      border-radius: 9px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-replay {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1.5px solid #bfdbfe;
+      padding: 7px 12px;
+      border-radius: 9px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-reset {
+      background: #f1f5f9;
+      color: var(--slate-700);
+      border: 1.5px solid #cbd5e1;
+      padding: 7px 12px;
+      border-radius: 9px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    /* ================= 바느질 도감 & 용구 탭 ================= */
+    #section-dictionary {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .dict-card {
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 22px;
+      padding: 20px;
+    }
+
+    .dict-header {
+      margin-bottom: 14px;
+    }
+
+    .dict-header h2 {
+      font-size: 1.18rem;
+      font-weight: 900;
+    }
+
+    .dict-header p {
+      font-size: 0.81rem;
+      color: var(--slate-500);
+      margin-top: 2px;
+      font-weight: 600;
+    }
+
+    .real-tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 14px;
+    }
+
+    .real-tech-card {
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .real-tech-imgs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .real-tech-imgs img {
+      width: 100%;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+    }
+
+    .tools-grid-6 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .tool-item-card {
+      background: #fffaf5;
+      border: 1.5px solid #fed7aa;
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 6px;
+    }
+
+    .tool-svg-box {
+      width: 105px;
+      height: 76px;
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #fde68a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ref-images-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .ref-images-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .ref-img-box {
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ref-img-box img {
+      width: 100%;
+      max-height: 330px;
+      object-fit: contain;
+      background: #ffffff;
+      padding: 8px;
+    }
+
+    .ref-img-caption {
+      padding: 9px 14px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--slate-700);
+      border-top: 1px solid #e2e8f0;
+      background: #f1f5f9;
+    }
+
+    .button-sew-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+
+    .button-step-card {
+      background: #f0f9ff;
+      border: 1.5px solid #bae6fd;
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 6px;
+    }
+
+    /* ================= 실전 수선 챌린지 탭 ================= */
+    #section-challenge {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .challenge-box {
+      background: #ffffff;
+      border: 2px solid #cbd5e1;
+      border-radius: 24px;
+      padding: 26px;
+      max-width: 820px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .quiz-opt-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .quiz-opt-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .quiz-choice-btn {
+      padding: 15px;
+      border-radius: 14px;
+      border: 2px solid #e2e8f0;
+      background: #f8fafc;
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: var(--slate-800);
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .quiz-choice-btn:hover {
+      background: #fff1f2;
+      border-color: #fb7185;
+      color: #be123c;
+    }
+
+    footer {
+      background: #ffffff;
+      border-top: 1px solid #e2e8f0;
+      padding: 12px;
+      text-align: center;
+      font-size: 0.76rem;
+      color: var(--slate-500);
+      font-weight: 600;
+    }
+  
+    /* --- [v7] 추가 개선 스타일 --- */
+    /* 전반적 텍스트 줄바꿈 및 박스 벗어남 방지 */
+    body, button, input, select, textarea, div, p, span, h1, h2, h3, h4, li {
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+    .btn-replay, .btn-demo, .btn-reset {
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .btn-replay:hover, .btn-demo:hover, .btn-reset:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    }
+
+    /* 대형 이미지 확대 모달 */
+    .image-modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.82);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 99999;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .image-modal-backdrop.open {
+      display: flex;
+    }
+    .image-modal-dialog {
+      background: #ffffff;
+      border-radius: 20px;
+      max-width: 900px;
+      width: 94%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5);
+      border: 2px solid #cbd5e1;
+      overflow: hidden;
+      animation: modalPop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes modalPop {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .image-modal-header {
+      padding: 16px 22px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .image-modal-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .image-modal-close {
+      background: #e2e8f0;
+      border: none;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .image-modal-close:hover {
+      background: #f43f5e;
+      color: #ffffff;
+    }
+    .image-modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #0f172a;
+    }
+    .image-modal-img {
+      max-width: 100%;
+      max-height: 65vh;
+      border-radius: 12px;
+      object-fit: contain;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    .image-modal-footer {
+      padding: 14px 22px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      font-size: 0.92rem;
+      color: #475569;
+      line-height: 1.5;
+    }
+
+
+    /* --- [v9] 텍스트 박스 벗어남 방지 및 상단 작업대 반응형 레이아웃 강화 --- */
+    * {
+      box-sizing: border-box;
+    }
+    .top-info-banner {
+      grid-template-columns: minmax(260px, 1fr) auto minmax(440px, 1.35fr) !important;
+      align-items: stretch !important;
+      width: 100% !important;
+      gap: 16px !important;
+    }
+    @media (max-width: 1200px) {
+      .top-info-banner {
+        grid-template-columns: 1fr !important;
+      }
+    }
+    .current-mission-box {
+      min-width: 0 !important;
+      overflow: hidden !important;
+      justify-content: center !important;
+      gap: 6px !important;
+      padding: 10px 14px !important;
+    }
+    .mission-header {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 8px !important;
+      flex-wrap: wrap !important;
+      min-width: 0 !important;
+    }
+    .mission-btn-group {
+      display: flex !important;
+      gap: 5px !important;
+      align-items: center !important;
+      flex-wrap: wrap !important;
+    }
+    .mission-btn-group button, .btn-replay, .btn-demo, .btn-reset {
+      white-space: nowrap !important;
+      padding: 5px 12px !important;
+      font-size: 0.82rem !important;
+      font-weight: 800 !important;
+      border-radius: 8px !important;
+      cursor: pointer !important;
+      flex-shrink: 0 !important;
+    }
+    .mission-body {
+      font-size: 0.88rem !important;
+      font-weight: 800 !important;
+      line-height: 1.45 !important;
+      word-break: keep-all !important;
+      overflow-wrap: break-word !important;
+      white-space: normal !important;
+      min-width: 0 !important;
+    }
+
+    /* 모든 안내 박스, 설명 카드, 팁 리스트 텍스트 오버플로우 방지 */
+    .mascot-coach-bubble, .formula-card, .formula-steps, .formula-steps div,
+    #examTipsList li, .side-caption-bar, #sideRealtimeCaption,
+    .banner-desc-col, .banner-tech-usage, .stage-bar-title,
+    .quiz-scenario-card, .quiz-question, .quiz-choice-btn, #quizFeedbackBox {
+      word-break: keep-all !important;
+      overflow-wrap: break-word !important;
+      min-width: 0 !important;
+      box-sizing: border-box !important;
+    }
+
+    /* 클릭 시 확대 가능함을 나타내는 커서 및 뱃지 */
+    .cursor-zoom {
+      cursor: zoom-in;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .cursor-zoom:hover {
+      transform: scale(1.02);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    .zoom-hint-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: #2563eb;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-left: 6px;
+      cursor: pointer;
+    }
+
+    /* 게임 시작 오버레이 화면 */
+    #gameStartScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #ffffff;
+      padding: 20px;
+      text-align: center;
+    }
+    .start-card {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 28px;
+      padding: 44px 36px;
+      max-width: 660px;
+      width: 92%;
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45);
+      animation: floatUp 0.6s ease-out;
+    }
+    @keyframes floatUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .start-mascot-glow {
+      width: 110px;
+      height: 110px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 4px solid #fb7185;
+      box-shadow: 0 0 35px rgba(244, 63, 94, 0.55);
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .start-mascot-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      display: block;
+    }
+    .start-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, #fbcfe8, #fda4af, #fef08a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .start-subtitle {
+      font-size: 1.08rem;
+      color: #cbd5e1;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .start-btn {
+      background: linear-gradient(135deg, #e11d48 0%, #f43f5e 100%);
+      color: #ffffff;
+      font-size: 1.25rem;
+      font-weight: 800;
+      padding: 16px 42px;
+      border-radius: 50px;
+      border: 3px solid #fecdd3;
+      cursor: pointer;
+      box-shadow: 0 12px 30px rgba(225, 29, 72, 0.5);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .start-btn:hover {
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 18px 36px rgba(225, 29, 72, 0.65);
+      background: linear-gradient(135deg, #be123c 0%, #e11d48 100%);
+    }
+
+    /* 실전 수선 챌린지 카드 스타일 */
+    .quiz-scenario-card {
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .quiz-scenario-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .quiz-scenario-img-wrapper {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px solid #cbd5e1;
+      background: #0f172a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      max-height: 280px;
+    }
+    .quiz-scenario-img {
+      max-width: 100%;
+      max-height: 270px;
+      object-fit: cover;
+      cursor: zoom-in;
+      transition: transform 0.2s ease;
+    }
+    .quiz-scenario-img:hover {
+      transform: scale(1.03);
+    }
+    .quiz-scenario-img-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(15, 23, 42, 0.78);
+      color: #ffffff;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      pointer-events: none;
+    }
+    .quiz-scenario-caption {
+      font-size: 0.88rem;
+      color: #475569;
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 8px 12px;
+      border-radius: 0 8px 8px 0;
+      line-height: 1.4;
+    }
+
+  </style>
+<link rel="preload" as="image" href="assets/fast-f35bef2c8985daaaa4570265.webp" fetchpriority="high"><style id="gc-fullscreen-only">
+html.gc-fullscreen,html.gc-fullscreen body{width:100%;min-height:100%;min-height:100dvh;margin:0!important;padding:0!important;box-sizing:border-box}
+html.gc-fullscreen #app,html.gc-fullscreen #root{width:100%;min-height:100dvh}
+html.gc-fullscreen .wrapper,html.gc-fullscreen .dashboard,html.gc-fullscreen main{max-width:none}
+html.gc-fullscreen .room-container{max-width:none;max-height:none}
+html.gc-fullscreen .console-container{max-width:none;width:100%;min-height:100dvh;border-radius:0}
+html.gc-fullscreen #game-app-viewport{height:100dvh}
+html.gc-fullscreen #game-frame{width:100%;max-width:none;height:100dvh;min-height:0;border:0;border-radius:0}
+html.gc-fullscreen #stage-viewport{min-height:0;padding-bottom:var(--gc-panel-space,240px)}
+html.gc-fullscreen #avatar-img{max-height:min(410px,44dvh)}
+html.gc-fullscreen #interaction-panel{max-height:55dvh;overflow-y:auto}
+@media(max-width:900px){html.gc-fullscreen #game-frame{height:100dvh}html.gc-fullscreen #interaction-panel{bottom:8px;width:calc(100% - 16px);padding:12px}html.gc-fullscreen #top-nav{padding:8px;gap:8px;flex-wrap:wrap}}
+</style></head>
+<body>
+
+  <!-- [게임 시작 화면] -->
+  <div id="gameStartScreen">
+    <div class="start-card">
+      <div class="start-mascot-glow">
+        <img src="assets/fast-f35bef2c8985daaaa4570265.webp" alt="한땀이" class="start-mascot-img">
+      </div>
+      <h1 class="start-title">🪡 바느질 시뮬레이터</h1>
+      <p class="start-subtitle">
+        중학교 기술·가정 수행평가 완벽 대비!<br>
+        옷 수선에 필요한 <strong>5대 손바느질 기법</strong>을 눈으로 관찰하고,<br>
+        직접 바늘을 클릭하며 바느질 마스터가 되어보세요!
+      </p>
+      <button class="start-btn" onclick="startGameSimulation()">
+        🎮 게임 시작 (바느질 시뮬레이션 시작) ➔
+      </button>
+    </div>
+  </div>
+
+
+  <!-- 상단 헤더 -->
+  <header>
+    <div class="brand-box">
+      <img src="assets/fast-f35bef2c8985daaaa4570265.webp" alt="바느질 요정 한땀이" class="brand-mascot">
+      <div>
+        <div class="brand-title">
+          🪡 바느질 시뮬레이터
+          
+        </div>
+        <p class="brand-sub">① 완성 모습과 핵심 설명 확인하기 ➔ ② 작업대에서 바늘 순서 클릭하며 실습하기</p>
+      </div>
+    </div>
+
+    <nav class="nav-tabs">
+      <button class="nav-tab-btn active" id="tabBtn-practice" onclick="switchTab('practice')">
+        📍 5대 기법 학습 & 실습
+      </button>
+      <button class="nav-tab-btn" id="tabBtn-dictionary" onclick="switchTab('dictionary')">
+        📖 완성 사진 도감 & 용구
+      </button>
+      <button class="nav-tab-btn" id="tabBtn-challenge" onclick="switchTab('challenge')">
+        🏆 실전 수선 챌린지 (5문항)
+      </button>
+    </nav>
+
+    <div class="header-controls">
+      <button class="ctrl-pill-btn" id="speedToggleBtn" onclick="toggleSpeed()">
+        🐢 <span id="speedStatusText">모션 속도: 학습용(천천히)</span>
+      </button>
+      <button class="ctrl-pill-btn" id="soundToggleBtn" onclick="toggleSound()">
+        🔊 <span id="soundStatusText">효과음 켜짐</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ========================================================== -->
+    <!-- 1. [5대 기법 학습 & 실습 탭] -->
+    <!-- ========================================================== -->
+    <section id="section-practice" style="display:flex; flex-direction:column; gap:12px;">
+      
+      <!-- 바느질 기법 5종 선택 바 + [1단계 설명 듣기 / 2단계 작업대 실습] 스텝퍼 -->
+      <div class="tech-selector-bar">
+        <div class="tech-btn-group">
+          <button class="tech-btn active" id="techBtn-running" onclick="selectTechnique('running')">1. 홈질</button>
+          <button class="tech-btn" id="techBtn-backstitch" onclick="selectTechnique('backstitch')">2. 박음질</button>
+          <button class="tech-btn" id="techBtn-slip" onclick="selectTechnique('slip')">3. 공그르기</button>
+          <button class="tech-btn" id="techBtn-overcast" onclick="selectTechnique('overcast')">4. 감침질</button>
+          <button class="tech-btn" id="techBtn-herringbone" onclick="selectTechnique('herringbone')">5. 새발뜨기</button>
+        </div>
+
+        <!-- 2단계 학습 순서 스텝퍼 -->
+        <div class="learning-flow-stepper">
+          <button class="flow-step-btn active-flow" id="flowBtn-intro" onclick="setLearningPhase('intro')">
+            ① 설명 & 완성 모습 보기
+          </button>
+          <span style="color:#94a3b8; font-weight:900;">➔</span>
+          <button class="flow-step-btn" id="flowBtn-work" onclick="setLearningPhase('work')">
+            ② 작업대에서 클릭 실습하기
+          </button>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- [STEP 1 화면] 바느질 시작 전: 핵심 1~2문장 설명 & 앞·옆·위 완성 모습 브리핑 -->
+      <!-- ======================================================== -->
+      <div id="introBriefingView" class="intro-briefing-card">
+        
+        <div class="intro-top-row">
+          <div class="intro-title-group">
+            <img src="assets/fast-f35bef2c8985daaaa4570265.webp" alt="한땀이" class="intro-mascot-avatar">
+            <div>
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                <span class="cat-pill" id="introCategoryBadge">솔기가 뜯어졌을 때</span>
+                <span class="diff-pill" id="introDirectionBadge">진행: 오른쪽 ➔ 왼쪽</span>
+              </div>
+              <h2 style="font-size:1.5rem; font-weight:900; color:#0f172a;" id="introTechTitle">1. 홈질 (Running Stitch)</h2>
+            </div>
+          </div>
+
+          <button class="start-practice-cta-btn" onclick="setLearningPhase('work')">
+            🪡 설명 확인 완료! 작업대에서 직접 클릭하며 연습하기 ➔
+          </button>
+        </div>
+
+        <!-- 줄글 없이 1~2문장 핵심 단어만 사용한 초간단 요약 카드 2개 -->
+        <div class="intro-summary-grid">
+          <div class="summary-keyword-box">
+            <div class="summary-label">📌 언제 사용할까? (사용 상황)</div>
+            <div class="summary-sentence" id="introWhenSentence">
+              <!-- JS 주입 (1문장 핵심 키워드) -->
+            </div>
+          </div>
+
+          <div class="summary-keyword-box how-box">
+            <div class="summary-label">🪡 어떻게 바느질할까? (핵심 방법)</div>
+            <div class="summary-sentence" id="introHowSentence">
+              <!-- JS 주입 (1~2문장 핵심 키워드) -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 앞(위), 뒤(아래), 옆(단면)에서 본 완성된 모습 3종 비교 -->
+        <div>
+          <h3 style="font-size:0.95rem; font-weight:900; color:#334155; margin-bottom:10px;">
+            👀 바느질 시작 전, <span style="color:#e11d48;">위(앞)·아래(뒤)·옆(단면)에서 본 완성 모습</span>을 먼저 확인하세요!
+          </h3>
+
+          <div class="completed-views-grid">
+            
+            <!-- 1) 교과서 완성 도안 카드 (클릭 시 대형 확대 모달 오픈) -->
+            <div class="view-preview-card" style="border-color:#bae6fd;">
+              <div class="view-preview-header">
+                <span style="font-weight:800; color:#0369a1; display:inline-flex; align-items:center;">
+                  📘 교과서 완성 도안
+                  <span class="zoom-hint-pill" onclick="openCurrentTechModal('tb')">🔍 확대</span>
+                </span>
+                <span style="font-size:0.75rem; color:#64748b;">(클릭하여 크게 보기)</span>
+              </div>
+              <div class="view-preview-body" style="background:#ffffff; padding:8px; cursor:zoom-in;" onclick="openCurrentTechModal('tb')">
+                <img id="introTbDiagram" class="cover-photo cursor-zoom" src="assets/fast-ccdb14681555149d98eb2eb7.webp" alt="교과서 완성 도안">
+              </div>
+              <div class="view-preview-caption">교과서 기준 실과 바늘땀 형성도</div>
+            </div>
+
+            <!-- 2) 실제 완성 모습 (앞면/겉면) -->
+            <div class="view-preview-card" style="border-color:#bbf7d0;">
+              <div class="view-preview-header">
+                <span style="font-weight:800; color:#15803d; display:inline-flex; align-items:center;">
+                  📸 실제 완성 모습 (앞면/겉면)
+                  <span class="zoom-hint-pill" onclick="openCurrentTechModal('realFront')">🔍 확대</span>
+                </span>
+                <span style="font-size:0.75rem; color:#64748b;">(클릭하여 크게 보기)</span>
+              </div>
+              <div class="view-preview-body" style="background:#0f172a; padding:6px; cursor:zoom-in;" onclick="openCurrentTechModal('realFront')">
+                <img id="introRealPhoto" class="cover-photo cursor-zoom" src="assets/fast-c06e4b073fdbff2290425fb3.webp" alt="실제 완성 바느질 사진(앞면)">
+              </div>
+              <div class="view-preview-caption" id="introRealPhotoFrontCaption">원단 위 실제 손바느질 모습 (겉면)</div>
+            </div>
+
+            <!-- 3) 실제 완성 모습 (뒷면/안쪽) - 홈질/박음질 전용 -->
+            <div class="view-preview-card" id="introRealBackCard" style="border-color:#fed7aa;">
+              <div class="view-preview-header">
+                <span style="font-weight:800; color:#c2410c; display:inline-flex; align-items:center;">
+                  🔄 실제 완성 모습 (뒷면/안쪽)
+                  <span class="zoom-hint-pill" onclick="openCurrentTechModal('realBack')">🔍 확대</span>
+                </span>
+                <span style="font-size:0.75rem; color:#64748b;">(클릭하여 크게 보기)</span>
+              </div>
+              <div class="view-preview-body" style="background:#0f172a; padding:6px; cursor:zoom-in;" onclick="openCurrentTechModal('realBack')">
+                <img id="introRealPhotoBack" class="cover-photo cursor-zoom" src="assets/fast-372945d2940041678995abf2.webp" alt="실제 완성 바느질 사진(뒷면)">
+              </div>
+              <div class="view-preview-caption">원단 아래 실제 바느질 뒷면 모습</div>
+            </div>
+
+            <!-- 4) 옆·위·아래 단면 완성 구조도 (3단 분할 캔버스) -->
+            <div class="view-preview-card" style="border-color:#cbd5e1;">
+              <div class="view-preview-header">
+                <span style="font-weight:800; color:#334155;">📐 입체 단면 투시도</span>
+                <span style="font-size:0.75rem; color:#64748b;">(3면 관찰)</span>
+              </div>
+              <div class="view-preview-body" style="background:#f8fafc; padding:4px;">
+                <canvas id="introPreviewCanvas" width="360" height="185" style="width:100%; height:185px; border-radius:10px; background:#ffffff; border:1px solid #e2e8f0;"></canvas>
+              </div>
+              <div class="view-preview-caption">옆(단면) · 위(앞면) · 아래(뒷면) 구조</div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- [STEP 2 화면] 작업대에서 순서 클릭하며 방법 확인하기 -->
+      <!-- ======================================================== -->
+      <div id="workspacePracticeView" class="workspace-container">
+        
+        <!-- 작업대 상단 요약 바 -->
+        <div class="top-info-banner">
+          <div class="banner-desc-col">
+            <div class="banner-badges">
+              <span class="cat-pill" id="infoCategory">솔기가 뜯어졌을 때</span>
+              <span class="diff-pill" id="infoDirectionBadge" style="background:#eff6ff; color:#1d4ed8; border-color:#93c5fd;">진행: 오른쪽 ➔ 왼쪽</span>
+              <button class="btn-replay" onclick="setLearningPhase('intro')" style="padding:3px 10px; font-size:0.74rem;">
+                📖 설명 & 완성 사진 다시 보기
+              </button>
+            </div>
+            <h2 class="banner-tech-title" id="infoTitle">홈질 (Running Stitch)</h2>
+            <p class="banner-tech-usage" id="infoUsage"></p>
+          </div>
+
+          <!-- 교과서 도안 & 실제 완성 사진 미니 썸네일 -->
+          <div class="reference-thumbs-box">
+            <div class="thumb-item" onclick="openCurrentTechModal('tb')" title="클릭하여 교과서 도안 확대 보기" style="cursor:zoom-in;">
+              <img id="bannerTbImg" src="assets/fast-ccdb14681555149d98eb2eb7.webp" alt="교과서 도안">
+              <span>📘 교과서 도안 🔍</span>
+            </div>
+            <div class="thumb-item" onclick="openCurrentTechModal('realFront')" title="클릭하여 실제 완성 사진 확대 보기" style="cursor:zoom-in;">
+              <img id="bannerRealImg" src="assets/fast-c06e4b073fdbff2290425fb3.webp" alt="실제 완성 사진">
+              <span>📸 실제 완성 모습 🔍</span>
+            </div>
+          </div>
+
+          <!-- 현재 클릭 순서 안내 박스 (1문장 핵심어!) -->
+          <div class="current-mission-box">
+            <div class="mission-header">
+              <span id="missionStepTag">🎯 클릭 순서 (1 / 8)</span>
+              <div class="mission-btn-group" style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                <button class="btn-replay" style="padding:5px 12px; font-size:0.82rem; font-weight:800; border-radius:8px; cursor:pointer;" onclick="replayLastMotion()">🔍 방금 모션</button>
+                <button class="btn-demo" style="padding:5px 12px; font-size:0.82rem; font-weight:800; border-radius:8px; cursor:pointer;" id="autoDemoBtn" onclick="toggleAutoDemo()">▶️ 자동시범</button>
+                <button class="btn-reset" style="padding:5px 12px; font-size:0.82rem; font-weight:800; border-radius:8px; cursor:pointer;" onclick="resetSewing()">🔄 처음부터</button>
+              </div>
+            </div>
+            <div class="mission-body" id="missionText">
+              <strong>1번 구멍</strong> 또는 <strong>바늘</strong>을 클릭하세요!
+            </div>
+          </div>
+        </div>
+
+        <!-- 메인 듀얼 뷰 작업대 + 우측 핵심 요약 -->
+        <div class="workspace-layout">
+          
+          <!-- 좌측: [상단] 옆에서 본 단면 투시 뷰 + [하단] 위/아래에서 본 표면 뷰 -->
+          <div class="dual-stage-card">
+            
+            <!-- [옆에서 본 모습] 스테이지 블록 -->
+            <div id="sideViewStageBlock">
+              <div class="stage-bar" style="background:#f0f9ff; border-bottom-color:#bae6fd;">
+                <div class="stage-bar-title" style="color:#0369a1;">
+                  <span style="width:11px; height:11px; border-radius:50%; background:#0284c7; display:inline-block;"></span>
+                  <span>[옆에서 본 모습] 천의 단면 투시 뷰 (바늘의 관통과 실의 이동 경로)</span>
+                </div>
+                <div class="stage-legend">
+                  <span class="legend-chip"><span style="width:12px; height:4px; background:#e11d48; display:inline-block; border-radius:2px;"></span> 겉면 실</span>
+                  <span class="legend-chip"><span style="width:12px; height:4px; background:#2563eb; display:inline-block; border-radius:2px;"></span> 안쪽/숨은 실</span>
+                  <span class="legend-chip"><span style="width:9px; height:9px; background:#f59e0b; display:inline-block; border-radius:50%;"></span> 나오기(OUT)</span>
+                  <span class="legend-chip"><span style="width:9px; height:9px; background:#10b981; display:inline-block; border-radius:50%;"></span> 찌르기(IN)</span>
+                </div>
+              </div>
+
+              <!-- Side Cross-Section View -->
+              <div class="canvas-wrapper" style="background:#f8fafc; min-height:280px;">
+                <canvas id="sideCanvas" class="interactive-canvas" width="840" height="280" style="height:280px;"></canvas>
+              </div>
+            </div>
+
+            <!-- 중간 모션 상태 브릿지 & 원클릭 실행 버튼 -->
+            <div class="motion-bridge-bar" id="motionBridgeBar">
+              <div class="motion-phase-steps">
+                <span style="color:#94a3b8;">바늘 모션:</span>
+                <span class="phase-pill active" id="phasePill-1">① 위치 확인</span>
+                <span>➔</span>
+                <span class="phase-pill" id="phasePill-2">② 바늘 찌르기</span>
+                <span>➔</span>
+                <span class="phase-pill" id="phasePill-3">③ 바늘 빼기·실 당기기</span>
+              </div>
+
+              <button class="big-stitch-trigger-btn" style="padding:15px 30px; font-size:1.15rem; font-weight:900;" id="mainActionBtn" onclick="triggerCurrentStep()">
+                🪡 <span id="mainActionBtnText">1번 순서 실행 (원형 번호 또는 구멍 클릭)</span>
+              </button>
+            </div>
+
+            <!-- [위에서 본 모습] 스테이지 블록 -->
+            <div id="topViewStageBlock">
+              <div class="stage-bar">
+                <div class="stage-bar-title">
+                  <span style="width:11px; height:11px; border-radius:50%; background:#e11d48; display:inline-block;" id="surfaceTitleDot"></span>
+                  <span id="surfaceViewTitleText">[위에서 본 모습] 옷감 앞면(작업면) 뷰</span>
+                </div>
+
+                <div class="surface-toggle-group">
+                  <button class="surface-toggle-btn active-top" id="btnViewTop" onclick="setSurfaceViewMode('top')">
+                    ☀️ 위에서 본 모습 (앞면/작업면)
+                  </button>
+                  <button class="surface-toggle-btn" id="btnViewBottom" onclick="setSurfaceViewMode('bottom')">
+                    🌙 아래에서 본 모습 (뒷면/바깥면 뒤집기)
+                  </button>
+                </div>
+              </div>
+
+              <!-- Top / Bottom Surface View -->
+              <div class="canvas-wrapper">
+                <canvas id="topCanvas" class="interactive-canvas" width="840" height="240"></canvas>
+              </div>
+            </div>
+
+            <!-- 완성 축하 및 교과서/실제 비교 박스 -->
+            <div class="complete-celebration" id="completeBox" style="display:none; margin-top:16px;">
+              <h4>🎉 바느질 완성! 교과서 도안 및 실제 완성 모습과 비교해 보세요!</h4>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:12px;">
+                <div style="background:#ffffff; padding:10px; border-radius:12px; border:1px solid #e2e8f0; text-align:center;">
+                  <div style="font-size:0.85rem; font-weight:800; color:#0369a1; margin-bottom:6px;">📘 교과서 완성 도안 (클릭 확대)</div>
+                  <img id="completeDiagramImg" class="cursor-zoom" src="" alt="교과서 도안" style="max-height:130px; max-width:100%; object-fit:contain; border-radius:8px;" onclick="openCompleteBoxModal('diagram')">
+                </div>
+                <div style="background:#ffffff; padding:10px; border-radius:12px; border:1px solid #e2e8f0; text-align:center;">
+                  <div style="font-size:0.85rem; font-weight:800; color:#15803d; margin-bottom:6px;">📸 실제 바느질 완성 모습 (클릭 확대)</div>
+                  <img id="completeRealImg" class="cursor-zoom" src="" alt="실제 완성 모습" style="max-height:130px; max-width:100%; object-fit:contain; border-radius:8px;" onclick="openCompleteBoxModal('real')">
+                </div>
+              </div>
+              <button class="btn-next-stage" style="margin-top:16px; width:100%;" onclick="nextTechnique()">다음 바느질 기법 배우기 ➔</button>
+            </div>
+
+            <!-- 하단 한 줄 핵심 해설 -->
+            <div class="side-caption-bar">
+              <div id="sideRealtimeCaption">
+                💡 바늘이나 번호 구멍을 클릭하며 바늘이 들어가고 나오는 순서를 확인하세요!
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 우측: 핵심 키워드 요약 패널 -->
+          <div class="side-guide-col">
+            
+            <div class="mascot-coach-card">
+              <div class="mascot-coach-top">
+                <img src="assets/fast-f35bef2c8985daaaa4570265.webp" alt="한땀이" class="mascot-coach-img">
+                <div class="mascot-coach-bubble" id="mascotSpeech"></div>
+              </div>
+            </div>
+
+            <div class="formula-card">
+              <h3>📐 바느질 순서 핵심 요약</h3>
+              <div class="formula-steps" id="formulaStepsList"></div>
+
+              <div class="progress-widget">
+                <div class="progress-top">
+                  <span>진행 순서</span>
+                  <span style="color:#e11d48;" id="progressText">0% (0 / 8)</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" id="progressBar"></div>
+                </div>
+              </div>
+
+              </div>
+
+            <div class="formula-card" style="background:#fffbeb; border-color:#fde68a;">
+              <h3 style="border-bottom-color:#fef3c7; color:#92400e;">⚠️ 수행평가 핵심 포인트</h3>
+              <ul id="examTipsList" style="padding-left:16px; font-size:0.76rem; color:#78350f; display:flex; flex-direction:column; gap:5px; line-height:1.4; font-weight:700;"></ul>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ========================================================== -->
+    <!-- 2. [완성 사진 도감 & 용구 탭] -->
+    <!-- ========================================================== -->
+    <section id="section-dictionary">
+      
+      <div class="dict-card">
+        <div class="dict-header">
+          <h2>📸 [II-17] 5대 바느질 기법 완료된 실제 사진 & 핵심 요약</h2>
+          <p>각 바느질 기법의 완성된 실제 모습과 언제 어떻게 쓰이는지 핵심 단어로 확인하세요.</p>
+        </div>
+        <div class="real-tech-grid" id="dictRealTechGrid"></div>
+      </div>
+
+      <div class="dict-card">
+        <div class="dict-header">
+          <h2>✂️ [II-16] 수선에 필요한 용구와 안전한 사용법</h2>
+          <p>솔기가 뜯어지거나 단추가 떨어지는 등 간단하게 수선할 수 있는 옷은 손바느질로 고쳐 입을 수 있습니다.</p>
+        </div>
+
+        <div class="tools-grid-6">
+          <div class="tool-item-card">
+            <div class="tool-svg-box">
+              <svg viewBox="0 0 120 80" width="95" height="65">
+                <ellipse cx="45" cy="42" rx="28" ry="20" fill="#eab308" stroke="#a16207" stroke-width="2"/>
+                <ellipse cx="45" cy="36" rx="28" ry="18" fill="#facc15" stroke="#a16207" stroke-width="2"/>
+                <ellipse cx="45" cy="36" rx="8" ry="5" fill="#fef08a" stroke="#a16207" stroke-width="1.5"/>
+                <path d="M 65 44 Q 90 45 108 32 L 108 44 Q 90 57 65 56 Z" fill="#fef08a" stroke="#a16207" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <h4 style="font-size:0.9rem; font-weight:900; color:#7c2d12;">줄자</h4>
+            <p style="font-size:0.76rem; color:#475569; font-weight:700;">치수를 잴 때 사용한다.</p>
+          </div>
+
+          <div class="tool-item-card">
+            <div class="tool-svg-box">
+              <svg viewBox="0 0 120 80" width="95" height="65">
+                <rect x="18" y="28" width="18" height="36" rx="5" transform="rotate(-12 27 46)" fill="#f472b6" stroke="#be185d" stroke-width="1.5"/>
+                <rect x="42" y="30" width="18" height="36" rx="5" transform="rotate(8 51 48)" fill="#60a5fa" stroke="#1d4ed8" stroke-width="1.5"/>
+                <rect x="76" y="10" width="10" height="54" rx="3" transform="rotate(-18 81 37)" fill="#38bdf8" stroke="#0284c7" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <h4 style="font-size:0.9rem; font-weight:900; color:#7c2d12;">초크, 초크 펜</h4>
+            <p style="font-size:0.76rem; color:#475569; font-weight:700;">옷감에 선을 그을 때 사용한다.</p>
+          </div>
+
+          <div class="tool-item-card">
+            <div class="tool-svg-box">
+              <svg viewBox="0 0 120 80" width="95" height="65">
+                <polygon points="12,42 72,28 72,38" fill="#cbd5e1" stroke="#475569" stroke-width="1.8"/>
+                <polygon points="12,46 72,52 72,40" fill="#94a3b8" stroke="#475569" stroke-width="1.8"/>
+                <ellipse cx="92" cy="28" rx="16" ry="10" fill="none" stroke="#1e293b" stroke-width="5"/>
+                <ellipse cx="92" cy="52" rx="18" ry="12" fill="none" stroke="#1e293b" stroke-width="5"/>
+              </svg>
+            </div>
+            <h4 style="font-size:0.9rem; font-weight:900; color:#7c2d12;">재단 가위</h4>
+            <p style="font-size:0.76rem; color:#475569; font-weight:700;">옷감을 자를 때 사용한다. 무겁고 뾰족해 주의한다.</p>
+          </div>
+
+          <div class="tool-item-card">
+            <div class="tool-svg-box">
+              <svg viewBox="0 0 120 80" width="95" height="65">
+                <polygon points="25,22 55,40 48,46" fill="#94a3b8" stroke="#334155" stroke-width="1.5"/>
+                <path d="M 52 38 L 90 58 Q 102 64 96 70 Q 88 74 76 66 L 46 44 Z" fill="#f59e0b" stroke="#b45309" stroke-width="1.8"/>
+              </svg>
+            </div>
+            <h4 style="font-size:0.9rem; font-weight:900; color:#7c2d12;">쪽가위</h4>
+            <p style="font-size:0.76rem; color:#475569; font-weight:700;">실을 자를 때 사용한다. 끝이 뾰족해 주의한다.</p>
+          </div>
+
+          <div class="tool-item-card">
+            <div class="tool-svg-box">
+              <svg viewBox="0 0 120 80" width="95" height="65">
+                <line x1="35" y1="22" x2="48" y2="66" stroke="#64748b" stroke-width="2"/>
+                <circle cx="35" cy="20" r="5" fill="#ec4899"/>
+                <line x1="58" y1="16" x2="60" y2="66" stroke="#64748b" stroke-width="2"/>
+                <circle cx="58" cy="14" r="5" fill="#eab308"/>
+                <line x1="82" y1="22" x2="72" y2="66" stroke="#64748b" stroke-width="2"/>
+                <circle cx="82" cy="20" r="5" fill="#10b981"/>
+              </svg>
+            </div>
+            <h4 style="font-size:0.9rem; font-weight:900; color:#7c2d12;">시침 핀</h4>
+            <p style="font-size:0.76rem; color:#475569; font-weight:700;">두 장의 옷감을 고정할 때 사용한다.</p>
+          </div>
+
+          <div class="tool-item-card">
+            <div class="tool-svg-box">
+              <svg viewBox="0 0 120 80" width="95" height="65">
+                <ellipse cx="48" cy="52" rx="26" ry="16" fill="#f43f5e" stroke="#be123c" stroke-width="1.8"/>
+                <line x1="38" y1="16" x2="44" y2="44" stroke="#64748b" stroke-width="2.2"/>
+                <rect x="82" y="16" width="22" height="50" rx="4" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <h4 style="font-size:0.9rem; font-weight:900; color:#7c2d12;">바늘 & 바늘꽂이</h4>
+            <p style="font-size:0.76rem; color:#475569; font-weight:700;">옷감을 꿰맬 때 사용하며 바늘꽂이에 보관한다.</p>
+          </div>
+        </div>
+
+        <div class="ref-images-grid">
+          <div class="ref-img-box">
+            <img src="assets/fast-4859cf032c43d4ca94b867be.webp" alt="바느질 도구 3D 일러스트 세트">
+            <div class="ref-img-caption">▲ 3D 바느질 수선 도구 세트 일러스트</div>
+          </div>
+          <div class="ref-img-box">
+            <img src="assets/fast-0b7d673bc6d6b57488096ae2.webp" alt="교과서 원본 수선 방법 참고자료">
+            <div class="ref-img-caption">▲ 교과서 [II-16 수선에 필요한 용구] 및 [II-17 간단한 수선 방법]</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dict-card">
+        <div class="dict-header">
+          <h2>🔘 [II-17] 단추 달기 4단계 핵심 요약</h2>
+          <p>단추와 옷 사이에 실기둥을 만들어 단추를 편하게 채울 수 있게 다는 순서입니다.</p>
+        </div>
+
+        <div class="button-sew-grid">
+          <div class="button-step-card">
+            <h4 style="color:#1e40af; font-size:0.88rem; font-weight:900;">① 첫 바늘 빼기</h4>
+            <p style="font-size:0.76rem; color:#334155; font-weight:700;">안쪽에서 바늘을 겉으로 빼내 단춧구멍을 통과시킨다.</p>
+          </div>
+          <div class="button-step-card">
+            <h4 style="color:#1e40af; font-size:0.88rem; font-weight:900;">② 4~5회 느슨하게 반복</h4>
+            <p style="font-size:0.76rem; color:#334155; font-weight:700;">4~5회 반복하되 단추와 옷 사이의 실을 조금 느슨하게 한다.</p>
+          </div>
+          <div class="button-step-card">
+            <h4 style="color:#1e40af; font-size:0.88rem; font-weight:900;">③ 실기둥 만들기 (핵심!)</h4>
+            <p style="font-size:0.76rem; color:#334155; font-weight:700;">옷과 단추 사이로 바늘을 뺀 후 실을 5~6회 감아 실기둥을 만든다.</p>
+          </div>
+          <div class="button-step-card">
+            <h4 style="color:#1e40af; font-size:0.88rem; font-weight:900;">④ 안쪽 매듭 마무리</h4>
+            <p style="font-size:0.76rem; color:#334155; font-weight:700;">바늘을 옷감 안쪽으로 뽑은 후 매듭을 지어 마무리한다.</p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================================== -->
+    <!-- 3. [실전 수선 챌린지 탭] -->
+    <!-- ========================================================== -->
+    <section id="section-challenge">
+      <div class="challenge-box" id="quizMainBox">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <span class="cat-pill" id="quizCatBadge" style="background:#e0e7ff; color:#3730a3; font-weight:800; font-size:0.95rem;">[실전 수선] 솔기가 터졌을 때</span>
+            <span style="font-size:0.92rem; font-weight:800; color:#64748b;" id="quizProgressBadge">1 / 5 문항</span>
+          </div>
+
+          <!-- 실물 수선 상황 사진 관찰 카드 -->
+          <div class="quiz-scenario-card">
+            <div class="quiz-scenario-header">
+              <span style="font-weight:800; font-size:0.95rem; color:#0f172a;">📸 수선할 옷감의 손상 상태 관찰하기</span>
+              <span class="zoom-hint-pill" onclick="openCurrentQuizModal()">🔍 실물 사진 크게 보기</span>
+            </div>
+            <div class="quiz-scenario-img-wrapper" onclick="openCurrentQuizModal()">
+              <img id="quizPhotoImg" class="quiz-scenario-img" src="" alt="수선 상황 사진">
+              <div class="quiz-scenario-img-badge">🔎 사진을 클릭하면 초고해상도로 확대됩니다</div>
+            </div>
+            <div id="quizPhotoCaption" class="quiz-scenario-caption"></div>
+          </div>
+
+          <h3 id="quizQuestionText" style="font-size:1.15rem; font-weight:900; color:#0f172a; margin-bottom:16px; line-height:1.55;">
+            문제 텍스트
+          </h3>
+
+          <div id="quizOptionsContainer" class="quiz-options-list"></div>
+
+          <div id="quizFeedbackBox" class="quiz-feedback-box" style="display:none; margin-top:16px;"></div>
+        </div>
+
+      <div class="challenge-box" id="quizResultBox" style="display:none; text-align:center; max-width:560px; background:linear-gradient(180deg,#fffbeb 0%,#ffffff 100%); border-color:#f59e0b;">
+        <div style="font-size:3rem; margin-bottom:6px;">🏆</div>
+        <h3 style="font-size:1.35rem; font-weight:900; color:#0f172a;">손바느질 수행평가 대비 최종 성적표</h3>
+        <p style="font-size:0.84rem; color:#64748b; margin-top:4px; margin-bottom:16px;">5대 바느질 기법 용도 및 동선 마스터 결과</p>
+
+        <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:16px; padding:16px; text-align:left; font-size:0.88rem; display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:#64748b; font-weight:700;">맞힌 문항 수:</span>
+            <strong id="finalScoreText" style="color:#0f172a;">5 / 5 (100점)</strong>
+          </div>
+          
+        </div>
+
+        <button class="big-stitch-trigger-btn" style="width:100%; justify-content:center;" onclick="initQuiz()">
+          🔄 챌린지 다시 풀기
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    바느질 시뮬레이터 &copy; 중학교 기술·가정 바느질 수행평가 사전 실습 프로그램
+  </footer>
+
+  <!-- ========================================================== -->
+  <!-- 핵심 듀얼 캔버스 & 60FPS 연속 보간 바늘 모션 엔진 -->
+  <!-- ========================================================== -->
+  <script>
+    const EMBEDDED_IMAGES = {
+      running: {
+        real: "assets/fast-c06e4b073fdbff2290425fb3.webp",
+        realFront: "assets/fast-c06e4b073fdbff2290425fb3.webp",
+        realBack: "assets/fast-372945d2940041678995abf2.webp",
+        tb: "assets/fast-ccdb14681555149d98eb2eb7.webp"
+      },
+      backstitch: {
+        real: "assets/fast-eae6f9ac4b65da0c5c92024d.webp",
+        realFront: "assets/fast-eae6f9ac4b65da0c5c92024d.webp",
+        realBack: "assets/fast-729f6808b3619ffefd169b27.webp",
+        tb: "assets/fast-4b541ab91d45769dd08748e5.webp"
+      },
+      slip: {
+        real: "assets/fast-64ead97403dd40c6415bc334.webp",
+        realFront: "assets/fast-64ead97403dd40c6415bc334.webp",
+        realBack: "",
+        tb: "assets/fast-6c3737c6d3b5c5ea0205d4ee.webp"
+      },
+      overcast: {
+        real: "assets/fast-13feb2c53eeba2c9a44198ef.webp",
+        realFront: "assets/fast-13feb2c53eeba2c9a44198ef.webp",
+        realBack: "",
+        tb: "assets/fast-f93d8bdca30ad1fd19f7b31e.webp"
+      },
+      herringbone: {
+        real: "assets/fast-bde54043038e8e82675b8757.webp",
+        realFront: "assets/fast-bde54043038e8e82675b8757.webp",
+        realBack: "",
+        tb: "assets/fast-e675ddabab834b236631a0de.webp"
+      }
+    };
+
+    // [대형 이미지 확대 모달 함수]
+    function openImageModal(src, title, caption) {
+      if (!src) return;
+      const modal = document.getElementById('imageModal');
+      const img = document.getElementById('imageModalImg');
+      const t = document.getElementById('imageModalTitle');
+      const c = document.getElementById('imageModalCaption');
+      if (img) img.src = src;
+      if (t) t.innerText = title || '📸 바느질 사진 확대 보기';
+      if (c) c.innerText = caption || '';
+      if (modal) modal.classList.add('open');
+    }
+
+    function closeImageModal(e) {
+      if (e && e.target && e.target !== document.getElementById('imageModal') && !e.target.classList.contains('image-modal-close')) {
+        return;
+      }
+      const modal = document.getElementById('imageModal');
+      if (modal) modal.classList.remove('open');
+    }
+
+    function openCurrentTechModal(type) {
+      const imgs = EMBEDDED_IMAGES[curTech.id];
+      if (!imgs) return;
+      if (type === 'tb') {
+        openImageModal(imgs.tb, '📘 ' + curTech.name + ' - 교과서 완성 도안', '실과 바늘의 이동 경로 및 완성된 땀의 구조를 꼼꼼히 확인하세요.');
+      } else if (type === 'realFront') {
+        openImageModal(imgs.realFront || imgs.real, '📸 ' + curTech.name + ' - 실제 바느질 완성 모습 (앞면/겉면)', curTech.shortUsage);
+      } else if (type === 'realBack') {
+        openImageModal(imgs.realBack, '🔄 ' + curTech.name + ' - 실제 바느질 완성 모습 (뒷면/안쪽)', '뒷면 땀 모양을 앞면과 비교해 보세요.');
+      }
+    }
+
+    function openCompleteBoxModal(type) {
+      const imgs = EMBEDDED_IMAGES[curTech.id];
+      if (!imgs) return;
+      if (type === 'diagram') {
+        openImageModal(imgs.tb, '📘 ' + curTech.name + ' - 교과서 완성 도안', '실습 완료! 교과서 도안과 내가 꿰맨 땀을 비교해 보세요.');
+      } else {
+        openImageModal(imgs.realFront || imgs.real, '📸 ' + curTech.name + ' - 실제 완성 모습', curTech.shortUsage);
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('imageModal');
+        if (modal && modal.classList.contains('open')) {
+          modal.classList.remove('open');
+        }
+      }
+    });
+
+    class SoundFX {
+      constructor() { this.ctx = null; this.on = true; }
+      ensure() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) this.ctx = new AC();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+      }
+      pierce() {
+        if (!this.on) return;
+        try {
+          this.ensure();
+          const osc = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(500, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(190, this.ctx.currentTime + 0.08);
+          g.gain.setValueAtTime(0.16, this.ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
+          osc.connect(g); g.connect(this.ctx.destination);
+          osc.start(); osc.stop(this.ctx.currentTime + 0.08);
+        } catch(e) {}
+      }
+      pullThread() {
+        if (!this.on) return;
+        try {
+          this.ensure();
+          const osc = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(240, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(410, this.ctx.currentTime + 0.14);
+          g.gain.setValueAtTime(0.12, this.ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.14);
+          osc.connect(g); g.connect(this.ctx.destination);
+          osc.start(); osc.stop(this.ctx.currentTime + 0.14);
+        } catch(e) {}
+      }
+      miss() {
+        if (!this.on) return;
+        try {
+          this.ensure();
+          const osc = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(110, this.ctx.currentTime + 0.1);
+          g.gain.setValueAtTime(0.08, this.ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+          osc.connect(g); g.connect(this.ctx.destination);
+          osc.start(); osc.stop(this.ctx.currentTime + 0.1);
+        } catch(e) {}
+      }
+      fanfare() {
+        if (!this.on) return;
+        try {
+          this.ensure();
+          const now = this.ctx.currentTime;
+          [523.25, 659.25, 783.99, 1046.5].forEach((f, idx) => {
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(f, now + idx * 0.09);
+            g.gain.setValueAtTime(0.16, now + idx * 0.09);
+            g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.09 + 0.25);
+            osc.connect(g); g.connect(this.ctx.destination);
+            osc.start(now + idx * 0.09); osc.stop(now + idx * 0.09 + 0.25);
+          });
+        } catch(e) {}
+      }
+    }
+    const sfx = new SoundFX();
+
+    function toggleSound() {
+      sfx.on = !sfx.on;
+      document.getElementById('soundStatusText').innerText = sfx.on ? '효과음 켜짐' : '효과음 꺼짐';
+    }
+
+    // --- 5대 기법 데이터 (모든 설명을 1~2문장 핵심 단어로만 간결하게 구성!) ---
+    const TECHNIQUES = {
+      running: {
+        id: 'running',
+        name: '1. 홈질 (Running Stitch)',
+        category: '솔기가 뜯어졌을 때',
+        directionText: '진행: 오른쪽 ➔ 왼쪽',
+        whenHtml: '<span class="kw-highlight">솔기가 뜯어졌을 때</span>나 두 천을 잇고 <span class="kw-highlight">주름</span>을 잡을 때 사용해요.',
+        howHtml: '바늘을 <span class="kw-highlight-red">아래➔위, 위➔아래</span>로 일정하게 통과시켜 앞·뒤 모두 <span class="kw-highlight-red">점선(- - - -)</span> 모양을 만들어요.',
+        shortUsage: '용도: 솔기 수선, 주름 잡기 | 특징: 앞·뒷면 모두 일정한 점선(- - - -) 모양',
+        mascotIntro: '"홈질은 아래➔위, 위➔아래를 번갈아 클릭하면 돼! 간격이 일정한 점선을 만들어 봐!"',
+        rules: [
+          '① <strong>첫 땀(OUT):</strong> 천 아래(뒤) ➔ 위(앞)로 바늘 빼기',
+          '② <strong>찌르기(IN):</strong> 왼쪽으로 이동해 위(앞) ➔ 아래(뒤)로 찌르기',
+          '③ <strong>반복:</strong> 0.2~0.3cm 간격으로 위·아래 교대 통과',
+          '④ <strong>완성:</strong> 앞면·뒷면 모두 고른 <strong>점선(━ ━ ━)</strong>'
+        ],
+        tips: [
+          '앞면 땀과 뒷면 땀 길이가 1:1로 일정해야 해요.',
+          '[아래에서 본 모습] 버튼으로 뒷면 점선도 확인해 보세요.'
+        ],
+        hasHemFold: false,
+        points: [
+          { x: 720, y: 122, sideY: 94,  action: 'out', angle: Math.PI, badgeDx: 0, badgeDy: -22, label: '1번: 첫 바늘 빼기(아래➔위 OUT)', desc: '천 아래(안쪽)에서 위(겉면)로 첫 바늘을 빼내세요. (매듭 숨김)' },
+          { x: 648, y: 122, sideY: 142, action: 'in',  angle: Math.PI, badgeDx: 0, badgeDy: 24,  label: '2번: 바늘 찌르기(위➔아래 IN)',   desc: '왼쪽으로 이동해 위(겉면)에서 아래(안쪽)로 바늘을 찌르세요.' },
+          { x: 576, y: 122, sideY: 94,  action: 'out', angle: Math.PI, badgeDx: 0, badgeDy: -22, label: '3번: 바늘 빼기(아래➔위 OUT)',    desc: '아래(안쪽)에서 위(겉면)로 바늘을 빼내세요.' },
+          { x: 504, y: 122, sideY: 142, action: 'in',  angle: Math.PI, badgeDx: 0, badgeDy: 24,  label: '4번: 바늘 찌르기(위➔아래 IN)',   desc: '위(겉면)에서 아래(안쪽)로 바늘을 찌르세요.' },
+          { x: 432, y: 122, sideY: 94,  action: 'out', angle: Math.PI, badgeDx: 0, badgeDy: -22, label: '5번: 바늘 빼기(아래➔위 OUT)',    desc: '아래(안쪽)에서 위(겉면)로 바늘을 빼내세요.' },
+          { x: 360, y: 122, sideY: 142, action: 'in',  angle: Math.PI, badgeDx: 0, badgeDy: 24,  label: '6번: 바늘 찌르기(위➔아래 IN)',   desc: '위(겉면)에서 아래(안쪽)로 바늘을 찌르세요.' },
+          { x: 288, y: 122, sideY: 94,  action: 'out', angle: Math.PI, badgeDx: 0, badgeDy: -22, label: '7번: 바늘 빼기(아래➔위 OUT)',    desc: '아래(안쪽)에서 위(겉면)로 바늘을 빼내세요.' },
+          { x: 216, y: 122, sideY: 142, action: 'in',  angle: Math.PI, badgeDx: 0, badgeDy: 24,  label: '8번: 마무리 찌르기(위➔아래 IN)',  desc: '마지막 땀을 아래(안쪽)로 찔러 홈질을 완성하세요!' }
+        ],
+        segments: [
+          { from: 0, to: 1, layer: 'front' },
+          { from: 1, to: 2, layer: 'back' },
+          { from: 2, to: 3, layer: 'front' },
+          { from: 3, to: 4, layer: 'back' },
+          { from: 4, to: 5, layer: 'front' },
+          { from: 5, to: 6, layer: 'back' },
+          { from: 6, to: 7, layer: 'front' }
+        ]
+      },
+
+      backstitch: {
+        id: 'backstitch',
+        name: '2. 박음질 (Backstitch)',
+        category: '솔기가 뜯어졌을 때',
+        directionText: '진행: 오른쪽 ➔ 왼쪽 (1땀 후진 + 2땀 전진)',
+        whenHtml: '뜯어진 <span class="kw-highlight">솔기를 가장 튼튼하게</span> 이어 꿰맬 때 사용해요.',
+        howHtml: '바늘이 나온 곳에서 <span class="kw-highlight-red">한 땀 뒤로 되돌아 찌르고</span>, 천 아래로 <span class="kw-highlight-red">두 땀 앞으로 나오는 것</span>을 반복해 <span class="kw-highlight-red">실선(━━━━)</span>을 만들어요.',
+        shortUsage: '용도: 튼튼한 솔기 수선 | 특징: 앞면은 빈틈없는 실선(━━━━), 뒷면은 두 겹 겹침',
+        mascotIntro: '"박음질은 [오른쪽으로 한 땀 후진 찌르기 ➔ 왼쪽으로 두 땀 전진 빼기]만 기억하면 돼!"',
+        rules: [
+          '① <strong>첫 땀(OUT):</strong> 한 땀 앞에서 아래(뒤) ➔ 위(앞)로 바늘 빼기',
+          '② <strong>후진(IN):</strong> 오른쪽(한 땀 뒤)으로 되돌아가 찌르기',
+          '③ <strong>전진(OUT):</strong> 천 아래로 두 땀 앞(왼쪽)으로 바늘 빼기',
+          '④ <strong>완성:</strong> 앞면은 <strong>빈틈없는 실선(━━━)</strong>, 뒷면은 두 겹 겹침'
+        ],
+        tips: [
+          '되돌아 찌를 때 이전 구멍 자리에 정확히 넣어야 실선이 끊기지 않아요.',
+          '[아래에서 본 모습] 버튼으로 뒷면 실이 겹쳐진 모습을 확인해 보세요.'
+        ],
+        hasHemFold: false,
+        points: [
+          { x: 620, y: 122, sideY: 94,  action: 'out', angle: 0,        badgeDx: 0, badgeDy: -24, label: '1번: 첫 바늘 빼기(아래➔위 OUT)',      desc: '시작 위치에서 아래(안쪽)➔위(겉면)로 첫 바늘을 빼내세요.' },
+          { x: 710, y: 122, sideY: 142, action: 'in',  angle: 0,        badgeDx: 0, badgeDy: 24,  label: '2번: 한 땀 뒤(오른쪽)로 후진 찌르기(IN)', desc: '오른쪽(한 땀 뒤)으로 되돌아가 위➔아래로 바늘을 찌르세요!' },
+          { x: 530, y: 122, sideY: 94,  action: 'out', angle: Math.PI,  badgeDx: 0, badgeDy: -24, label: '3번: 두 땀 앞(왼쪽)으로 전진 빼기(OUT)',  desc: '천 아래를 따라 왼쪽 두 땀 앞(3번)으로 바늘을 빼내세요!' },
+          { x: 620, y: 122, sideY: 142, action: 'in',  angle: 0,        badgeDx: 0, badgeDy: 24,  label: '4번: 한 땀 뒤(1번 자리)로 후진 찌르기(IN)', desc: '다시 오른쪽 한 땀 뒤(1번 구멍 자리)로 되돌아가 찌르세요!' },
+          { x: 440, y: 122, sideY: 94,  action: 'out', angle: Math.PI,  badgeDx: 0, badgeDy: -24, label: '5번: 두 땀 앞(왼쪽)으로 전진 빼기(OUT)',  desc: '천 아래로 두 땀 왼쪽(5번)으로 바늘을 빼내세요.' },
+          { x: 530, y: 122, sideY: 142, action: 'in',  angle: 0,        badgeDx: 0, badgeDy: 24,  label: '6번: 한 땀 뒤(3번 자리)로 후진 찌르기(IN)', desc: '오른쪽 한 땀 뒤(3번 구멍 자리)로 되돌아가 찌르세요.' },
+          { x: 350, y: 122, sideY: 94,  action: 'out', angle: Math.PI,  badgeDx: 0, badgeDy: -24, label: '7번: 두 땀 앞(왼쪽)으로 전진 빼기(OUT)',  desc: '천 아래로 두 땀 왼쪽(7번)으로 바늘을 빼내세요.' },
+          { x: 440, y: 122, sideY: 142, action: 'in',  angle: 0,        badgeDx: 0, badgeDy: 24,  label: '8번: 마무리 후진 찌르기(5번 자리 IN)',   desc: '오른쪽 한 땀 뒤(5번 자리)로 되돌아 찔러 박음질을 완성하세요!' }
+        ],
+        segments: [
+          { from: 0, to: 1, layer: 'front' },
+          { from: 1, to: 2, layer: 'back', arcDepth: 20, backBowY: 18 },
+          { from: 2, to: 3, layer: 'front' },
+          { from: 3, to: 4, layer: 'back', arcDepth: 30, backBowY: -18 },
+          { from: 4, to: 5, layer: 'front' },
+          { from: 5, to: 6, layer: 'back', arcDepth: 20, backBowY: 18 },
+          { from: 6, to: 7, layer: 'front' }
+        ]
+      },
+
+      slip: {
+        id: 'slip',
+        name: '3. 공그르기 (Slip Stitch)',
+        category: '단 수선 & 창구멍 막기',
+        directionText: '진행: 오른쪽 ➔ 왼쪽 (마주보는 양쪽 접힌 선 속 지그재그 통과)',
+        whenHtml: '바지·치마 <span class="kw-highlight">단이 뜯어졌을 때</span>나 인형·소품의 <span class="kw-highlight">창구멍을 막을 때</span> 겉에서 <span class="kw-highlight">바느질 실이 전혀 안 보이게</span> 꿰맬 때 사용해요.',
+        howHtml: '시접 안쪽에서 매듭을 숨기고, <span class="kw-highlight-red">마주보는 양쪽 접힌 선 속(터널)</span>으로 바늘을 번갈아 한 땀(2~3mm)씩 통과시킨 뒤 실을 당겨 감춰요.',
+        shortUsage: '용도: 감쪽같은 밑단 수선 & 창구멍 막기 | 핵심: 마주보는 접힌 선 속을 번갈아 통과해 실 숨기기',
+        mascotIntro: '"공그르기는 밑단 수선뿐만 아니라 창구멍 막기에도 최고야! 마주보는 접힌 선 속(터널)으로 번갈아 한 땀씩 건너가며 실을 당기면 감쪽같이 숨겨져!"',
+        rules: [
+          '① <strong>매듭 숨기기:</strong> 접힌 시접 속 안쪽에서 첫 바늘을 빼내 매듭을 안으로 숨깁니다.',
+          '② <strong>맞은편 한 땀:</strong> 마주보는 반대편 접힌 선 속으로 들어가 한 땀(2~3mm) 통과 후 뺍니다.',
+          '③ <strong>다시 건너편 한 땀:</strong> 다시 마주보는 접힌 선 속으로 건너가 한 땀(2~3mm) 통과 후 뺍니다.',
+          '④ <strong>실 당겨 완성:</strong> 양쪽을 번갈아 통과한 뒤 실을 살짝 당기면 실이 안으로 숨겨져 겉에서 보이지 않습니다.'
+        ],
+        tips: [
+          '실을 너무 세게 당기면 천이 울고, 너무 헐렁하면 틈이 벌어지므로 적당한 힘으로 당겨야 해요.',
+          '접힌 선의 모서리 터널 속으로 바늘이 지나가야 실이 겉으로 드러나지 않아요.',
+          '교과 영상처럼 양쪽 접힌 선 속을 사다리 모양으로 번갈아 뜬 뒤 실을 당기면 마술처럼 실이 사라져요!'
+        ],
+        hasHemFold: true,
+        points: [
+          { x: 720, y: 158, sideY: 88,  action: 'out', angle: Math.PI, badgeDx: 14,  badgeDy: 24,  label: '1번: 접힌 단 속에서 첫 바늘 빼기(OUT)', desc: '접힌 단(시접) 속에서 첫 바늘을 빼내세요. (매듭 숨김)' },
+          { x: 695, y: 94,  sideY: 120, action: 'in',  angle: Math.PI, badgeDx: 14,  badgeDy: -22, label: '2번: 위 바탕천 1~2올 찌르기(IN)',     desc: '바로 위 바탕천을 1~2올만 살짝 찌르세요. (겉면까지 안 뚫림)' },
+          { x: 650, y: 94,  sideY: 120, action: 'out', angle: Math.PI, badgeDx: -14, badgeDy: -22, label: '3번: 바탕천 1~2올 떠서 빼기(OUT)',    desc: '바탕천을 1~2올만 살짝 떠서 바늘을 빼내세요.' },
+          { x: 625, y: 158, sideY: 88,  action: 'in',  angle: Math.PI, badgeDx: -14, badgeDy: 24,  label: '4번: 접힌 단 속 터널로 넣기(IN)',     desc: '아래 접힌 단 속(터널)으로 바늘을 넣으세요.' },
+          { x: 495, y: 158, sideY: 88,  action: 'out', angle: Math.PI, badgeDx: 14,  badgeDy: 24,  label: '5번: 단 속 터널 통과해 빼기(OUT)',    desc: '접힌 단 속 터널로 숨어서 이동한 뒤 5번으로 빼내세요!' },
+          { x: 470, y: 94,  sideY: 120, action: 'in',  angle: Math.PI, badgeDx: 14,  badgeDy: -22, label: '6번: 위 바탕천 1~2올 찌르기(IN)',     desc: '다시 위 바탕천을 1~2올만 살짝 찌르세요.' },
+          { x: 425, y: 94,  sideY: 120, action: 'out', angle: Math.PI, badgeDx: -14, badgeDy: -22, label: '7번: 바탕천 1~2올 떠서 빼기(OUT)',    desc: '바탕천을 1~2올만 살짝 떠서 바늘을 빼내세요.' },
+          { x: 400, y: 158, sideY: 88,  action: 'in',  angle: Math.PI, badgeDx: -14, badgeDy: 24,  label: '8번: 접힌 단 속 터널로 넣기(IN)',     desc: '다시 아래 접힌 단 속(터널)으로 바늘을 넣으세요.' },
+          { x: 270, y: 158, sideY: 88,  action: 'out', angle: Math.PI, badgeDx: 0,   badgeDy: 24,  label: '9번: 단 속 터널 통과해 마무리(OUT)',  desc: '단 속 터널을 통과해 바늘을 빼내면 공그르기 완성!' }
+        ],
+        segments: [
+          { from: 0, to: 1, layer: 'front' },
+          { from: 1, to: 2, layer: 'pick' },
+          { from: 2, to: 3, layer: 'front' },
+          { from: 3, to: 4, layer: 'tunnel' },
+          { from: 4, to: 5, layer: 'front' },
+          { from: 5, to: 6, layer: 'pick' },
+          { from: 6, to: 7, layer: 'front' },
+          { from: 7, to: 8, layer: 'tunnel' }
+        ]
+      },
+
+      overcast: {
+        id: 'overcast',
+        name: '4. 감침질 (Overcasting Stitch)',
+        category: '단이 뜯어졌거나 올이 풀릴 때',
+        directionText: '진행: 오른쪽 ➔ 왼쪽 (사선 / / / / 감아 넘기기)',
+        whenHtml: '단이 뜯어졌을 때 <span class="kw-highlight">단을 고정</span>하거나 옷감 가장자리 <span class="kw-highlight">올 풀림을 막을 때</span> 사용해요.',
+        howHtml: '<span class="kw-highlight-red">항상 뒤에서 앞으로</span> 바늘을 빼내어, 실로 원단 가장자리를 감싸 넘기며 <span class="kw-highlight-red">일정한 사선(/ / / /)</span>을 만들어요.',
+        shortUsage: '용도: 단 고정, 올 풀림 방지 | 특징: 항상 뒤➔앞으로 빼며 가장자리를 감싸는 사선(/ / / /) 모양',
+        mascotIntro: '"감침질은 바늘을 항상 뒤에서 앞으로 빼고, 실로 가장자리를 감싸 넘기며 일정한 사선(/)을 만들어!"',
+        rules: [
+          '① <strong>첫 땀(OUT):</strong> 원단 뒤 ➔ 앞으로 바늘 빼기',
+          '② <strong>가장자리 감싸기:</strong> 실을 원단 위 가장자리 너머로 감아 넘기기',
+          '③ <strong>사선 땀(OUT):</strong> 왼쪽 대각선 뒤 ➔ 앞으로 바늘 빼기',
+          '④ <strong>완성:</strong> 일정한 사선(/ / / /) 모양으로 가장자리 올 풀림 방지'
+        ],
+        tips: [
+          '바늘을 앞➔뒤로 찌르는 것이 아니라, 항상 뒤➔앞으로 빼내야 실이 가장자리를 감싸게 돼요.',
+          '사선의 기울기와 땀 간격이 일정해야 완성된 모양이 깔끔해요.'
+        ],
+        hasHemFold: false,
+        points: [
+          { x: 720, y: 130, sideY: 96,  action: 'out', angle: -2.3, badgeDx: 0, badgeDy: 24,  label: '1번: 원단 뒤 ➔ 앞으로 첫 바늘 빼기(OUT)',    desc: '원단 뒤에서 앞으로 첫 바늘을 빼내어 시작하세요. (매듭 숨김)' },
+          { x: 650, y: 130, sideY: 96,  action: 'out', angle: -2.3, badgeDx: 0, badgeDy: 24,  label: '2번: 가장자리 감싸고 뒤 ➔ 앞으로 빼기(OUT)',  desc: '가장자리를 실로 감아 넘긴 뒤, 왼쪽 뒤에서 앞으로 바늘을 빼내세요!' },
+          { x: 580, y: 130, sideY: 96,  action: 'out', angle: -2.3, badgeDx: 0, badgeDy: 24,  label: '3번: 가장자리 감싸고 뒤 ➔ 앞으로 빼기(OUT)',  desc: '실을 감아 넘기며 일정한 사선(/) 모양을 만드세요.' },
+          { x: 510, y: 130, sideY: 96,  action: 'out', angle: -2.3, badgeDx: 0, badgeDy: 24,  label: '4번: 가장자리 감싸고 뒤 ➔ 앞으로 빼기(OUT)',  desc: '뒤에서 앞으로 바늘을 빼내어 사선 땀을 이어가세요.' },
+          { x: 440, y: 130, sideY: 96,  action: 'out', angle: -2.3, badgeDx: 0, badgeDy: 24,  label: '5번: 가장자리 감싸고 뒤 ➔ 앞으로 빼기(OUT)',  desc: '땀 간격을 일정하게 유지하며 가장자리를 튼튼히 감싸세요.' },
+          { x: 370, y: 130, sideY: 96,  action: 'out', angle: -2.3, badgeDx: 0, badgeDy: 24,  label: '6번: 가장자리 감싸고 뒤 ➔ 앞으로 빼기(OUT)',  desc: '실을 감아 넘기며 올 풀림을 깔끔하게 막아주세요.' },
+          { x: 300, y: 130, sideY: 96,  action: 'out', angle: -2.3, badgeDx: 0, badgeDy: 24,  label: '7번: 가장자리 감싸고 뒤 ➔ 앞으로 빼기(OUT)',  desc: '뒤에서 앞으로 바늘을 빼내어 마지막 땀을 준비하세요.' },
+          { x: 230, y: 130, sideY: 96,  action: 'out', angle: -2.3, badgeDx: 0, badgeDy: 24,  label: '8번: 마지막 감침 땀 빼기 및 마무리(OUT)',     desc: '마지막 사선 땀을 빼고 뒷면에서 매듭을 지어 감침질 완성!' }
+        ],
+        segments: [
+          { from: 0, to: 1, layer: 'wrap' },
+          { from: 1, to: 2, layer: 'wrap' },
+          { from: 2, to: 3, layer: 'wrap' },
+          { from: 3, to: 4, layer: 'wrap' },
+          { from: 4, to: 5, layer: 'wrap' },
+          { from: 5, to: 6, layer: 'wrap' },
+          { from: 6, to: 7, layer: 'wrap' }
+        ]
+      },
+
+      herringbone: {
+        id: 'herringbone',
+        name: '5. 새발뜨기 (Herringbone Stitch)',
+        category: '단이 뜯어졌을 때',
+        directionText: '★진행: 왼쪽 ➔ 오른쪽 (바늘끝은 오른쪽 ➔ 왼쪽!)',
+        whenHtml: '<span class="kw-highlight">두꺼운 모직물</span>이나 <span class="kw-highlight">신축성 있는 옷의 단</span>이 뜯어졌을 때 사용해요.',
+        howHtml: '<span class="kw-highlight-red">왼쪽➔오른쪽</span>으로 진행하며, 위·아래를 번갈아 <span class="kw-highlight-red">바늘끝을 오른쪽➔왼쪽</span>으로 떠서 <span class="kw-highlight-red">X자(XXXX)</span> 모양을 만들어요.',
+        shortUsage: '용도: 두꺼운 옷·신축성 단 수선 | 특징: 좌➔우 진행, 우➔좌 바늘 뜨기, X자(XXXX) 교차',
+        mascotIntro: '"새발뜨기는 [진행은 왼쪽➔오른쪽, 바늘끝은 오른쪽➔왼쪽]으로 떠서 X자 모양을 만드는 게 핵심이야!"',
+        rules: [
+          '① <strong>방향:</strong> 전체 진행은 <strong>[왼쪽 ➔ 오른쪽]</strong>!',
+          '② <strong>바늘끝:</strong> 바늘은 항상 <strong>[오른쪽 ➔ 왼쪽]</strong>으로 1~2올 뜨기!',
+          '③ <strong>교차:</strong> 위(바탕천)와 아래(접힌 단)를 지그재그로 번갈아 뜨기',
+          '④ <strong>완성:</strong> 신축성을 유지하는 <strong>X자(X X X X)</strong> 교차 모양'
+        ],
+        tips: [
+          '전체 진행(좌➔우)과 바늘 찌르는 방향(우➔좌)이 반대라 X자로 교차돼요.',
+          '[아래에서 본 모습(바깥 겉면)]에서는 작은 점땀만 보여 깔끔해요.'
+        ],
+        hasHemFold: true,
+        points: [
+          { x: 220, y: 160, sideY: 88,  action: 'out', angle: Math.PI, badgeDx: 0,   badgeDy: 24,  label: '1번: 왼쪽 단에서 첫 바늘 빼기(OUT)',    desc: '왼쪽 아래 접힌 단 속에서 첫 바늘을 빼내세요.' },
+          { x: 335, y: 94,  sideY: 120, action: 'in',  angle: Math.PI, badgeDx: 14,  badgeDy: -22, label: '2번: 오른쪽 위 바탕천 찌르기(우➔좌 IN)', desc: '오른쪽 위 바탕천에서 바늘끝을 왼쪽으로 향하게 찌르세요!' },
+          { x: 285, y: 94,  sideY: 120, action: 'out', angle: Math.PI, badgeDx: -14, badgeDy: -22, label: '3번: 왼쪽으로 1~2올 떠서 빼기(OUT)',    desc: '오른쪽➔왼쪽(2번➔3번)으로 1~2올 떠서 빼내세요!' },
+          { x: 445, y: 160, sideY: 88,  action: 'in',  angle: Math.PI, badgeDx: 14,  badgeDy: 24,  label: '4번: 오른쪽 아래 단 찌르기(우➔좌 IN)',   desc: '오른쪽 아래 단으로 내려가 바늘을 왼쪽으로 찌르세요. (첫 X자 교차!)' },
+          { x: 395, y: 160, sideY: 88,  action: 'out', angle: Math.PI, badgeDx: -14, badgeDy: 24,  label: '5번: 왼쪽으로 단 떠서 빼기(OUT)',       desc: '오른쪽➔왼쪽(4번➔5번)으로 단을 떠서 빼내세요!' },
+          { x: 555, y: 94,  sideY: 120, action: 'in',  angle: Math.PI, badgeDx: 14,  badgeDy: -22, label: '6번: 오른쪽 위 바탕천 찌르기(우➔좌 IN)', desc: '오른쪽 위 바탕천으로 올라가 바늘을 왼쪽으로 찌르세요! (두 번째 X자!)' },
+          { x: 505, y: 94,  sideY: 120, action: 'out', angle: Math.PI, badgeDx: -14, badgeDy: -22, label: '7번: 왼쪽으로 1~2올 떠서 빼기(OUT)',    desc: '오른쪽➔왼쪽(6번➔7번)으로 바탕천을 떠서 빼내세요!' },
+          { x: 665, y: 160, sideY: 88,  action: 'in',  angle: Math.PI, badgeDx: 14,  badgeDy: 24,  label: '8번: 오른쪽 아래 단 찌르기(우➔좌 IN)',   desc: '오른쪽 아래 단으로 내려가 바늘을 왼쪽으로 찌르세요. (세 번째 X자!)' },
+          { x: 615, y: 160, sideY: 88,  action: 'out', angle: Math.PI, badgeDx: -14, badgeDy: 24,  label: '9번: 왼쪽으로 단 떠서 마무리(OUT)',     desc: '바늘을 빼내고 실을 당기면 X자 모양 새발뜨기 완성!' }
+        ],
+        segments: [
+          { from: 0, to: 1, layer: 'front' },
+          { from: 1, to: 2, layer: 'pick' },
+          { from: 2, to: 3, layer: 'front' },
+          { from: 3, to: 4, layer: 'tunnel' },
+          { from: 4, to: 5, layer: 'front' },
+          { from: 5, to: 6, layer: 'pick' },
+          { from: 6, to: 7, layer: 'front' },
+          { from: 7, to: 8, layer: 'tunnel' }
+        ]
+      }
+    };
+
+    const QUIZ_DATA = [
+      {
+        cat: '[실전 수선 1] 뜯어진 셔츠 솔기',
+        photoCaption: '🔍 상황 관찰: 얇은 면직물 셔츠의 일직선 솔기가 가볍게 뜯어져 실밥이 풀린 모습',
+        img: "assets/fast-c17fe1943f3653cd30146f41.webp",
+        q: '위 실물 사진처럼 셔츠의 일직선 솔기가 가볍게 뜯어졌거나 천에 고른 주름을 잡아야 할 때, 바늘을 아래➔위, 위➔아래로 일정하게 통과시켜 앞뒤 모두 점선(- - - -) 모양을 만드는 기본 바느질은?',
+        opts: ['홈질', '박음질', '공그르기', '새발뜨기'],
+        ans: 0,
+        exp: '홈질(Running Stitch)은 바늘이 앞뒤를 일정하게 통과하여 점선 모양을 만들며, 가벼운 솔기 수선과 주름 잡기에 적합합니다.'
+      },
+      {
+        cat: '[실전 수선 2] 큰 힘을 받는 바지 솔기',
+        photoCaption: '🔍 상황 관찰: 튼튼한 청바지 옆솔기와 주머니 부분이 큰 장력을 받아 완전히 터져 벌어진 모습',
+        img: "assets/fast-1a6a1af9527c77513c8b3267.webp",
+        q: '위 실물 사진처럼 활동량이 많아 큰 힘을 받는 바지 옆솔기나 주머니 솔기가 터졌습니다. 손바느질 중 가장 튼튼하며, 한 땀 뒤로 되돌아가 찌르고 두 땀 앞으로 나와 겉면에 빈틈없는 실선(━━━━)을 만드는 기법은?',
+        opts: ['감침질', '박음질', '홈질', '공그르기'],
+        ans: 1,
+        exp: '박음질(Backstitch)은 손바느질 중 가장 튼튼하여 큰 힘을 받는 바지 솔기 수선에 필수적입니다.'
+      },
+      {
+        cat: '[실전 수선 3] 풀려버린 교복 바지 밑단',
+        photoCaption: '🔍 상황 관찰: 교복 바지 밑단의 접힌 단 실밥이 풀려 겉에서 실이 보이지 않게 단을 올려야 하는 모습',
+        img: "assets/fast-a7ec2f1ee785ab8fd1a494b3.webp",
+        q: '위 실물 사진처럼 교복 바지나 치마 밑단이 뜯어져 수선할 때, 겉면에 바느질 땀이 전혀 드러나지 않도록 접힌 단 속(터널)으로 바늘을 통과시키는 기법은?',
+        opts: ['홈질', '공그르기', '박음질', '감침질'],
+        ans: 1,
+        exp: '공그르기(Slip Stitch)는 단 속으로 바늘을 숨겨 통과시키므로 겉에서 실이 보이지 않는 깔끔한 단 수선 기법입니다.'
+      },
+      {
+        cat: '[실전 수선 4] 가장자리 올 풀림 방지',
+        photoCaption: '🔍 상황 관찰: 잘라낸 직물 원단의 가장자리 실밥이 너덜너덜하게 풀려나오는 모습',
+        img: "assets/fast-68652863e5b8b96872603b9a.webp",
+        q: '위 실물 사진처럼 직물 가장자리의 올이 풀리지 않도록 실을 비스듬히 감아 넘기며 사선(/ / / /) 모양으로 가장자리를 감싸 꿰매는 손바느질은?',
+        opts: ['감침질', '홈질', '공그르기', '새발뜨기'],
+        ans: 0,
+        exp: '감침질(Overcasting Stitch)은 실로 가장자리를 둥글게 감아 넘겨 올 풀림을 막고 단을 고정합니다.'
+      },
+      {
+        cat: '[실전 수선 5] 두꺼운 모직 코트 밑단',
+        photoCaption: '🔍 상황 관찰: 두꺼운 겨울 외투(모직 코트)의 안쪽 접힌 단이 풀려 단을 튼튼하고 신축성 있게 고정해야 하는 모습',
+        img: "assets/fast-63a62ebb7c565e8fdcb5751e.webp",
+        q: '위 실물 사진처럼 두꺼운 모직 코트나 신축성 있는 니트의 밑단이 풀렸을 때, 왼쪽에서 오른쪽으로 진행하며 실이 X자 모양으로 엇갈리도록 떠올려 신축성을 살리는 손바느질은?',
+        opts: ['박음질', '홈질', '새발뜨기', '공그르기'],
+        ans: 2,
+        exp: '새발뜨기(Herringbone Stitch)는 왼쪽에서 오른쪽으로 진행하며 실이 X자로 교차되어 신축성이 뛰어나 두꺼운 모직 코트나 니트류의 단 수선에 가장 적합합니다.'
+      }
+    ];
+
+    // --- 전역 상태 ---
+    let curTech = TECHNIQUES.running;
+    let curStep = 0;
+    let learningPhase = 'intro'; // 'intro' (1단계: 설명 & 완성 모습 확인) or 'work' (2단계: 작업대 실습)
+    let surfaceViewMode = 'top';
+    let slowMode = true;
+    let isAnimating = false;
+    let animStepIdx = -1;
+    let autoDemoActive = false;
+    let currentPhasePill = 1;
+
+    let needlePose = {
+      topTipX: 720, topTipY: 122, topAngle: Math.PI, pierceDepth: 0,
+      sideTipX: 720, sideTipY: 130, sideTailX: 730, sideTailY: 185, threadTighten: 0
+    };
+
+    const topCanvas = document.getElementById('topCanvas');
+    const topCtx = topCanvas.getContext('2d');
+    const sideCanvas = document.getElementById('sideCanvas');
+    const sideCtx = sideCanvas.getContext('2d');
+    const introPreviewCanvas = document.getElementById('introPreviewCanvas');
+    const introPreviewCtx = introPreviewCanvas.getContext('2d');
+
+    function easeInOutCubic(x) {
+      return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    }
+    function easeOutCubic(x) {
+      return 1 - Math.pow(1 - x, 3);
+    }
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    // --- 학습 단계 전환 ([① 설명 듣기] <-> [② 작업대 클릭 실습]) ---
+    function setLearningPhase(phase) {
+      learningPhase = phase;
+      const introView = document.getElementById('introBriefingView');
+      const workView = document.getElementById('workspacePracticeView');
+      const btnIntro = document.getElementById('flowBtn-intro');
+      const btnWork = document.getElementById('flowBtn-work');
+
+      if (phase === 'intro') {
+        autoDemoActive = false;
+        introView.style.display = 'flex';
+        workView.style.display = 'none';
+        btnIntro.classList.add('active-flow');
+        btnWork.classList.remove('active-flow');
+        drawIntroCompletedPreview();
+      } else {
+        introView.style.display = 'none';
+        workView.style.display = 'flex';
+        btnIntro.classList.remove('active-flow');
+        btnWork.classList.add('active-flow');
+        drawAll();
+      }
+    }
+
+    // --- 1단계 브리핑 화면의 [옆·위·아래 완성 구조도] 캔버스 렌더링 ---
+    function drawIntroCompletedPreview() {
+      const ctx = introPreviewCtx;
+      const W = introPreviewCanvas.width;
+      const H = introPreviewCanvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      // 3단 분할:
+      // 1) 상단(y: 6~62): 옆에서 본 단면 완성 모습
+      // 2) 중단(y: 68~122): 위(앞면)에서 본 완성 모습
+      // 3) 하단(y: 128~180): 아래(뒷면/바깥면)에서 본 완성 모습
+      ctx.fillStyle = '#f0f9ff';
+      ctx.beginPath(); ctx.roundRect(6, 6, W - 12, 54, 8); ctx.fill();
+      ctx.fillStyle = '#fffbeb';
+      ctx.beginPath(); ctx.roundRect(6, 66, W - 12, 54, 8); ctx.fill();
+      ctx.fillStyle = '#fdf2f8';
+      ctx.beginPath(); ctx.roundRect(6, 126, W - 12, 54, 8); ctx.fill();
+
+      ctx.font = 'bold 11px Pretendard, sans-serif';
+      ctx.fillStyle = '#0369a1';
+      ctx.fillText('① 옆(단면) 완성 모습', 16, 26);
+      ctx.fillStyle = '#b45309';
+      ctx.fillText('② 위(앞/작업면) 완성 모습', 16, 86);
+      ctx.fillStyle = '#9d174d';
+      ctx.fillText('③ 아래(뒷면/바깥면) 완성 모습', 16, 146);
+
+      // 각 기법별 3방향 완성 실 그림
+      const startX = 165;
+      const endX = 395;
+
+      // ① 옆(단면) 천 그리기
+      ctx.fillStyle = '#fde68a';
+      ctx.fillRect(startX - 10, 28, endX - startX + 20, 14);
+      ctx.strokeStyle = '#d97706';
+      ctx.strokeRect(startX - 10, 28, endX - startX + 20, 14);
+
+      if (curTech.id === 'running') {
+        // 홈질: 옆(파동), 위(점선), 아래(점선)
+        for (let i = 0; i < 4; i++) {
+          const x1 = startX + i * 56;
+          const x2 = x1 + 28;
+          const x3 = x1 + 56;
+          // 옆면 위 실
+          ctx.strokeStyle = '#e11d48'; ctx.lineWidth = 3.5;
+          ctx.beginPath(); ctx.moveTo(x1, 26); ctx.lineTo(x2, 26); ctx.stroke();
+          // 옆면 아래 실
+          if (i < 3) {
+            ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2.5;
+            ctx.beginPath(); ctx.moveTo(x2, 44); ctx.lineTo(x3, 44); ctx.stroke();
+          }
+          // 윗면 점선
+          ctx.strokeStyle = '#e11d48'; ctx.lineWidth = 4;
+          ctx.beginPath(); ctx.moveTo(x1, 95); ctx.lineTo(x2, 95); ctx.stroke();
+          // 아랫면 점선
+          if (i < 3) {
+            ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 4;
+            ctx.beginPath(); ctx.moveTo(x2, 155); ctx.lineTo(x3, 155); ctx.stroke();
+          }
+        }
+      } else if (curTech.id === 'backstitch') {
+        // 박음질: 옆(위 실선 + 아래 겹침 고리), 위(일직선 실선), 아래(두 겹 겹침)
+        ctx.strokeStyle = '#e11d48'; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(startX, 26); ctx.lineTo(endX - 20, 26); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(startX, 95); ctx.lineTo(endX - 20, 95); ctx.stroke();
+
+        for (let i = 0; i < 3; i++) {
+          const x1 = startX + i * 55;
+          const x2 = x1 + 95;
+          ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2.5;
+          ctx.beginPath(); ctx.moveTo(x1, 43); ctx.quadraticCurveTo((x1+x2)/2, 54, x2, 43); ctx.stroke();
+          ctx.lineWidth = 3.5;
+          ctx.beginPath(); ctx.moveTo(x1, 152); ctx.quadraticCurveTo((x1+x2)/2, 165 - (i%2)*22, x2, 152); ctx.stroke();
+        }
+      } else if (curTech.id === 'slip') {
+        // 공그르기: 옆(단 터널 속 통과 + 1올 뜨기), 위(단 속 점선 + 작은 땀), 아래(바깥면: 작은 점만 보임)
+        for (let i = 0; i < 3; i++) {
+          const x1 = startX + i * 75;
+          // 옆면
+          ctx.strokeStyle = '#7c3aed'; ctx.lineWidth = 2.5; ctx.setLineDash([4, 3]);
+          ctx.beginPath(); ctx.moveTo(x1, 32); ctx.lineTo(x1 + 55, 32); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.strokeStyle = '#e11d48'; ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.moveTo(x1 + 55, 32); ctx.lineTo(x1 + 65, 39); ctx.stroke();
+          // 윗면(안쪽 작업면)
+          ctx.strokeStyle = '#7c3aed'; ctx.setLineDash([4, 3]);
+          ctx.beginPath(); ctx.moveTo(x1, 98); ctx.lineTo(x1 + 55, 98); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.strokeStyle = '#e11d48'; ctx.lineWidth = 3.5;
+          ctx.beginPath(); ctx.moveTo(x1 + 55, 88); ctx.lineTo(x1 + 65, 88); ctx.stroke();
+          // 아랫면(바깥 겉면: 아주 작은 점만 보임!)
+          ctx.fillStyle = '#2563eb';
+          ctx.beginPath(); ctx.arc(x1 + 60, 155, 2.5, 0, Math.PI * 2); ctx.fill();
+        }
+      } else if (curTech.id === 'overcast') {
+        // 감침질: 옆(나선 감기), 위(사선 / / / /), 아래(바깥면 작은 점)
+        for (let i = 0; i < 4; i++) {
+          const x1 = startX + i * 52;
+          ctx.strokeStyle = '#e11d48'; ctx.lineWidth = 3.5;
+          ctx.beginPath(); ctx.moveTo(x1, 25); ctx.lineTo(x1 + 22, 43); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(x1, 105); ctx.lineTo(x1 + 24, 82); ctx.stroke();
+          ctx.fillStyle = '#2563eb';
+          ctx.beginPath(); ctx.arc(x1 + 24, 155, 2.5, 0, Math.PI * 2); ctx.fill();
+        }
+      } else if (curTech.id === 'herringbone') {
+        // 새발뜨기: 옆(교차), 위(X X X X 교차), 아래(바깥면 작은 점)
+        ctx.strokeStyle = '#e11d48'; ctx.lineWidth = 3;
+        ctx.beginPath();
+        for (let i = 0; i < 3; i++) {
+          const x = startX + i * 68;
+          ctx.moveTo(x, 105); ctx.lineTo(x + 42, 82);
+          ctx.moveTo(x + 30, 82); ctx.lineTo(x + 68, 105);
+          ctx.moveTo(x, 42); ctx.lineTo(x + 42, 26);
+          ctx.moveTo(x + 30, 26); ctx.lineTo(x + 68, 42);
+          ctx.fillStyle = '#2563eb';
+          ctx.fillRect(x + 30, 153, 8, 3);
+        }
+        ctx.stroke();
+      }
+    }
+
+    function setSurfaceViewMode(mode) {
+      surfaceViewMode = mode;
+      const btnTop = document.getElementById('btnViewTop');
+      const btnBot = document.getElementById('btnViewBottom');
+      const titleText = document.getElementById('surfaceViewTitleText');
+      const dot = document.getElementById('surfaceTitleDot');
+      const imgs = EMBEDDED_IMAGES[curTech.id];
+
+      if (mode === 'top') {
+        if (btnTop) btnTop.className = 'surface-toggle-btn active-top';
+        if (btnBot) btnBot.className = 'surface-toggle-btn';
+        if (titleText) titleText.innerText = '[위에서 본 모습] 옷감 앞면(작업면) 뷰';
+        if (dot) dot.style.background = '#e11d48';
+        const compImg = document.getElementById('completeRealImg');
+        if (compImg && imgs) compImg.src = imgs.realFront || imgs.real;
+      } else {
+        if (btnTop) btnTop.className = 'surface-toggle-btn';
+        if (btnBot) btnBot.className = 'surface-toggle-btn active-bottom';
+        if (titleText) titleText.innerText = '[아래에서 본 모습] 옷감 뒷면(바깥면 뒤집기) 뷰';
+        if (dot) dot.style.background = '#2563eb';
+        const compImg = document.getElementById('completeRealImg');
+        if (compImg && imgs && imgs.realBack) compImg.src = imgs.realBack;
+      }
+      drawAll();
+    }
+
+    function toggleSpeed() {
+      slowMode = !slowMode;
+      document.getElementById('speedStatusText').innerText = slowMode
+        ? '모션 속도: 학습용(천천히)'
+        : '모션 속도: 보통 속도';
+    }
+
+    function getStepStartPose(stepIdx) {
+      const pt = curTech.points[stepIdx];
+      const dirX = Math.cos(pt.angle);
+      const dirY = Math.sin(pt.angle);
+      const isOut = (pt.action === 'out');
+
+      return {
+        topTipX: pt.x - dirX * 16,
+        topTipY: pt.y - dirY * 16 + (isOut ? 6 : -6),
+        topAngle: pt.angle,
+        pierceDepth: -0.8,
+        sideTipX: pt.x,
+        sideTipY: isOut ? (pt.sideY + 26) : (pt.sideY - 26),
+        sideTailX: pt.x - dirX * 12,
+        sideTailY: isOut ? (pt.sideY + 78) : (pt.sideY - 78),
+        threadTighten: 0
+      };
+    }
+
+    function getStepEndPose(stepIdx) {
+      const pt = curTech.points[stepIdx];
+      const dirX = Math.cos(pt.angle);
+      const dirY = Math.sin(pt.angle);
+      const isOut = (pt.action === 'out');
+
+      return {
+        topTipX: pt.x + dirX * 48,
+        topTipY: pt.y + dirY * 48 + (isOut ? -6 : 6),
+        topAngle: pt.angle,
+        pierceDepth: 1.0,
+        sideTipX: pt.x + dirX * 16,
+        sideTipY: isOut ? (pt.sideY - 50) : (pt.sideY + 50),
+        sideTailX: pt.x + dirX * 4,
+        sideTailY: isOut ? (pt.sideY - 4) : (pt.sideY + 4),
+        threadTighten: 1
+      };
+    }
+
+    function applyPose(pose) {
+      needlePose.topTipX = pose.topTipX;
+      needlePose.topTipY = pose.topTipY;
+      needlePose.topAngle = pose.topAngle;
+      needlePose.pierceDepth = pose.pierceDepth;
+      needlePose.sideTipX = pose.sideTipX;
+      needlePose.sideTipY = pose.sideTipY;
+      needlePose.sideTailX = pose.sideTailX;
+      needlePose.sideTailY = pose.sideTailY;
+      needlePose.threadTighten = pose.threadTighten;
+    }
+
+    function updatePhasePillDOM(num) {
+      if (currentPhasePill === num) return;
+      currentPhasePill = num;
+      [1, 2, 3].forEach(n => {
+        const el = document.getElementById(`phasePill-${n}`);
+        if (el) {
+          if (n === num) el.classList.add('active');
+          else el.classList.remove('active');
+        }
+      });
+    }
+
+    // --- 기법 선택 시: 항상 [1단계: 설명 & 앞·옆·위 완성 모습 브리핑]부터 시작! ---
+    function selectTechnique(techKey, skipIntro = false) {
+      autoDemoActive = false;
+      document.getElementById('autoDemoBtn').innerText = '▶️ 자동시범';
+      curTech = TECHNIQUES[techKey];
+      curStep = 0;
+      isAnimating = false;
+      animStepIdx = -1;
+
+      document.querySelectorAll('.tech-btn').forEach(b => b.classList.remove('active'));
+      const btn = document.getElementById(`techBtn-${techKey}`);
+      if (btn) btn.classList.add('active');
+
+      // 1) 브리핑 화면(STEP 1) 정보 업데이트
+      document.getElementById('introCategoryBadge').innerText = curTech.category;
+      document.getElementById('introDirectionBadge').innerText = curTech.directionText;
+      document.getElementById('introTechTitle').innerText = curTech.name;
+      document.getElementById('introWhenSentence').innerHTML = curTech.whenHtml;
+      document.getElementById('introHowSentence').innerHTML = curTech.howHtml;
+
+      const imgs = EMBEDDED_IMAGES[techKey];
+      if (imgs) {
+        const frontImg = document.getElementById('introRealPhoto');
+        if (frontImg) frontImg.src = imgs.realFront || imgs.real;
+        const tbImg = document.getElementById('introTbDiagram');
+        if (tbImg) tbImg.src = imgs.tb;
+        const bTb = document.getElementById('bannerTbImg');
+        if (bTb) bTb.src = imgs.tb;
+        const bReal = document.getElementById('bannerRealImg');
+        if (bReal) bReal.src = imgs.realFront || imgs.real;
+        const backCard = document.getElementById('introRealBackCard');
+        if (backCard) {
+          // 공그르기, 감침질, 새발뜨기 등 뒷면 사진이 없는 기법은 뒷면 카드 숨김 (공그르기 아래 실제 사진 삭제 요청 반영)
+          if (imgs.realBack) {
+            backCard.style.display = 'flex';
+            const backImg = document.getElementById('introRealPhotoBack');
+            if (backImg) backImg.src = imgs.realBack;
+          } else {
+            backCard.style.display = 'none';
+          }
+        }
+        const compReal = document.getElementById('completeRealImg');
+        if (compReal) compReal.src = imgs.realFront || imgs.real;
+        const compTb = document.getElementById('completeDiagramImg');
+        if (compTb) compTb.src = imgs.tb;
+      }
+      const compBox = document.getElementById('completeBox');
+      if (compBox) compBox.style.display = 'none';
+
+      // [새발뜨기 & 공그르기] 위에서 본 모습과 옆에서 본 모습의 위치 동적 전환
+      updateViewStagesOrder(techKey);
+
+    function updateViewStagesOrder(techId) {
+      const container = document.querySelector('.dual-stage-card');
+      const sideBlock = document.getElementById('sideViewStageBlock');
+      const topBlock = document.getElementById('topViewStageBlock');
+      const bridge = document.getElementById('motionBridgeBar');
+      const complete = document.getElementById('completeBox');
+      if (!container || !sideBlock || !topBlock || !bridge || !complete) return;
+
+      if (techId === 'herringbone' || techId === 'slip') {
+        // [새발뜨기 & 공그르기] 위에서 본 모습(Top)을 상단, 옆에서 본 모습(Side)을 하단으로 배치
+        container.insertBefore(topBlock, bridge);
+        container.insertBefore(sideBlock, complete);
+      } else {
+        // [홈질, 박음질, 감침질] 옆에서 본 모습(Side)을 상단, 위에서 본 모습(Top)을 하단으로 배치
+        container.insertBefore(sideBlock, bridge);
+        container.insertBefore(topBlock, complete);
+      }
+    }
+
+      // 2) 작업대 화면(STEP 2) 정보 업데이트
+      document.getElementById('infoCategory').innerText = curTech.category;
+      document.getElementById('infoDirectionBadge').innerText = curTech.directionText;
+      document.getElementById('infoTitle').innerText = curTech.name;
+      document.getElementById('infoUsage').innerText = curTech.shortUsage;
+      document.getElementById('mascotSpeech').innerHTML = curTech.mascotIntro;
+
+      document.getElementById('formulaStepsList').innerHTML = curTech.rules
+        .map(r => `<div style="padding:3px 0; border-bottom:1px dashed #e2e8f0;">${r}</div>`)
+        .join('');
+
+      document.getElementById('examTipsList').innerHTML = curTech.tips
+        .map(t => `<li>${t}</li>`)
+        .join('');
+
+      document.getElementById('completeBox').style.display = 'none';
+
+      setSurfaceViewMode('top');
+      applyPose(getStepStartPose(0));
+      updatePhasePillDOM(1);
+      updateMissionUI();
+
+      // 기법 선택 시 먼저 [① 설명 & 완성 모습 보기] 화면을 보여줌
+      setLearningPhase(skipIntro ? 'work' : 'intro');
+    }
+
+    function triggerCurrentStep() {
+      if (isAnimating) return;
+      if (curStep >= curTech.points.length) {
+        resetSewing();
+        return;
+      }
+      runSmoothStepAnimation(curStep);
+    }
+
+    function replayLastMotion() {
+      if (isAnimating) return;
+      if (curStep > 0) {
+        curStep--;
+        applyPose(getStepStartPose(curStep));
+        runSmoothStepAnimation(curStep);
+      } else {
+        applyPose(getStepStartPose(0));
+        runSmoothStepAnimation(0);
+      }
+    }
+
+    function runSmoothStepAnimation(stepIdx) {
+      isAnimating = true;
+      animStepIdx = stepIdx;
+
+      const startPose = getStepStartPose(stepIdx);
+      const endPose = getStepEndPose(stepIdx);
+      const nextReadyPose = (stepIdx + 1 < curTech.points.length)
+        ? getStepStartPose(stepIdx + 1)
+        : endPose;
+
+      const totalDuration = slowMode ? 1150 : 650;
+      const t0 = performance.now();
+      sfx.pierce();
+      let pullPlayed = false;
+
+      function animateFrame(now) {
+        const rawT = Math.min(1, (now - t0) / totalDuration);
+
+        if (rawT <= 0.72) {
+          const u = easeInOutCubic(rawT / 0.72);
+          updatePhasePillDOM(u < 0.55 ? 2 : 3);
+
+          if (!pullPlayed && u > 0.45) {
+            sfx.pullThread();
+            pullPlayed = true;
+          }
+
+          needlePose.topTipX = lerp(startPose.topTipX, endPose.topTipX, u);
+          needlePose.topTipY = lerp(startPose.topTipY, endPose.topTipY, u);
+          needlePose.topAngle = startPose.topAngle;
+          needlePose.pierceDepth = lerp(startPose.pierceDepth, endPose.pierceDepth, u);
+          needlePose.sideTipX = lerp(startPose.sideTipX, endPose.sideTipX, u);
+          needlePose.sideTipY = lerp(startPose.sideTipY, endPose.sideTipY, u);
+          needlePose.sideTailX = lerp(startPose.sideTailX, endPose.sideTailX, u);
+          needlePose.sideTailY = lerp(startPose.sideTailY, endPose.sideTailY, u);
+          needlePose.threadTighten = easeOutCubic(Math.max(0, (u - 0.2) / 0.8));
+        } else {
+          const v = easeInOutCubic((rawT - 0.72) / 0.28);
+          updatePhasePillDOM(1);
+
+          needlePose.topTipX = lerp(endPose.topTipX, nextReadyPose.topTipX, v);
+          needlePose.topTipY = lerp(endPose.topTipY, nextReadyPose.topTipY, v);
+          needlePose.topAngle = nextReadyPose.topAngle;
+          needlePose.pierceDepth = lerp(endPose.pierceDepth, nextReadyPose.pierceDepth, v);
+          needlePose.sideTipX = lerp(endPose.sideTipX, nextReadyPose.sideTipX, v);
+          needlePose.sideTipY = lerp(endPose.sideTipY, nextReadyPose.sideTipY, v);
+          needlePose.sideTailX = lerp(endPose.sideTailX, nextReadyPose.sideTailX, v);
+          needlePose.sideTailY = lerp(endPose.sideTailY, nextReadyPose.sideTailY, v);
+          needlePose.threadTighten = 1;
+        }
+
+        drawAll();
+
+        if (rawT < 1) {
+          requestAnimationFrame(animateFrame);
+        } else {
+          isAnimating = false;
+          animStepIdx = -1;
+          curStep = stepIdx + 1;
+
+          if (curStep >= curTech.points.length) {
+            sfx.fanfare();
+            document.getElementById('completeBox').style.display = 'block';
+            document.getElementById('mascotSpeech').innerHTML =
+              `"완성했어! <strong>[🌙 아래에서 본 모습]</strong> 버튼을 눌러 뒷면 모양도 확인해 봐!"`;
+          } else {
+            applyPose(getStepStartPose(curStep));
+          }
+          updateMissionUI();
+          drawAll();
+        }
+      }
+
+      requestAnimationFrame(animateFrame);
+    }
+
+    function updateMissionUI() {
+      const total = curTech.points.length;
+      const pct = Math.round((curStep / total) * 100);
+
+      document.getElementById('progressText').innerText = `${pct}% (${curStep} / ${total})`;
+      document.getElementById('progressBar').style.width = `${pct}%`;
+
+      const missionTag = document.getElementById('missionStepTag');
+      const missionText = document.getElementById('missionText');
+      const mainActionBtnText = document.getElementById('mainActionBtnText');
+      const sideCaption = document.getElementById('sideRealtimeCaption');
+
+      if (curStep < total) {
+        const pt = curTech.points[curStep];
+        missionTag.innerText = `🎯 클릭 순서 (${curStep + 1} / ${total})`;
+        const badgeColor = pt.action === 'out' ? '#d97706' : '#059669';
+        const actionWord = pt.action === 'out' ? '바늘 빼내기(OUT)' : '바늘 찌르기(IN)';
+
+        missionText.innerHTML = `<span style="color:${badgeColor};">[${pt.label}]</span> — ${pt.desc}`;
+        mainActionBtnText.innerText = `${curStep + 1}번 순서: ${actionWord} (바늘/구멍 클릭 또는 Space)`;
+        sideCaption.innerHTML = `🔍 <strong>${curStep + 1}번 순서:</strong> ${pt.desc}`;
+      } else {
+        missionTag.innerText = `🎉 완성! (${total} / ${total})`;
+        missionText.innerHTML = `<span style="color:#059669;">모든 순서를 완료했습니다!</span> [🌙 아래에서 본 모습] 버튼으로 뒷면도 확인하세요.`;
+        mainActionBtnText.innerText = `🔄 처음부터 다시 연습하기`;
+        sideCaption.innerHTML = `🎉 <strong>완성!</strong> 옆(단면), 위(앞면), 아래(뒷면) 모습을 비교해 보세요!`;
+      }
+    }
+
+    function drawAll() {
+      drawSideView();
+      drawSurfaceView();
+    }
+
+    // ==============================================================
+    // [상단 캔버스] 옆에서 본 옷감 단면 투시 뷰
+    // ==============================================================
+    function drawSideView() {
+      const ctx = sideCtx;
+      const W = sideCanvas.width;
+      const H = sideCanvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      ctx.fillStyle = '#f0f9ff';
+      ctx.fillRect(0, 0, W, 115);
+      ctx.fillStyle = '#fff7ed';
+      ctx.fillRect(0, 115, W, 115);
+
+      // [캔버스 상하 여백 최적화 (H=280 대응)]
+      ctx.fillStyle = '#0369a1';
+      ctx.font = 'bold 12px Pretendard, sans-serif';
+      ctx.fillText('▲ 위쪽: 작업 겉면 방향 (학생이 내려다보는 시선)', 45, 26);
+      ctx.fillStyle = '#c2410c';
+      ctx.fillText('▼ 아래쪽: 안쪽/바닥면 방향 (책상 바닥 쪽)', 45, H - 16);
+
+      // [학생 시선 아이콘 & 사람 얼굴: 상단 우측 독립 배치 (x=W-52, y=30)]
+      ctx.save();
+      const faceX = W - 52;
+      const faceY = 30;
+
+      // 귀엽고 친근한 학생 얼굴 (천을 내려다보는 시선)
+      ctx.beginPath();
+      ctx.arc(faceX, faceY, 16, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffedd5';
+      ctx.fill();
+      ctx.strokeStyle = '#ea580c';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 머리카락
+      ctx.beginPath();
+      ctx.arc(faceX, faceY - 5, 16, Math.PI, Math.PI * 2);
+      ctx.fillStyle = '#7c2d12';
+      ctx.fill();
+
+      // 옷감을 내려다보는 눈
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(faceX - 5, faceY + 3.5, 2.2, 0, Math.PI * 2);
+      ctx.arc(faceX + 5, faceY + 3.5, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 미소 입
+      ctx.beginPath();
+      ctx.arc(faceX, faceY + 5.5, 6, 0.2 * Math.PI, 0.8 * Math.PI);
+      ctx.strokeStyle = '#c2410c';
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+
+      // 옷감을 향한 시선 유도선
+      ctx.strokeStyle = 'rgba(234, 88, 12, 0.65)';
+      ctx.setLineDash([3, 3]);
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(faceX - 4, faceY + 16);
+      ctx.lineTo(faceX - 12, 56);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // 얼굴 아래 세로 라벨 (좌우 텍스트 겹침 절대 없음)
+      ctx.fillStyle = '#9a3412';
+      ctx.font = 'bold 10px Pretendard, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('학생 시선 👁️', faceX, 68);
+      ctx.fillStyle = '#e11d48';
+      ctx.font = '900 9.5px Pretendard, sans-serif';
+      ctx.fillText('(겉면 내려다봄)', faceX, 81);
+      ctx.restore();
+
+      if (curTech.hasHemFold) {
+        ctx.fillStyle = '#fbcfe8';
+        ctx.strokeStyle = '#db2777';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(42, 75, W - 84, 26, 12);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(190, 24, 93, 0.35)';
+        ctx.setLineDash([5, 4]);
+        ctx.beginPath();
+        ctx.moveTo(190, 88);
+        ctx.lineTo(W - 60, 88);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#fde68a';
+        ctx.strokeStyle = '#d97706';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(42, 107, W - 84, 35, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#9d174d';
+        ctx.font = 'bold 11.5px Pretendard, sans-serif';
+        ctx.fillText('접어 올린 단(시접 터널)', 52, 92);
+        ctx.fillStyle = '#92400e';
+        ctx.fillText('바탕 옷감(1~2올만 뜸)', 52, 128);
+      } else {
+        ctx.fillStyle = '#fef08a';
+        ctx.strokeStyle = '#ca8a04';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(42, 94, W - 84, 24, 4);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#fde047';
+        ctx.strokeStyle = '#a16207';
+        ctx.beginPath();
+        ctx.roundRect(42, 118, W - 84, 24, 4);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#713f12';
+        ctx.font = 'bold 11.5px Pretendard, sans-serif';
+        ctx.fillText('윗장 옷감 단면', 52, 110);
+        ctx.fillText('아랫장 옷감 단면', 52, 134);
+      }
+
+      if (curStep > 0 || isAnimating) {
+        const firstPt = curTech.points[0];
+        const knotY = curTech.hasHemFold ? 88 : 150;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(firstPt.x, knotY, 5.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#e11d48';
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.fillStyle = '#be123c';
+        ctx.font = 'bold 10.5px Pretendard, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('시작 매듭', firstPt.x, knotY + 15);
+        ctx.restore();
+      }
+
+      for (let i = 0; i < curStep; i++) {
+        const pt = curTech.points[i];
+        ctx.save();
+        ctx.strokeStyle = pt.action === 'out' ? '#f59e0b' : '#10b981';
+        ctx.lineWidth = 2.8;
+        ctx.beginPath();
+        if (curTech.hasHemFold) {
+          ctx.moveTo(pt.x, 78);
+          ctx.lineTo(pt.x, pt.sideY);
+        } else {
+          ctx.moveTo(pt.x, 94);
+          ctx.lineTo(pt.x, 142);
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      const completedSegCount = Math.max(0, curStep - 1);
+      for (let i = 0; i < completedSegCount; i++) {
+        if (i >= curTech.segments.length) break;
+        const seg = curTech.segments[i];
+        drawSideSegment(ctx, curTech.points[seg.from], curTech.points[seg.to], seg, 1.0);
+      }
+
+      if (isAnimating && animStepIdx > 0) {
+        const segIdx = animStepIdx - 1;
+        if (segIdx < curTech.segments.length) {
+          const seg = curTech.segments[segIdx];
+          drawSideSegment(ctx, curTech.points[seg.from], curTech.points[seg.to], seg, needlePose.threadTighten);
+        }
+      }
+
+      const activeIdx = isAnimating ? animStepIdx : curStep;
+      curTech.points.forEach((pt, idx) => {
+        const isDone = idx < curStep;
+        const isCurrent = (idx === activeIdx);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.sideY, isCurrent ? 8 : 4.5, 0, Math.PI * 2);
+        ctx.fillStyle = isCurrent
+          ? (pt.action === 'out' ? '#f59e0b' : '#10b981')
+          : (isDone ? '#334155' : '#ffffff');
+        ctx.fill();
+        ctx.strokeStyle = isCurrent ? '#ffffff' : '#64748b';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        const badgeX = pt.x + (pt.badgeDx || 0) * 0.5;
+        const badgeY = pt.badgeDy < 0 ? 56 : 168;
+
+        ctx.beginPath();
+        ctx.arc(badgeX, badgeY, isCurrent ? 11 : 8.5, 0, Math.PI * 2);
+        ctx.fillStyle = isCurrent ? '#e11d48' : (isDone ? '#cbd5e1' : '#ffffff');
+        ctx.fill();
+        ctx.strokeStyle = isCurrent ? '#ffffff' : '#94a3b8';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = isCurrent ? '#ffffff' : '#1e293b';
+        ctx.font = isCurrent ? '900 11px Pretendard, sans-serif' : 'bold 10px Pretendard, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(String(idx + 1), badgeX, badgeY);
+        ctx.restore();
+      });
+
+      if (activeIdx >= 0 && activeIdx < curTech.points.length) {
+        const pt = curTech.points[activeIdx];
+        ctx.save();
+        const calloutX = Math.max(260, Math.min(520, pt.x));
+        const calloutY = 23;
+        const text = `📍 ${activeIdx + 1}번(${pt.action === 'out' ? '위로 빼기 OUT' : '아래로 찌르기 IN'}) 클릭!`;
+        ctx.font = 'bold 12px Pretendard, sans-serif';
+        const tw = ctx.measureText(text).width + 22;
+
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.roundRect(calloutX - tw / 2, calloutY - 14, tw, 24, 8);
+        ctx.fill();
+
+        ctx.fillStyle = '#facc15';
+        ctx.textAlign = 'center';
+        ctx.fillText(text, calloutX, calloutY + 2);
+        ctx.restore();
+
+        drawSideNeedleSmooth(ctx, pt);
+      }
+    }
+
+    function drawSideSegment(ctx, p1, p2, seg, tighten) {
+      ctx.save();
+      ctx.beginPath();
+      const midX = (p1.x + p2.x) / 2;
+
+      if (seg.layer === 'front') {
+        const topY = curTech.hasHemFold ? 73 : 91;
+        const bulge = (1 - tighten) * -32;
+        ctx.moveTo(p1.x, topY);
+        ctx.quadraticCurveTo(midX, topY - 10 + bulge, p2.x, topY);
+        ctx.strokeStyle = '#e11d48';
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+      } else if (seg.layer === 'tunnel') {
+        ctx.moveTo(p1.x, 88);
+        ctx.lineTo(p2.x, 88);
+        ctx.strokeStyle = '#7c3aed';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([5, 3]);
+        ctx.stroke();
+      } else if (seg.layer === 'pick') {
+        ctx.moveTo(p1.x, 120);
+        ctx.quadraticCurveTo(midX, 126, p2.x, 120);
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      } else {
+        const botY = curTech.hasHemFold ? 120 : 144;
+        const depth = seg.arcDepth || 15;
+        const bulge = (1 - tighten) * 26;
+        ctx.moveTo(p1.x, botY);
+        ctx.quadraticCurveTo(midX, botY + depth + bulge, p2.x, botY);
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([5, 3]);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawSideNeedleSmooth(ctx, targetPt) {
+      ctx.save();
+      const tipX = needlePose.sideTipX;
+      const tipY = needlePose.sideTipY;
+      const tailX = needlePose.sideTailX;
+      const tailY = needlePose.sideTailY;
+
+      // [바늘과 실 연결] 이전 바느질 땀 구멍(또는 시작 매듭)에서 바늘귀(tailX, tailY)로 연결되는 실 렌더링
+      const activeIdx = isAnimating ? animStepIdx : curStep;
+      let fromX, fromY;
+      if (activeIdx > 0 && curTech.points[activeIdx - 1]) {
+        const prevPt = curTech.points[activeIdx - 1];
+        fromX = prevPt.x;
+        fromY = prevPt.sideY;
+      } else {
+        const firstPt = curTech.points[0];
+        fromX = firstPt.x;
+        fromY = curTech.hasHemFold ? 88 : 150;
+      }
+
+      // 원단에서 바늘귀로 이어지는 실 (자연스러운 완만한 곡선)
+      ctx.beginPath();
+      const midX = (fromX + tailX) / 2;
+      const midY = Math.min(fromY, tailY) - 15;
+      ctx.moveTo(fromX, fromY);
+      ctx.quadraticCurveTo(midX, midY, tailX, tailY);
+      ctx.strokeStyle = '#e11d48';
+      ctx.lineWidth = 3.6;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // [바늘귀 잔여 실 가닥 완전 제거] 오직 직물에서 바늘귀로 연결되는 연속된 실만 렌더링됨
+      // (불필요한 꼬리/가닥 일체 없음)
+
+      // 바늘 본체 (어두운 회색 메탈)
+      ctx.beginPath();
+      ctx.moveTo(tailX, tailY);
+      ctx.lineTo(tipX, tipY);
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 5.5;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // 바늘 광택 하이라이트 (은색 광원)
+      ctx.beginPath();
+      ctx.moveTo(tailX, tailY);
+      ctx.lineTo(tipX, tipY);
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 2.2;
+      ctx.stroke();
+
+      // 바늘 끝(tip) 포인트
+      ctx.beginPath();
+      ctx.arc(tipX, tipY, 4, 0, Math.PI * 2);
+      ctx.fillStyle = targetPt.action === 'out' ? '#f59e0b' : '#10b981';
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // ==============================================================
+    // [하단 캔버스] 위에서 본 모습 & 아래에서 본 모습
+    // ==============================================================
+    function drawSurfaceView() {
+      const ctx = topCtx;
+      const W = topCanvas.width;
+      const H = topCanvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      const isBottomView = (surfaceViewMode === 'bottom');
+
+      if (curTech.hasHemFold) {
+        if (!isBottomView) {
+          ctx.fillStyle = '#fdf2f8';
+          ctx.fillRect(36, 18, W - 72, 102);
+
+          const grad = ctx.createLinearGradient(0, 120, 0, 222);
+          grad.addColorStop(0, '#f9a8d4');
+          grad.addColorStop(0.2, '#fbcfe8');
+          grad.addColorStop(1, '#f472b6');
+          ctx.fillStyle = grad;
+          ctx.fillRect(36, 120, W - 72, 102);
+
+          ctx.strokeStyle = '#db2777';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(36, 120);
+          ctx.lineTo(W - 36, 120);
+          ctx.stroke();
+
+          ctx.fillStyle = '#9d174d';
+          ctx.font = 'bold 11.5px Pretendard, sans-serif';
+          ctx.fillText('바탕 옷감 (안쪽면)', 48, 44);
+          ctx.fillText('1~2올만 살짝 뜨는 곳', 48, 62);
+
+          ctx.fillStyle = '#831843';
+          ctx.fillText('접어 올린 단 (시접)', 48, 150);
+          ctx.fillText('매듭·실을 숨기는 곳', 48, 168);
+        } else {
+          ctx.fillStyle = '#fce7f3';
+          ctx.fillRect(36, 18, W - 72, H - 36);
+          ctx.strokeStyle = '#ec4899';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(36, 18, W - 72, H - 36);
+
+          ctx.strokeStyle = 'rgba(219, 39, 119, 0.3)';
+          ctx.setLineDash([6, 6]);
+          ctx.beginPath();
+          ctx.moveTo(36, 120);
+          ctx.lineTo(W - 36, 120);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          ctx.fillStyle = '#9d174d';
+          ctx.font = 'bold 12px Pretendard, sans-serif';
+          ctx.fillText('🌙 [옷의 바깥 겉면]', 48, 44);
+          ctx.font = 'bold 11px Pretendard, sans-serif';
+          ctx.fillText('1~2올만 떴기 때문에', 48, 64);
+          ctx.fillText('바깥엔 작은 점만 보여요!', 48, 80);
+        }
+      } else {
+        ctx.fillStyle = isBottomView ? '#fef3c7' : '#fef9e7';
+        ctx.fillRect(36, 18, W - 72, H - 36);
+        ctx.strokeStyle = isBottomView ? '#d97706' : '#ca8a04';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(36, 18, W - 72, H - 36);
+
+        ctx.strokeStyle = '#93c5fd';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 5]);
+        ctx.beginPath();
+        ctx.moveTo(190, 122);
+        ctx.lineTo(W - 60, 122);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#78350f';
+        ctx.font = 'bold 12px Pretendard, sans-serif';
+        ctx.fillText(isBottomView ? '🌙 [옷감 뒷면(안쪽)]' : '☀️ [옷감 앞면(겉면)]', 48, 44);
+        ctx.font = 'bold 11px Pretendard, sans-serif';
+        ctx.fillText(isBottomView ? '시작 매듭과 뒷면 실이' : '겉면 실이 선명한', 48, 64);
+        ctx.fillText('실선으로 보입니다!', 48, 80);
+      }
+
+      if (isBottomView && !curTech.hasHemFold && (curStep > 0 || isAnimating)) {
+        const firstPt = curTech.points[0];
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(firstPt.x + 12, firstPt.y - 10, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#e11d48';
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.fillStyle = '#be123c';
+        ctx.font = 'bold 10.5px Pretendard, sans-serif';
+        ctx.fillText('시작 매듭', firstPt.x + 18, firstPt.y - 16);
+        ctx.restore();
+      }
+
+      const completedSegCount = Math.max(0, curStep - 1);
+      for (let i = 0; i < completedSegCount; i++) {
+        if (i >= curTech.segments.length) break;
+        const seg = curTech.segments[i];
+        drawSurfaceSegment(ctx, curTech.points[seg.from], curTech.points[seg.to], seg, 1.0, isBottomView);
+      }
+
+      if (isAnimating && animStepIdx > 0) {
+        const segIdx = animStepIdx - 1;
+        if (segIdx < curTech.segments.length) {
+          const seg = curTech.segments[segIdx];
+          drawSurfaceSegment(ctx, curTech.points[seg.from], curTech.points[seg.to], seg, needlePose.threadTighten, isBottomView);
+        }
+      }
+
+      const activeIdx = isAnimating ? animStepIdx : curStep;
+      curTech.points.forEach((pt, idx) => {
+        const isDone = idx < curStep;
+        const isCurrent = (idx === activeIdx);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, isCurrent ? 9.5 : 5, 0, Math.PI * 2);
+        ctx.fillStyle = isCurrent
+          ? (pt.action === 'out' ? '#f59e0b' : '#10b981')
+          : (isDone ? '#1e293b' : '#ffffff');
+        ctx.fill();
+        ctx.lineWidth = 2.2;
+        ctx.strokeStyle = isCurrent ? '#ffffff' : '#64748b';
+        ctx.stroke();
+
+        if (isCurrent) {
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 15, 0, Math.PI * 2);
+          ctx.strokeStyle = pt.action === 'out' ? '#d97706' : '#059669';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([4, 3]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
+        const bx = pt.x + (pt.badgeDx || 0);
+        const by = pt.y + (pt.badgeDy || -22);
+
+        ctx.beginPath();
+        ctx.arc(bx, by, isCurrent ? 11.5 : 9, 0, Math.PI * 2);
+        ctx.fillStyle = isCurrent ? '#e11d48' : (isDone ? '#cbd5e1' : '#ffffff');
+        ctx.fill();
+        ctx.strokeStyle = isCurrent ? '#ffffff' : '#94a3b8';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = isCurrent ? '#ffffff' : '#1e293b';
+        ctx.font = isCurrent ? '900 11px Pretendard, sans-serif' : 'bold 10px Pretendard, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(String(idx + 1), bx, by);
+        ctx.restore();
+      });
+
+      if (activeIdx >= 0 && activeIdx < curTech.points.length) {
+        const pt = curTech.points[activeIdx];
+        ctx.save();
+        const calloutX = Math.max(300, Math.min(W - 170, pt.x));
+        const calloutY = 23;
+        const actionDesc = isBottomView
+          ? (pt.action === 'in' ? '뒷면으로 바늘 나오기' : '뒷면에서 앞면으로 찌르기')
+          : (pt.action === 'out' ? '앞면으로 바늘 빼기(OUT)' : '앞면에서 안쪽으로 찌르기(IN)');
+        const text = `🪡 ${activeIdx + 1}번 구멍: ${actionDesc} (클릭!)`;
+        ctx.font = 'bold 12px Pretendard, sans-serif';
+        const tw = ctx.measureText(text).width + 22;
+
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.roundRect(calloutX - tw / 2, calloutY - 14, tw, 24, 8);
+        ctx.fill();
+
+        ctx.fillStyle = '#facc15';
+        ctx.textAlign = 'center';
+        ctx.fillText(text, calloutX, calloutY + 2);
+        ctx.restore();
+
+        drawSurfaceNeedleSmooth(ctx, pt, isBottomView);
+      }
+    }
+
+    function drawSurfaceSegment(ctx, p1, p2, seg, tighten, isBottomView) {
+      ctx.save();
+      ctx.beginPath();
+      const midX = (p1.x + p2.x) / 2;
+      const midY = (p1.y + p2.y) / 2;
+
+      // [감침질 사선 감싸기 렌더링: 가장자리를 감싸는 대각선 땀]
+      if (seg.layer === 'wrap') {
+        const edgeY = 72; // 원단 가장자리 선
+        const slantX = p2.x + 18; // 대각선 기울기 (/ / / /)
+        if (!isBottomView) {
+          // 겉면: 이전 구멍(p1)에서 원단 위 가장자리(slantX, edgeY)로 감아 올라가는 선명한 사선(/)
+          const loop = (1 - tighten) * -18;
+          ctx.moveTo(p1.x, p1.y);
+          ctx.quadraticCurveTo(midX + 6, edgeY + loop, slantX, edgeY);
+          ctx.strokeStyle = '#e11d48';
+          ctx.lineWidth = 4.5;
+          ctx.lineCap = 'round';
+          ctx.stroke();
+        } else {
+          // 뒷면: 가장자리에서 다음 구멍(p2) 뒤로 넘어가는 선
+          ctx.moveTo(slantX, edgeY);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.strokeStyle = '#2563eb';
+          ctx.lineWidth = 4.0;
+          ctx.lineCap = 'round';
+          ctx.stroke();
+        }
+        ctx.restore();
+        return;
+      }
+
+      if (!isBottomView) {
+        if (seg.layer === 'front') {
+          const loopOffset = (1 - tighten) * -28;
+          ctx.moveTo(p1.x, p1.y);
+          ctx.quadraticCurveTo(midX, midY + loopOffset, p2.x, p2.y);
+          ctx.strokeStyle = '#e11d48';
+          ctx.lineWidth = 4.5;
+          ctx.lineCap = 'round';
+          ctx.stroke();
+        } else {
+          const bow = seg.backBowY ? seg.backBowY * 0.5 : 0;
+          ctx.moveTo(p1.x, p1.y);
+          ctx.quadraticCurveTo(midX, midY + bow, p2.x, p2.y);
+          ctx.strokeStyle = seg.layer === 'tunnel' ? '#7c3aed' : '#2563eb';
+          ctx.lineWidth = 2.5;
+          ctx.setLineDash([5, 4]);
+          ctx.stroke();
+        }
+      } else {
+        if (curTech.hasHemFold) {
+          if (seg.layer === 'pick') {
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 3.5;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+          } else {
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = 'rgba(225, 29, 72, 0.22)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 4]);
+            ctx.stroke();
+          }
+        } else {
+          if (seg.layer === 'back') {
+            const bow = seg.backBowY || 0;
+            ctx.moveTo(p1.x, p1.y);
+            ctx.quadraticCurveTo(midX, midY + bow, p2.x, p2.y);
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 4.5;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+          } else {
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = 'rgba(225, 29, 72, 0.28)';
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([4, 4]);
+            ctx.stroke();
+          }
+        }
+      }
+      ctx.restore();
+    }
+
+    function drawSurfaceNeedleSmooth(ctx, targetPt, isBottomView) {
+      ctx.save();
+      const needleLen = 64;
+      const angle = needlePose.topAngle;
+      const dirX = Math.cos(angle);
+      const dirY = Math.sin(angle);
+
+      const headX = needlePose.topTipX;
+      const headY = needlePose.topTipY;
+      const tailX = headX - dirX * needleLen;
+      const tailY = headY - dirY * needleLen - 12;
+
+      // [바늘과 실 연결] 이전 바느질 땀 구멍에서 바늘귀(tailX, tailY)로 연결되는 실 렌더링
+      const activeIdx = isAnimating ? animStepIdx : curStep;
+      let fromX, fromY;
+      if (activeIdx > 0 && curTech.points[activeIdx - 1]) {
+        const prevPt = curTech.points[activeIdx - 1];
+        fromX = prevPt.x;
+        fromY = prevPt.y;
+      } else {
+        const firstPt = curTech.points[0];
+        fromX = firstPt.x;
+        fromY = firstPt.y;
+      }
+
+      // 원단 표면에서 바늘귀로 이어지는 실 (곡선)
+      ctx.beginPath();
+      const midX = (fromX + tailX) / 2;
+      const midY = (fromY + tailY) / 2 - 16;
+      ctx.moveTo(fromX, fromY);
+      ctx.quadraticCurveTo(midX, midY, tailX, tailY);
+      ctx.strokeStyle = '#e11d48';
+      ctx.lineWidth = 3.6;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // [바늘귀 잔여 실 가닥 완전 제거] 오직 직물에서 바늘귀로 연결되는 연속된 실만 렌더링됨
+      // (불필요한 꼬리/가닥 일체 없음)
+
+      const isUnder = (!isBottomView && targetPt.action === 'out' && needlePose.pierceDepth < 0) ||
+                      (isBottomView && targetPt.action === 'in' && needlePose.pierceDepth < 0);
+
+      // 바늘 본체
+      ctx.beginPath();
+      ctx.moveTo(tailX, tailY);
+      ctx.lineTo(headX, headY);
+      ctx.strokeStyle = isUnder ? 'rgba(71, 85, 105, 0.45)' : '#334155';
+      ctx.lineWidth = 5.5;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // 바늘 광택
+      ctx.beginPath();
+      ctx.moveTo(tailX, tailY);
+      ctx.lineTo(headX, headY);
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 2.2;
+      ctx.stroke();
+
+      // 바늘귀 구멍
+      ctx.beginPath();
+      ctx.arc(tailX + dirX * 5, tailY + 1, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#e11d48';
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function getCanvasPos(canvas, evt) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+      const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+      return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height)
+      };
+    }
+
+    function onStageClick(canvas, isSide, evt) {
+      if (isAnimating) return;
+      if (curStep >= curTech.points.length) return;
+
+      const pos = getCanvasPos(canvas, evt);
+      const pt = curTech.points[curStep];
+
+      // 1) 원형 번호 뱃지(1, 2, 3...) 위치 계산 및 거리 측정
+      let distBadge;
+      if (isSide) {
+        const badgeX = pt.x + (pt.badgeDx || 0) * 0.5;
+        const badgeY = pt.badgeDy < 0 ? 56 : 168;
+        distBadge = Math.hypot(pos.x - badgeX, pos.y - badgeY);
+      } else {
+        const badgeX = pt.x + (pt.badgeDx || 0);
+        const badgeY = pt.y + (pt.badgeDy || 0);
+        distBadge = Math.hypot(pos.x - badgeX, pos.y - badgeY);
+      }
+
+      // 2) 바늘구멍 중심 거리 측정
+      const targetY = isSide ? pt.sideY : pt.y;
+      const distHole = Math.hypot(pos.x - pt.x, pos.y - targetY);
+
+      // 3) 바늘 끝 거리 측정
+      const nX = isSide ? needlePose.sideTipX : needlePose.topTipX;
+      const nY = isSide ? needlePose.sideTipY : needlePose.topTipY;
+      const distNeedle = Math.hypot(pos.x - nX, pos.y - nY);
+
+      // [정답 클릭 판정] 원형 번호 뱃지(반경 36px), 바늘구멍(반경 28px), 바늘(반경 32px)을 정확히 클릭했을 때만 실행!
+      // (기존의 Math.abs(pos.x - pt.x) <= 95 제거로 엉뚱한 위치 클릭 및 자동 1,2,3,4 완료 버그 완벽 해결)
+      if (distBadge <= 36 || distHole <= 28 || distNeedle <= 32) {
+        triggerCurrentStep();
+      }
+    }
+
+    sideCanvas.addEventListener('click', (e) => onStageClick(sideCanvas, true, e));
+    topCanvas.addEventListener('click', (e) => onStageClick(topCanvas, false, e));
+
+    window.addEventListener('keydown', (e) => {
+      // Space/Enter 키를 통한 바느질 진행은 학생의 정확한 위치 클릭 학습을 위해 비활성화
+      if (false && (e.code === 'Space' || e.code === 'Enter')) {
+        const sec = document.getElementById('section-practice');
+        if (sec.style.display !== 'none') {
+          e.preventDefault();
+          if (learningPhase === 'intro') {
+            setLearningPhase('work');
+          } else {
+            triggerCurrentStep();
+          }
+        }
+      }
+    });
+
+        function startGameSimulation() {
+      sfx.fanfare();
+      const screen = document.getElementById('gameStartScreen');
+      if (screen) {
+        screen.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        screen.style.opacity = '0';
+        screen.style.transform = 'scale(1.05)';
+        setTimeout(() => {
+          screen.style.display = 'none';
+        }, 400);
+      }
+      // 게임 시작 화면이 먼저 표시되므로, 기본 세팅만 수행
+      curTech = TECHNIQUES['running'];
+      initQuiz();
+    }
+
+    function resetSewing() {
+      autoDemoActive = false;
+      document.getElementById('autoDemoBtn').innerText = '▶️ 자동시범';
+      curStep = 0;
+      isAnimating = false;
+      animStepIdx = -1;
+      document.getElementById('completeBox').style.display = 'none';
+      applyPose(getStepStartPose(0));
+      updatePhasePillDOM(1);
+      updateMissionUI();
+      drawAll();
+    }
+
+    async function toggleAutoDemo() {
+      if (autoDemoActive) {
+        autoDemoActive = false;
+        document.getElementById('autoDemoBtn').innerText = '▶️ 자동시범';
+        return;
+      }
+      autoDemoActive = true;
+      document.getElementById('autoDemoBtn').innerText = '⏹️ 정지';
+      if (curStep >= curTech.points.length) {
+        curStep = 0;
+        applyPose(getStepStartPose(0));
+        updateMissionUI();
+        drawAll();
+      }
+
+      while (autoDemoActive && curStep < curTech.points.length) {
+        if (!isAnimating) {
+          runSmoothStepAnimation(curStep);
+        }
+        await new Promise(r => setTimeout(r, slowMode ? 1300 : 750));
+      }
+      autoDemoActive = false;
+      document.getElementById('autoDemoBtn').innerText = '▶️ 자동시범';
+    }
+
+    function nextTechnique() {
+      const keys = Object.keys(TECHNIQUES);
+      const idx = keys.indexOf(curTech.id);
+      selectTechnique(keys[(idx + 1) % keys.length]);
+    }
+
+    function buildDictionaryRealCards() {
+      const container = document.getElementById('dictRealTechGrid');
+      if (!container) return;
+      container.innerHTML = Object.keys(TECHNIQUES).map(key => {
+        const t = TECHNIQUES[key];
+        const imgs = EMBEDDED_IMAGES[key];
+        const frontSrc = (imgs && (imgs.realFront || imgs.real)) || '';
+        const backSrc = (imgs && imgs.realBack) || '';
+        const tbSrc = (imgs && imgs.tb) || '';
+
+        return `
+          <div class="tech-real-card" style="display:flex; flex-direction:column; gap:8px;">
+            <div style="font-weight:900; color:#0f172a; font-size:1.02rem; border-bottom:2px solid #e2e8f0; padding-bottom:6px;">
+              ${t.name}
+            </div>
+
+            <div style="display:grid; grid-template-columns:${backSrc ? '1fr 1fr' : '1fr'}; gap:8px;">
+              <div style="text-align:center;">
+                <div style="font-size:0.75rem; font-weight:800; color:#15803d; margin-bottom:3px;">앞면(겉면)</div>
+                <img class="cursor-zoom" src="${frontSrc}" alt="${t.name} 앞면" style="width:100%; height:110px; object-fit:cover; border-radius:8px; border:1px solid #cbd5e1;" onclick="openImageModal('${frontSrc}', '${t.name} (앞면/겉면)', '${t.shortUsage}')">
+              </div>
+              ${backSrc ? `
+              <div style="text-align:center;">
+                <div style="font-size:0.75rem; font-weight:800; color:#c2410c; margin-bottom:3px;">뒷면(안쪽)</div>
+                <img class="cursor-zoom" src="${backSrc}" alt="${t.name} 뒷면" style="width:100%; height:110px; object-fit:cover; border-radius:8px; border:1px solid #cbd5e1;" onclick="openImageModal('${backSrc}', '${t.name} (뒷면/안쪽)', '뒷면 땀 모양 확인')">
+              </div>
+              ` : ''}
+            </div>
+
+            <div style="text-align:center; margin-top:2px;">
+              <div style="font-size:0.75rem; font-weight:800; color:#0369a1; margin-bottom:3px;">📘 교과서 완성 도안</div>
+              <img class="cursor-zoom" src="${tbSrc}" alt="${t.name} 교과서 도안" style="width:100%; height:80px; object-fit:contain; border-radius:8px; border:1px solid #bae6fd; background:#ffffff;" onclick="openImageModal('${tbSrc}', '${t.name} (교과서 도안)', '교과서 바느질 도안')">
+            </div>
+
+            <div style="font-size:0.83rem; color:#475569; margin-top:4px; line-height:1.4;">
+              ${t.shortUsage}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function switchTab(tabName) {
+      autoDemoActive = false;
+      ['practice', 'dictionary', 'challenge'].forEach(t => {
+        document.getElementById(`section-${t}`).style.display = (t === tabName) ? 'flex' : 'none';
+        const btn = document.getElementById(`tabBtn-${t}`);
+        if (btn) {
+          if (t === tabName) btn.classList.add('active');
+          else btn.classList.remove('active');
+        }
+      });
+      if (tabName === 'challenge') {
+        initQuiz();
+      }
+    }
+
+    // ==============================================================
+    // [실전 수선 챌린지 퀴즈 엔진: 항상 무작위 출제 & 중복 클릭 방지 100점 만점 보장]
+    // ==============================================================
+    let activeQuizList = [];
+    let qIdx = 0;
+    let userAnswers = {}; // { 0: true, 1: false, ... } - 각 문항당 1회 정답 여부 기록
+
+    // 피셔-예이츠 셔플 알고리즘 (문항 및 보기 순서 무작위 믹스)
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function initQuiz() {
+      // 1. 항상 문제를 무작위(Random)로 섞어 새 세트 구성
+      activeQuizList = shuffleArray(QUIZ_DATA).map(item => {
+        // 보기(opts)도 무작위 셔플하고 정답 인덱스(ans) 동기화
+        const optPairs = item.opts.map((text, idx) => ({ text, isCorrect: idx === item.ans }));
+        const shuffledPairs = shuffleArray(optPairs);
+        const newAns = shuffledPairs.findIndex(p => p.isCorrect);
+        return {
+          ...item,
+          opts: shuffledPairs.map(p => p.text),
+          ans: newAns
+        };
+      });
+
+      qIdx = 0;
+      userAnswers = {};
+      document.getElementById('quizMainBox').style.display = 'block';
+      document.getElementById('quizResultBox').style.display = 'none';
+      renderQuizItem();
+    }
+
+    function openCurrentQuizModal() {
+      if (qIdx < activeQuizList.length) {
+        const item = activeQuizList[qIdx];
+        openImageModal(item.img, item.cat, item.photoCaption);
+      }
+    }
+
+    function renderQuizItem() {
+      // 퀴즈 완료 시 채점 결과 화면 (중복 클릭 방지 & 100점 만점 엄격 보장)
+      if (qIdx >= activeQuizList.length) {
+        document.getElementById('quizMainBox').style.display = 'none';
+        document.getElementById('quizResultBox').style.display = 'block';
+
+        const totalQ = activeQuizList.length;
+        // userAnswers 객체의 true 개수만 엄격히 집계 (최대 totalQ개 = 5개)
+        const correctCount = Math.min(totalQ, Object.values(userAnswers).filter(Boolean).length);
+        const scorePct = Math.min(100, Math.round((correctCount / totalQ) * 100));
+
+        document.getElementById('finalScoreText').innerText = `${correctCount} / ${totalQ} (${scorePct}점)`;
+        return;
+      }
+
+      const item = activeQuizList[qIdx];
+      // 문항 번호와 카테고리 표시 (무작위 출제되더라도 [실전 수선 1~5]로 일관성 있게 표시)
+      const cleanCat = item.cat.replace(/\[실전 수선 \d*\]\s*/, '');
+      document.getElementById('quizCatBadge').innerText = `[실전 수선 ${qIdx + 1}] ${cleanCat}`;
+      document.getElementById('quizProgressBadge').innerText = `${qIdx + 1} / ${activeQuizList.length} 문항`;
+      document.getElementById('quizPhotoImg').src = item.img;
+      document.getElementById('quizPhotoCaption').innerText = item.photoCaption;
+      document.getElementById('quizQuestionText').innerText = item.q;
+      document.getElementById('quizFeedbackBox').style.display = 'none';
+
+      const container = document.getElementById('quizOptionsContainer');
+      container.innerHTML = '';
+      item.opts.forEach((optText, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-choice-btn';
+        btn.innerHTML = `<span style="width:28px;height:28px;border-radius:50%;background:#e2e8f0;display:inline-flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:900;">${i + 1}</span> <span style="font-size:0.98rem;">${optText}</span>`;
+        btn.onclick = () => checkAnswer(i);
+        container.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(choiceIdx) {
+      // 이미 답변한 문항이면 중복 실행 방지 (120점 등 점수 뻥튀기 버그 원천 차단)
+      if (userAnswers[qIdx] !== undefined) return;
+
+      const item = activeQuizList[qIdx];
+      const isCorrect = (choiceIdx === item.ans);
+      userAnswers[qIdx] = isCorrect; // 1회만 정확히 기록
+
+      // 보기 버튼들 비활성화 및 정답/오답 스타일 표시
+      const container = document.getElementById('quizOptionsContainer');
+      const buttons = container.querySelectorAll('.quiz-choice-btn');
+      buttons.forEach((b, idx) => {
+        b.disabled = true;
+        b.style.cursor = 'default';
+        if (idx === item.ans) {
+          b.style.borderColor = '#10b981';
+          b.style.background = '#ecfdf5';
+          b.style.color = '#065f46';
+          b.style.fontWeight = 'bold';
+        } else if (idx === choiceIdx && !isCorrect) {
+          b.style.borderColor = '#f43f5e';
+          b.style.background = '#fff1f2';
+          b.style.color = '#9f1239';
+        } else {
+          b.style.opacity = '0.5';
+        }
+      });
+
+      const fb = document.getElementById('quizFeedbackBox');
+      fb.style.display = 'flex';
+
+      if (isCorrect) {
+        sfx.fanfare();
+        fb.style.background = '#ecfdf5';
+        fb.style.border = '2px solid #34d399';
+        fb.style.color = '#065f46';
+        fb.innerHTML = `
+          <div><strong>✅ 정답입니다!</strong> ${item.exp}</div>
+          <button class="big-stitch-trigger-btn" onclick="qIdx++; renderQuizItem();">다음 문항 ➔</button>
+        `;
+      } else {
+        sfx.pullThread();
+        fb.style.background = '#fff1f2';
+        fb.style.border = '2px solid #fda4af';
+        fb.style.color = '#9f1239';
+        fb.innerHTML = `
+          <div><strong>❌ 아쉽네요!</strong> ${item.exp}</div>
+          <button class="big-stitch-trigger-btn" style="background:#e11d48; border-color:#fda4af;" onclick="qIdx++; renderQuizItem();">다음 문항 ➔</button>
+        `;
+      }
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+      buildDictionaryRealCards();
+      selectTechnique('running');
+    });
+  </script>
+
+  <!-- ========================================================== -->
+  <!-- [이미지 대형 확대 팝업 모달] -->
+  <!-- ========================================================== -->
+  <div id="imageModal" class="image-modal-backdrop" onclick="closeImageModal(event)">
+    <div class="image-modal-dialog" onclick="event.stopPropagation()">
+      <div class="image-modal-header">
+        <h3 id="imageModalTitle" class="image-modal-title">📸 바느질 사진 확대 보기</h3>
+        <button class="image-modal-close" onclick="closeImageModal()">&times;</button>
+      </div>
+      <div class="image-modal-body">
+        <img id="imageModalImg" class="image-modal-img" src="" alt="확대 이미지">
+      </div>
+      <div id="imageModalCaption" class="image-modal-footer"></div>
+    </div>
+  </div>
+
+<script>(()=>{let embedded=false;const apply=()=>{document.documentElement.classList.toggle('gc-fullscreen',embedded||!!document.fullscreenElement);dispatchEvent(new Event('resize'))};addEventListener('message',e=>{if(e.source===parent&&e.origin==='https://game-center-site.beefly1136.workers.dev'&&e.data?.type==='game-center:fullscreen'){embedded=!!e.data.active;apply()}});document.addEventListener('fullscreenchange',apply);apply()})();</script></body>
+</html>

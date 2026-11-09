@@ -1,0 +1,42 @@
+name: Cloudflare 게임 서버 배포
+
+on:
+  push:
+    branches: [main]
+    paths: ['g/**', 'games/**', 'cloudflare/**', '.github/workflows/deploy-cloudflare.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-cloudflare
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      HAS_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+    steps:
+      - name: 비밀 값 확인
+        if: env.HAS_TOKEN != 'true'
+        run: echo "::notice::CLOUDFLARE_API_TOKEN과 CLOUDFLARE_ACCOUNT_ID를 등록하면 자동 배포가 시작됩니다. 게임은 GitHub 경로로 계속 실행됩니다."
+      - uses: actions/checkout@v4
+        if: env.HAS_TOKEN == 'true'
+      - uses: actions/setup-node@v4
+        if: env.HAS_TOKEN == 'true'
+        with:
+          node-version: 22
+      - name: 정적 복제본 만들기
+        if: env.HAS_TOKEN == 'true'
+        run: node cloudflare/build-mirror.mjs
+      - name: 배포
+        if: env.HAS_TOKEN == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: cloudflare
+          command: deploy

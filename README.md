@@ -14,6 +14,14 @@
 
 games/영문게임이름/index.html과 이미지 폴더를 올린 뒤 게임센터의 선생님 관리에서 GitHub 실행 파일 경로를 입력해 등록합니다. 예: games/new-game/index.html. 제목, 단원, 썸네일, 공개 여부는 게임센터에서 관리합니다.
 
+## Cloudflare 자동 배포
+
+main 브랜치의 `g/`, `games/`, `cloudflare/`가 바뀌면 GitHub Actions(`.github/workflows/deploy-cloudflare.yml`)가 게임 전용 서버 `game-center-play`를 다시 배포합니다. 배포 1회는 약 1분이고, 공개 저장소라 무료입니다.
+
+- `cloudflare/build-mirror.mjs`: 파일 이름의 24자리 해시가 내용의 SHA-256과 같은 이미지·음악만 골라 Cloudflare 정적 복제본으로 만듭니다.
+- `cloudflare/src/`: 게임 전용 서버 코드. HTML은 GitHub에서 읽고, 검증된 미디어는 정적 복제본에서 전달합니다.
+- 저장소 Settings → Secrets and variables → Actions에 `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`가 있어야 배포됩니다. 없으면 배포를 건너뛰고 게임은 GitHub 경로로 계속 실행됩니다.
+
 ## 게임 목록
 
 | 번호 | 게임 | 게임 파일 폴더 |

@@ -1,0 +1,14 @@
+// 게임 전용 서버 game-center-play 설정. GitHub Actions가 main 브랜치가 바뀔 때마다 배포합니다.
+{
+  "name": "game-center-play",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": true,
+  "assets": { "directory": "./.mirror", "binding": "ASSETS" },
+  "kv_namespaces": [{ "binding": "GAMES", "id": "22da9bf75a0b4bbda88e46698739bf7e" }],
+  "vars": {
+    "SITE_ORIGIN": "https://game-center-site.beefly1136.workers.dev",
+    "GITHUB_REPOSITORY": "beefly1136-dev/gijeong-game-library",
+    "GITHUB_BRANCH": "main"
+  }
+}

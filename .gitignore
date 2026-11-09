@@ -1,2 +1,5 @@
 .DS_Store
 Thumbs.db
+cloudflare/.mirror/
+cloudflare/src/github-mirror.json
+node_modules/

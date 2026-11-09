@@ -40,6 +40,27 @@ for (const top of ['g', 'games']) {
   }
 }
 const sorted = Object.fromEntries(Object.entries(mirror).sort(([a], [b]) => (a < b ? -1 : 1)));
+// Public game URLs are real static assets: no Worker hop on the published path.
+const mediaRoutes={};
+for(const p of Object.keys(mirror)){
+  const bytes=readFileSync(join(root,p)),hash=createHash('sha256').update(bytes).digest('hex'),ext=p.split('.').pop();
+  const target=`media/${hash}.${ext}`;mkdirSync(join(out,'media'),{recursive:true});writeFileSync(join(out,target),bytes);mediaRoutes[p]='/'+target;
+}
+let direct=0;
+for(const p of [...Object.keys(mirror),...Object.keys(snapshots)]){
+  let bytes=readFileSync(join(root,p));
+  if(/\.(html?|css|m?js|json)$/.test(p)){
+    let text=bytes.toString('utf8');const scope=p.split('/').slice(0,3).join('/')+'/';
+    for(const [original,target] of Object.entries(mediaRoutes)){
+      text=text.replaceAll('https://game-center-play.beefly1136.workers.dev/github/'+original,target).replaceAll('/github/'+original,target);
+      if(original.startsWith(scope))text=text.replaceAll(relative(dirname(join(root,p)),join(root,original)).split(sep).join('/'),target);
+    }
+    bytes=Buffer.from(text);
+  }
+  const target=join(out,'github',p);mkdirSync(dirname(target),{recursive:true});writeFileSync(target,bytes);direct++;
+}
+writeFileSync(join(out,'_headers'),`/*\n  X-Content-Type-Options: nosniff\n  Cross-Origin-Resource-Policy: cross-origin\n  Content-Security-Policy: frame-ancestors https://game-center-site.beefly1136.workers.dev\n  X-Game-Delivery: cloudflare-direct\n\n/github/*\n  Cache-Control: public, max-age=60\n\n/media/*\n  Cache-Control: public, max-age=31536000, immutable\n`);
+writeFileSync(join(here,'src','direct-media.json'),JSON.stringify(mediaRoutes));
 writeFileSync(join(here, 'src', 'github-mirror.json'), JSON.stringify(sorted));
 writeFileSync(join(here, 'src', 'github-snapshots.json'), JSON.stringify(snapshots));
-console.log(`고정 미디어 ${Object.keys(sorted).length}개, 즉시 실행 전달본 ${Object.keys(snapshots).length}개`);
+console.log(`고정 미디어 ${Object.keys(sorted).length}개, 직접 전달 게임 파일 ${direct}개`);

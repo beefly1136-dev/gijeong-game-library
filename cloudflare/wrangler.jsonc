@@ -4,7 +4,7 @@
   "main": "src/worker.js",
   "compatibility_date": "2026-11-01",
   "workers_dev": true,
-  "assets": { "directory": "./.mirror", "binding": "ASSETS", "run_worker_first": ["/github/*"], "html_handling":"none" },
+  "assets": { "directory": "./.mirror", "binding": "ASSETS", "run_worker_first": false, "html_handling":"none" },
   "kv_namespaces": [{ "binding": "GAMES", "id": "22da9bf75a0b4bbda88e46698739bf7e" }],
   "vars": {
     "SITE_ORIGIN": "https://game-center-site.beefly1136.workers.dev",

@@ -3,4 +3,5 @@ Thumbs.db
 cloudflare/.mirror/
 cloudflare/src/github-mirror.json
 cloudflare/src/github-snapshots.json
+cloudflare/src/direct-media.json
 node_modules/

@@ -23,7 +23,9 @@ function refresh(path,key,env,cache,describe){
   if(attempted.size>2000)attempted.delete(attempted.keys().next().value);
   const task=(async()=>{
     try{
-      const upstream=await fetch(githubRawUrl(env,path),{signal:AbortSignal.timeout(10000)});
+      const upstreamUrl=new URL(githubRawUrl(env,path));
+      upstreamUrl.searchParams.set('snapshot',snapshots[path]?.revision||'live');
+      const upstream=await fetch(upstreamUrl,{signal:AbortSignal.timeout(10000)});
       if(!upstream.ok){await upstream.body?.cancel();return new Response('GitHub에서 게임 파일을 찾지 못했습니다.',{status:upstream.status===404?404:502});}
       // Complete upstream transfer off the gameplay path, including its slow body stream.
       const bytes=await upstream.arrayBuffer();
@@ -42,7 +44,7 @@ export async function serveGithub(request,env,ctx,describe){
     const asset=await env.ASSETS.fetch(new Request(url.origin+'/'+mirrors[path]));
     if(asset.status===200)return delivered(new Response(asset.body,{headers:gameHeaders(env,path,describe)}),request,'cloudflare-static',true);
   }
-  const cache=caches.default,key=new Request(url.origin+'/github-cache-v2/'+path.split('/').map(encodeURIComponent).join('/'));
+  const cache=caches.default,key=new Request(url.origin+'/github-cache-v2/'+(snapshots[path]?.revision||'live')+'/'+path.split('/').map(encodeURIComponent).join('/'));
   const cached=await cache.match(key);
   if(cached){
     const fresh=Date.now()-Number(cached.headers.get('X-GitHub-Fetched-At'))<FRESH_MS;
@@ -51,7 +53,7 @@ export async function serveGithub(request,env,ctx,describe){
   }
   // Include every game HTML and nonhashed asset in deployment, not just media hashes.
   if(snapshots[path]&&env.ASSETS){
-    const asset=await env.ASSETS.fetch(new Request(url.origin+'/'+snapshots[path]));
+    const asset=await env.ASSETS.fetch(new Request(url.origin+'/'+snapshots[path].asset));
     if(asset.status===200){
       ctx.waitUntil(refresh(path,key,env,cache,describe));
       return delivered(new Response(asset.body,{headers:gameHeaders(env,path,describe)}),request,'cloudflare-snapshot');

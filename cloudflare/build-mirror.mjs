@@ -36,7 +36,7 @@ for (const top of ['g', 'games']) {
     mkdirSync(dirname(join(out, path)), { recursive: true });
     cpSync(file, join(out, path));
     if(match&&MEDIA.has(match[2])&&createHash('sha256').update(data).digest('hex').slice(0,24)===match[1])mirror[path]=path;
-    else { snapshots[path]=path; if(match)skipped++; }
+    else { snapshots[path]={asset:path,revision:createHash('sha256').update(data).digest('hex').slice(0,16)}; if(match)skipped++; }
   }
 }
 const sorted = Object.fromEntries(Object.entries(mirror).sort(([a], [b]) => (a < b ? -1 : 1)));

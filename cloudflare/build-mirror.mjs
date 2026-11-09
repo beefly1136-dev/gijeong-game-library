@@ -1,8 +1,7 @@
-// 게임 폴더에서 내용이 검증된 해시 이름 미디어를 찾아 Cloudflare 정적 복제본을 만듭니다.
-// 파일 이름 속 24자리 해시가 파일 내용의 SHA-256 앞 24자리와 같을 때만 복제합니다.
-// 내용이 바뀌면 이름도 바뀌므로 오래 캐시해도 예전 파일이 보이지 않습니다.
+// 모든 게임 파일을 Cloudflare에 미리 배포해 콜드 캐시에서도 GitHub를 기다리지 않습니다.
+// 내용 해시가 검증된 미디어만 장기 캐시하고, 나머지는 배포본 우선 + 배경 갱신합니다.
 import { createHash } from 'node:crypto';
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -21,9 +20,10 @@ function* walk(dir) {
   }
 }
 
+if(existsSync(out)&&realpathSync(out).toLowerCase()!==out.toLowerCase())throw new Error('복제 출력 폴더가 다른 경로를 가리킵니다.');
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
-const mirror = {};
+const mirror = {}, snapshots = {};
 let skipped = 0;
 for (const top of ['g', 'games']) {
   const base = join(root, top);
@@ -31,14 +31,15 @@ for (const top of ['g', 'games']) {
   for (const file of walk(base)) {
     const path = relative(root, file).split(sep).join('/');
     const match = path.split('/').pop().match(HASH);
-    if (!match || !MEDIA.has(match[2])) continue;
     const data = readFileSync(file);
-    if (data.length > MAX_BYTES || createHash('sha256').update(data).digest('hex').slice(0, 24) !== match[1]) { skipped++; continue; }
+    if(data.length>MAX_BYTES)throw new Error(`게임 파일이 25 MB를 초과합니다: ${path}`);
     mkdirSync(dirname(join(out, path)), { recursive: true });
     cpSync(file, join(out, path));
-    mirror[path] = path;
+    if(match&&MEDIA.has(match[2])&&createHash('sha256').update(data).digest('hex').slice(0,24)===match[1])mirror[path]=path;
+    else { snapshots[path]=path; if(match)skipped++; }
   }
 }
 const sorted = Object.fromEntries(Object.entries(mirror).sort(([a], [b]) => (a < b ? -1 : 1)));
 writeFileSync(join(here, 'src', 'github-mirror.json'), JSON.stringify(sorted));
-console.log(`정적 복제 ${Object.keys(sorted).length}개, 해시 불일치로 제외 ${skipped}개`);
+writeFileSync(join(here, 'src', 'github-snapshots.json'), JSON.stringify(snapshots));
+console.log(`고정 미디어 ${Object.keys(sorted).length}개, 즉시 실행 전달본 ${Object.keys(snapshots).length}개`);

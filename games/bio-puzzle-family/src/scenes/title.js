@@ -68,12 +68,13 @@
   BPF.scenes.boot = {
     enter() {
       this.p = 0; this.done = false;
-      const keys = ['body_p01', 'body_p02', 'body_p03', 'body_p04'];
+      BPF.audio.prepare('main'); // 첫 곡을 이미지보다 먼저 준비하되 자동 재생하지 않습니다.
+      const keys = ['title_bg', 'title_logo', 'body_p01', 'body_p02', 'body_p03', 'body_p04'];
       ['p01', 'p02', 'p03', 'p04'].forEach(p => ['idle', 'success', 'mistake', 'combo', 'thinking', 'acting'].forEach(f => keys.push(`face_${p}_${f}`)));
       ['lulu', 'coco', 'tani', 'bibi'].forEach(p => keys.push(`pet_${p}_1`));
       ['bld_institute', 'bld_lab', 'bld_barn', 'bld_house', 'bld_greenhouse', 'tree', 'tree_pink', 'scales', 'alchemy_pot'].forEach(k => keys.push(k));
       BPF.assets.preload(keys, p => this.p = p).then(() => {
-        this.done = true; BPF.assets.loadAll();
+        this.done = true; // 이후 그림은 assets.get()이 해당 화면에서 필요할 때 준비합니다.
         // 유전자 재조합 과정 그림(rc_p*, rc_x*)은 선생님이 나중에 넣는 그림이라 없으면 조용히 대체
         const fails = Object.keys(BPF.assets.manifest).filter(k => BPF.assets.failed(k) && !/^rc_(p\d|x\d)/.test(k));
         if (fails.length) BPF.toast(`이미지 ${fails.length}개를 불러오지 못해 대체 그림을 씁니다.`, '#b03040');

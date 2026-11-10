@@ -50,10 +50,15 @@ let direct=0;
 for(const p of [...Object.keys(mirror),...Object.keys(snapshots)]){
   let bytes=readFileSync(join(root,p));
   if(/\.(html?|css|m?js|json)$/.test(p)){
-    let text=bytes.toString('utf8');const scope=p.split('/').slice(0,3).join('/')+'/';
+    let text=bytes.toString('utf8');
+    const scope=p.split('/').slice(0,p.startsWith('games/')?2:3).join('/')+'/';
     for(const [original,target] of Object.entries(mediaRoutes)){
       text=text.replaceAll('https://game-center-play.beefly1136.workers.dev/github/'+original,target).replaceAll('/github/'+original,target);
-      if(original.startsWith(scope))text=text.replaceAll(relative(dirname(join(root,p)),join(root,original)).split(sep).join('/'),target);
+      if(original.startsWith(scope)){
+        text=text.replaceAll(relative(dirname(join(root,p)),join(root,original)).split(sep).join('/'),target);
+        // 게임 루트 기준 에셋 맵(BPF_HASH 등)의 값도 장기 캐시 경로로 연결합니다.
+        text=text.replaceAll(JSON.stringify(original.slice(scope.length)),JSON.stringify(target));
+      }
     }
     bytes=Buffer.from(text);
   }

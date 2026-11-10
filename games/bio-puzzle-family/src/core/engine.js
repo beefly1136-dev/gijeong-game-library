@@ -119,6 +119,11 @@
   let fade = 0, fadeDir = 0, pending = null;
   BPF.go = function (name, params) {
     if (!BPF.scenes[name]) { console.error('scene 없음', name); return; }
+    if (BPF.audio && BPF.audio.prepare) {
+      const modes = { title:'main', playerSelect:'main', gamecenter:'main', village:'town', lab:'town', shop:'town', farm:'farm', adopt:'farm', album:'farm', codex:'codex', festival:'ending' };
+      const mode = name === 'play' ? 'game:' + (params && params.id || '') : modes[name];
+      if (mode) BPF.audio.prepare(mode);
+    }
     pending = { name, params: params || {} };
     fadeDir = 1;
     if (BPF.save && BPF.save.data && BPF.save.data.settings.reduceMotion) fade = 1;

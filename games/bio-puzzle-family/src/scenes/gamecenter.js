@@ -10,6 +10,8 @@
       this.avatar = new BPF.PlayerAvatar().mount({ id: 'village' }, BPF.save.player, BPF.save.data.selectedCostumeId, { x: 1020, y: 76, w: 252, h: 486 });
       this.avatar.line = '어떤 연구를 해 볼까?';
       BPF.audio.bgm('main');
+      const selected = BPF_DATA.games[this.idx];
+      if (BPF.save.isUnlocked(selected.id)) BPF.audio.anticipate('game:' + selected.id);
     },
     exit() { this.avatar && this.avatar.unmount(); },
     update(dt) {
@@ -20,7 +22,7 @@
       if (I.confirm()) this.play(this.idx);
       if (I.key('Escape')) BPF.go('village', { from: 'gamecenter' });
     },
-    hint() { BPF.audio.sfx('move'); this.avatar.setState('thinking', { line: BPF_DATA.games[this.idx].title + '?' }); },
+    hint() { BPF.audio.sfx('move'); const game=BPF_DATA.games[this.idx]; this.avatar.setState('thinking', { line: game.title + '?' }); if (BPF.save.isUnlocked(game.id)) BPF.audio.anticipate('game:' + game.id); },
     play(i) {
       const G = BPF_DATA.games[i];
       if (!BPF.save.isUnlocked(G.id)) { BPF.audio.sfx('bad'); BPF.toast('🔒 연구소를 승급하면 새 미니게임이 열려요!'); return; }

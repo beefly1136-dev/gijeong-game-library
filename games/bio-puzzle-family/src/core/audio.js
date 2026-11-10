@@ -64,31 +64,77 @@
   }
   let holdUntil = 0;
   const players = {};
-  let cur = null, want = null;
+  const pendingPlay = new Map(), failures = new Set();
+  let cur = null, want = null, unlocked = false, anticipateTimer;
+  function track(mode) {
+    const map = { village:'town', town:'town', main:'main', game:'main', farm:'farm', codex:'codex', ending:'ending' };
+    if (!mode) return want;
+    if (mode.indexOf('game:') === 0) return TRACKS[mode.slice(5)] ? mode.slice(5) : 'main';
+    return map[mode] || 'main';
+  }
   function el(k) {
-    if (!players[k]) { const a = new Audio(window.BPF_URL ? window.BPF_URL(TRACKS[k]) : TRACKS[k]); a.loop = true; a.preload = 'auto'; a.volume = 0.45; players[k] = a; }
+    if (!players[k]) {
+      const a = new Audio();
+      a.loop = true; a.preload = 'auto'; a.volume = 0.45;
+      a.setAttribute('data-bpf-track', k); a.setAttribute('aria-hidden', 'true');
+      a.addEventListener('canplay', () => { failures.delete(k); if (want === k) apply(); });
+      a.addEventListener('error', () => {
+        if (!failures.has(k)) { failures.add(k); console.warn('배경음 로드 실패', k, a.error && a.error.code); }
+      });
+      players[k] = a;
+      a.src = window.BPF_URL ? window.BPF_URL(TRACKS[k]) : TRACKS[k];
+      document.body.appendChild(a);
+      a.load();
+    }
     return players[k];
+  }
+  function prepare(mode) {
+    if (muted() || (BPF.save && BPF.save.data && BPF.save.data.settings.bgm === false)) return;
+    const k = track(mode); if (k) el(k);
   }
   function allowed() { return Date.now() >= holdUntil && !muted() && BPF.save && BPF.save.data && BPF.save.data.settings.bgm !== false; }
   function apply() {
-    Object.keys(players).forEach(k => { if (k !== want || !allowed()) { if (!players[k].paused) players[k].pause(); } });
-    if (want && allowed()) {
-      const a = el(want);
-      if (cur !== want) { try { a.currentTime = 0; } catch (e) { } cur = want; }
-      if (a.paused) { const p = a.play(); if (p && p.catch) p.catch(() => { }); }
+    if (!unlocked || !allowed()) {
+      Object.values(players).forEach(a => { if (!a.paused) a.pause(); });
+      return;
     }
+    if (!want) return;
+    const k = want, a = el(k);
+    if (pendingPlay.has(k) || failures.has(k)) return;
+    if (cur === k && !a.paused) return;
+    // 다음 곡이 실제로 재생될 때까지 이전 곡을 유지해 화면 전환의 무음을 줄입니다.
+    const started = () => {
+      if (want !== k || !allowed()) { a.pause(); return; }
+      cur = k;
+      Object.entries(players).forEach(([other, player]) => { if (other !== k && !player.paused) player.pause(); });
+    };
+    try {
+      const result = a.play();
+      if (result && result.then) {
+        pendingPlay.set(k, result);
+        result.then(started).catch(error => {
+          if (error.name !== 'NotAllowedError' && error.name !== 'AbortError') console.warn('배경음 재생 실패', k, error.name);
+        }).finally(() => pendingPlay.delete(k));
+      } else started();
+    } catch (error) { console.warn('배경음 재생 실패', k, error.name); }
   }
   setInterval(apply, 500); // 설정(음소거·배경음) 변경 즉시 반영
   BPF.audio = {
-    state() { const a = want && players[want]; return { want, playing: !!(a && !a.paused) }; },
-    unlock() { if (ensure() && ac.state === 'suspended') ac.resume(); apply(); },
+    state() { const a = want && players[want]; return { want, current:cur, playing:!!(a && !a.paused && a.readyState >= 2), loading:!!(a && a.readyState < 2), failed:want && failures.has(want) }; },
+    prepare,
+    anticipate(mode) { clearTimeout(anticipateTimer); anticipateTimer = setTimeout(() => prepare(mode), 500); },
+    unlock() {
+      unlocked = true;
+      if (ensure() && ac.state === 'suspended') ac.resume();
+      // 시작 화면의 실제 포인터/키 이벤트에서 재생 권한을 확보합니다.
+      if (!want && BPF.sceneName === 'boot' && BPF.scene && BPF.scene.done) want = 'main';
+      apply();
+    },
     sfx(name) { if (muted()) return; if (SFX_FILES[name]) { playFile(name); return; } if (!ensure()) return; try { SFX[name] && SFX[name](); } catch (e) { } },
     bgm(mode) {
-      const map = { village: 'town', town: 'town', main: 'main', game: 'main', farm: 'farm', codex: 'codex', ending: 'ending' };
-      // 'game:g05' → 그 게임 전용 곡(없으면 기본 테마)
-      let k = mode ? (map[mode] || 'main') : want;
-      if (mode && mode.indexOf('game:') === 0) { const id = mode.slice(5); k = TRACKS[id] ? id : 'main'; } // null이면 지금 곡 유지
-      if (k === want) return;
+      const k = track(mode);
+      if (k === want) { apply(); return; }
+      if (k && players[k] && cur !== k) { try { players[k].currentTime = 0; } catch (_) {} }
       want = k; apply();
     }
   };

@@ -69,7 +69,7 @@
   }
   // 한꺼번에 수백 개를 요청하면 게임 서버가 밀리므로, 정해진 개수씩 차례로 불러온다
   const queue = []; let active = 0;
-  const MAX_ACTIVE = window.BPF_HASH ? 8 : 64;
+  const MAX_ACTIVE = window.BPF_HASH ? 4 : 64; // 음악 스트리밍 대역폭을 남겨 둡니다.
   function pump() {
     while (active < MAX_ACTIVE && queue.length) {
       const [key, src] = queue.shift(); active++;

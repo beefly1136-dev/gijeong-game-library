@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { bundleStartup } from './bundle-startup.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
@@ -68,4 +69,6 @@ writeFileSync(join(out,'_headers'),`/*\n  X-Content-Type-Options: nosniff\n  Cro
 writeFileSync(join(here,'src','direct-media.json'),JSON.stringify(mediaRoutes));
 writeFileSync(join(here, 'src', 'github-mirror.json'), JSON.stringify(sorted));
 writeFileSync(join(here, 'src', 'github-snapshots.json'), JSON.stringify(snapshots));
+const startup=bundleStartup(out,'games/bio-puzzle-family/index.html');
+if(startup)console.log('시작 코드 묶음:',JSON.stringify(startup));
 console.log(`고정 미디어 ${Object.keys(sorted).length}개, 직접 전달 게임 파일 ${direct}개`);

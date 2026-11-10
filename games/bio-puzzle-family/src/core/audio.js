@@ -89,6 +89,7 @@
     return players[k];
   }
   function prepare(mode) {
+    if (!unlocked) return; // 첫 화면의 이미지와 코드를 음악 다운로드와 경쟁시키지 않습니다.
     if (muted() || (BPF.save && BPF.save.data && BPF.save.data.settings.bgm === false)) return;
     const k = track(mode); if (k) el(k);
   }

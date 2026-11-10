@@ -92,20 +92,17 @@
     /* 필수(P0) 이미지를 먼저 불러온다 */
     preload(keys, onProgress) {
       return new Promise(res => {
-        let done = 0;
-        const total = keys.length;
+        keys = [...new Set(keys)];
+        const total = keys.length, until = Date.now() + 8000;
         if (!total) return res();
-        keys.forEach(k => {
-          load(k);
-          const check = () => {
-            if (status[k] === 'ok' || status[k] === 'error' || status[k] === 'missing') {
-              done++; onProgress && onProgress(done / total);
-              if (done === total) res();
-            } else setTimeout(check, 30);
-          };
-          check();
-        });
-        setTimeout(res, 8000); // 느린 기기에서도 진행
+        keys.forEach(load);
+        const check = () => {
+          const done = keys.filter(k => status[k] === 'ok' || status[k] === 'error' || status[k] === 'missing').length;
+          onProgress && onProgress(done / total);
+          if (done === total || Date.now() >= until) { res(); return; }
+          setTimeout(check, 80); // 키별 반복 타이머 없이, 제한 시간 이후에는 검사도 끝냅니다.
+        };
+        check();
       });
     },
     loadAll() { Object.keys(manifest).forEach(load); }

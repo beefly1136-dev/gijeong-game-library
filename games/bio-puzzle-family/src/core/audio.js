@@ -54,16 +54,22 @@
     try {
       if (!sfxEls[name]) { sfxEls[name] = new Audio(window.BPF_URL ? window.BPF_URL(SFX_FILES[name]) : SFX_FILES[name]); sfxEls[name].preload = 'auto'; }
       const a = sfxEls[name]; a.volume = 0.8; a.currentTime = 0;
-      const p = a.play(); if (p && p.catch) p.catch(() => { });
+      // 미니게임 성공·실패 음악(3초)이 나오는 동안은 배경음을 멈춘다
+      if (name === 'mg_win' || name === 'mg_lose') {
+        holdUntil = Date.now() + 3200; apply();
+        a.onended = () => { holdUntil = 0; apply(); };
+      }
+      const p = a.play(); if (p && p.catch) p.catch(() => { holdUntil = 0; apply(); });
     } catch (e) { }
   }
+  let holdUntil = 0;
   const players = {};
   let cur = null, want = null;
   function el(k) {
     if (!players[k]) { const a = new Audio(window.BPF_URL ? window.BPF_URL(TRACKS[k]) : TRACKS[k]); a.loop = true; a.preload = 'auto'; a.volume = 0.45; players[k] = a; }
     return players[k];
   }
-  function allowed() { return !muted() && BPF.save && BPF.save.data && BPF.save.data.settings.bgm !== false; }
+  function allowed() { return Date.now() >= holdUntil && !muted() && BPF.save && BPF.save.data && BPF.save.data.settings.bgm !== false; }
   function apply() {
     Object.keys(players).forEach(k => { if (k !== want || !allowed()) { if (!players[k].paused) players[k].pause(); } });
     if (want && allowed()) {

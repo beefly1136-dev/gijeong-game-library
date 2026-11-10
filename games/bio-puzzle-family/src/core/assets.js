@@ -69,15 +69,17 @@
   }
   // 한꺼번에 수백 개를 요청하면 게임 서버가 밀리므로, 정해진 개수씩 차례로 불러온다
   const queue = []; let active = 0;
-  const MAX_ACTIVE = window.BPF_HASH ? 6 : 64;
+  const MAX_ACTIVE = window.BPF_HASH ? 8 : 64;
   function pump() {
     while (active < MAX_ACTIVE && queue.length) {
       const [key, src] = queue.shift(); active++;
       const im = new Image();
-      let fin = false;
-      const done = ok => { if (fin) return; fin = true; active--; if (ok) { imgs[key] = im; status[key] = 'ok'; } else { status[key] = 'error'; console.warn('이미지 로드 실패', src); } pump(); };
-      im.onload = () => done(true);
-      im.onerror = () => done(false);
+      let freed = false;
+      const free = () => { if (!freed) { freed = true; active--; pump(); } };
+      // 느린 그림 하나가 줄 전체를 막지 않게 6초가 지나면 자리를 비워 준다(그림은 계속 받는다)
+      setTimeout(free, 6000);
+      im.onload = () => { imgs[key] = im; status[key] = 'ok'; free(); };
+      im.onerror = () => { status[key] = 'error'; console.warn('이미지 로드 실패', src); free(); };
       im.src = window.BPF_URL ? window.BPF_URL(src) : src; // 배포판에서는 해시 이름으로 바꿔 빠르게 전달
     }
   }

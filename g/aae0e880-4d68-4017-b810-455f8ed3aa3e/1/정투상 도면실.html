@@ -1,0 +1,1013 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><title>정투상 도면실</title>
+<style>
+/* Layout: 태블릿 한 화면 제도판 — 위 띠에 활동·각법 버튼, 아래는 모형대(3D)와 도면 작업대. 가로는 좌우, 세로는 위아래 배치. 스크롤 없음, 탭으로만 조작 */
+:root{
+  --bg:#eef1ea; --sheet:#fbfcf7; --grid:#e1e8da; --ink:#1c2830; --muted:#5b696e; --rule:#b4c2b9;
+  --accent:#dc5418; --accent-soft:#fbe5d8; --on-accent:#ffffff; --model:#e4cda3;
+  --ok:#2c8744; --ok-soft:#dff1e3; --bad:#c23131; --bad-soft:#f8e1de; --scrim:rgba(20,28,32,.45);
+  --display:"Black Han Sans","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono","IBM Plex Sans KR",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11171b; --sheet:#182128; --grid:#212d34; --ink:#e2e9e4; --muted:#96a5a9; --rule:#3a4a52;
+    --accent:#ff8649; --accent-soft:#3a2417; --on-accent:#1b0e07; --model:#b9996a;
+    --ok:#62cd7b; --ok-soft:#15301f; --bad:#ff7272; --bad-soft:#3a1b1b; --scrim:rgba(0,0,0,.6); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11171b; --sheet:#182128; --grid:#212d34; --ink:#e2e9e4; --muted:#96a5a9; --rule:#3a4a52;
+  --accent:#ff8649; --accent-soft:#3a2417; --on-accent:#1b0e07; --model:#b9996a;
+  --ok:#62cd7b; --ok-soft:#15301f; --bad:#ff7272; --bad-soft:#3a1b1b; --scrim:rgba(0,0,0,.6); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;background:var(--bg)}
+body{color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;word-break:keep-all;overflow-wrap:break-word;overflow:hidden;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+button{font:inherit;color:inherit;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.gridpaper{background-color:var(--sheet);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:16px 16px}
+
+.app{height:100%;display:flex;flex-direction:column;gap:10px;padding:12px 16px;max-width:1400px;margin:0 auto}
+
+/* 상단 띠 */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding-bottom:10px;border-bottom:2px solid var(--ink)}
+h1{font-family:var(--display);font-weight:400;font-size:28px;line-height:1;margin:0 6px 0 0;white-space:nowrap}
+.brand{display:flex;flex-direction:column;gap:3px;margin-right:6px}
+.brand h1{margin:0}
+.credit{margin:0;font-size:10.5px;line-height:1.3;color:var(--muted);white-space:nowrap}
+.group{display:flex;align-items:center;gap:8px}
+.group-label{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:var(--muted)}
+.mode-btn{appearance:none;display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:7px 14px;border:1.5px solid var(--ink);border-radius:10px;background:var(--sheet);cursor:pointer;text-align:left;min-height:48px;justify-content:center}
+.mode-btn b{font-size:15px;line-height:1.2}
+.mode-btn small{font-size:11.5px;color:var(--muted);line-height:1.2}
+.mode-btn[aria-pressed="true"]{background:var(--ink);color:var(--sheet)}
+.mode-btn[aria-pressed="true"] small{color:var(--sheet);opacity:.75}
+.meth-btn{appearance:none;display:flex;align-items:center;gap:7px;padding:0 14px 0 9px;min-height:48px;border:1.5px solid var(--ink);border-radius:999px;background:var(--sheet);cursor:pointer;font-weight:700;font-size:15px}
+.meth-btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.sym{width:34px;height:17px;flex:none}
+.spacer{flex:1}
+.score{display:flex;gap:8px}
+.stat{display:flex;flex-direction:column;gap:1px;padding:4px 12px;border:1.5px solid var(--rule);border-radius:10px;min-width:118px}
+.stat.on{border-color:var(--ink)}
+.stat-label{font-size:11.5px;color:var(--muted);line-height:1.2}
+.stat-val{font-family:var(--mono);font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:6px}
+.stat-val b{font-size:21px;font-weight:500;color:var(--ink)}
+.rules-btn{appearance:none;min-height:44px;padding:0 14px;border:1.5px solid var(--rule);border-radius:10px;background:var(--sheet);cursor:pointer;font-weight:600;font-size:14px}
+.sound-group{display:flex;gap:6px}
+.snd-btn{appearance:none;display:flex;align-items:center;gap:5px;min-height:44px;padding:0 11px 0 9px;border:1.5px solid var(--rule);border-radius:10px;background:var(--sheet);cursor:pointer;font-weight:600;font-size:13.5px;color:var(--muted)}
+.snd-btn svg{width:20px;height:20px;flex:none}
+.snd-btn .wave{display:none}
+.snd-btn[aria-pressed="true"]{border-color:var(--ink);color:var(--ink)}
+.snd-btn[aria-pressed="true"] .wave{display:inline}
+.snd-btn[aria-pressed="true"] .slash{display:none}
+.reset-btn.confirm{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+
+@media (max-width:1260px){
+  .group-label,.mode-btn small{display:none}
+  h1{font-size:24px}
+  .top{gap:8px 10px}
+  .stat{min-width:0;padding:3px 10px}
+  .snd-btn span{display:none}
+  .snd-btn{padding:0 9px}
+  .stat-label .lf{display:none}
+  .mode-btn{padding:7px 11px}
+  .meth-btn{padding:0 11px 0 7px;gap:5px}
+  .rules-btn{padding:0 11px}
+  .sound-group{gap:4px}
+}
+/* 본문 */
+.layout{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,4fr) minmax(0,6fr);gap:12px}
+@media (orientation:portrait){.layout{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,4fr) minmax(0,6fr)}}
+.panel{background:var(--sheet);border:1.5px solid var(--rule);border-radius:12px;padding:12px;min-width:0;min-height:0}
+
+.model{display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:10px}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;color:var(--muted)}
+.shape-name{font-weight:700;font-size:14px}
+.stage-wrap{position:relative;min-height:0;border-radius:8px;overflow:hidden;border:1px solid var(--rule)}
+#stage{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+#stage:active{cursor:grabbing}
+.stage-tag{position:absolute;top:8px;left:10px;font-family:var(--mono);font-size:12px;color:var(--muted);pointer-events:none}
+.stage-note{position:absolute;bottom:8px;left:10px;right:10px;font-size:12px;color:var(--muted);pointer-events:none}
+.stage-note em{font-style:normal;color:var(--accent);font-weight:700}
+.stage-fallback{position:absolute;inset:0;display:grid;place-items:center;padding:20px;text-align:center;color:var(--muted)}
+.rot{position:absolute;right:10px;bottom:10px;display:grid;grid-template-columns:repeat(3,42px);grid-template-rows:repeat(2,42px);gap:5px}
+.rot button{appearance:none;border:1.5px solid var(--ink);border-radius:10px;background:var(--sheet);cursor:pointer;display:grid;place-items:center;padding:0}
+.rot button svg{width:20px;height:20px}
+.rot .up{grid-column:2;grid-row:1} .rot .lf{grid-column:1;grid-row:2} .rot .dn{grid-column:2;grid-row:2} .rot .rt{grid-column:3;grid-row:2}
+.viewbtns{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.vbtn{appearance:none;font-size:13px;font-weight:700;background:var(--sheet);border:1.5px solid var(--rule);border-radius:10px;min-height:44px;padding:2px 4px;cursor:pointer;line-height:1.15}
+.vbtn small{display:block;font-weight:500;font-size:11px;color:var(--muted)}
+.vbtn[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--sheet)}
+.vbtn[aria-pressed="true"] small{color:var(--sheet);opacity:.75}
+.vbtn[disabled]{opacity:.38;cursor:not-allowed}
+
+.work{display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:10px}
+.work-head{display:flex;flex-direction:column;gap:2px}
+.work-head h2{margin:0;font-size:19px;line-height:1.35;font-weight:700;text-wrap:balance}
+.work-head h2 u{text-decoration-color:var(--accent);text-decoration-thickness:3px;text-underline-offset:4px}
+.work-body{min-height:0;container-type:size;display:flex;align-items:center;justify-content:center;gap:14px}
+
+/* 배치 퍼즐 */
+.place-body{flex-direction:column;gap:12px;--s:min(calc((100cqh - 66px) / 4), calc((100cqw - 44px) / 5))}
+.sheet{flex:none;display:grid;grid-template-columns:repeat(4,var(--s));grid-template-rows:repeat(3,var(--s));gap:8px;padding:10px;border:2px solid var(--ink);outline:1px solid var(--ink);outline-offset:3px}
+.slot.omitted{border:1.5px dashed var(--rule);background:transparent;cursor:default}
+.omit-txt{font-family:var(--display);font-size:clamp(16px,4cqh,24px);color:var(--muted);line-height:1}
+.slot.omitted .slot-name{color:var(--muted);font-weight:500}
+.msg .omit{color:var(--ink)}
+.msg .omit b{background:linear-gradient(transparent 55%,var(--accent-soft) 55%)}
+.omit-callout{grid-column:1/-1;border:2px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:12px 14px}
+.omit-callout b{font-size:16px;color:var(--accent)}
+.omit-callout p{margin:4px 0 0;font-size:14px;color:var(--ink)}
+.slot{appearance:none;background:transparent;border:1.5px dashed var(--rule);border-radius:6px;padding:6%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;min-width:0;min-height:0}
+.slot.fixed{border-style:solid;border-color:var(--ink);cursor:default;background:var(--sheet)}
+.slot.armed{border-color:var(--accent);border-style:solid;background:var(--accent-soft)}
+.slot.filled{border-style:solid;border-color:var(--ink);background:var(--sheet)}
+.slot.ok{border:2px solid var(--ok);background:var(--ok-soft)}
+.slot.bad{border:2px solid var(--bad);background:var(--bad-soft)}
+.slot-draw{flex:1;min-height:0;width:100%}
+.slot-draw svg,.cdraw svg{width:100%;height:100%;display:block}
+.slot-name{font-size:12px;font-weight:700;line-height:1.2}
+.slot.ok .slot-name{color:var(--ok)} .slot.bad .slot-name{color:var(--bad)}
+.slot-q{font-family:var(--display);font-size:clamp(20px,6cqh,34px);color:var(--rule);line-height:1}
+.slot.armed .slot-q{color:var(--accent)}
+.titleblock{align-self:end;border:1.5px solid var(--ink);font-size:11px;line-height:1.25;background:var(--sheet);min-width:0}
+.tb-row{display:grid;grid-template-columns:auto minmax(0,1fr);border-top:1px solid var(--ink)}
+.tb-row:first-child{border-top:0}
+.tb-row span{padding:3px 5px;border-right:1px solid var(--ink);color:var(--muted)}
+.tb-row b{padding:3px 5px;font-weight:600;display:flex;align-items:center;gap:3px;min-width:0;overflow-wrap:anywhere}
+.tb-row .sym{width:22px;height:11px}
+.tray{flex:none;display:grid;grid-template-columns:repeat(5,var(--s));gap:10px}
+.card{appearance:none;aspect-ratio:1;background:var(--sheet);border:1.5px solid var(--ink);border-radius:10px;padding:5%;cursor:pointer;transition:transform .15s,box-shadow .15s;min-width:0}
+.card svg{width:100%;height:100%;display:block}
+.card[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent);transform:translateY(-3px)}
+.card.gone{visibility:hidden}
+
+/* 투상도 고르기 */
+.ctx{flex:none;display:flex;flex-direction:column;align-items:center;gap:10px}
+.mini{display:grid;grid-template-columns:repeat(4,46px);grid-template-rows:repeat(3,46px);gap:5px;padding:7px;border:1.5px solid var(--ink)}
+.mini .m{border:1px dashed var(--rule);border-radius:4px;display:grid;place-items:center;min-width:0;padding:6px}
+.mini .m svg{width:100%;height:100%}
+.mini .m.front{border:1px solid var(--ink);background:var(--sheet)}
+.mini .m.ask{border:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);font-family:var(--display);font-size:22px}
+.mini .m.blank{border:0}
+.method-badge{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--ink);border-radius:999px;padding:2px 12px 2px 6px;font-weight:700;font-size:14px}
+.choices{--cw:100cqw;width:min(100cqh,var(--cw));height:min(100cqh,var(--cw));flex:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:12px}
+.with-ctx .choices{--cw:calc(100cqw - 250px)}
+.choice{appearance:none;position:relative;border:1.5px solid var(--rule);border-radius:12px;padding:14% 12% 16%;display:flex;flex-direction:column;cursor:pointer;min-width:0;min-height:0}
+.choice[disabled]{cursor:default}
+.cdraw{flex:1;min-height:0}
+.choice .num{position:absolute;top:6px;left:10px;font-family:var(--mono);font-weight:500;font-size:16px}
+.choice .cap{position:absolute;left:6px;right:6px;bottom:5px;font-size:12px;font-weight:700;text-align:center;line-height:1.25;color:var(--muted)}
+.choice.ok{border:2.5px solid var(--ok);background:var(--ok-soft)} .choice.ok .cap{color:var(--ok)}
+.choice.bad{border:2.5px solid var(--bad);background:var(--bad-soft)} .choice.bad .cap{color:var(--bad)}
+.choice.dim{opacity:.7}
+
+/* 아래 띠: 안내·결과·버튼 */
+.foot{display:flex;align-items:flex-end;gap:12px}
+.msg{flex:1;min-width:0;max-height:118px;overflow-y:auto;border-radius:10px;padding:9px 12px;font-size:14px;line-height:1.45;background:var(--bg)}
+.msg.ok{background:var(--ok-soft)} .msg.bad{background:var(--bad-soft)}
+.msg p,.msg ul{margin:0}
+.msg ul{padding-left:18px}
+.msg li+li,.msg p+p{margin-top:3px}
+.pill{display:inline-block;font-weight:700;font-size:12.5px;padding:0 9px;border-radius:999px;margin-right:6px;vertical-align:1px}
+.msg.ok .pill{background:var(--ok);color:var(--sheet)} .msg.bad .pill{background:var(--bad);color:var(--sheet)}
+.actions{display:flex;gap:8px;flex:none}
+.btn{appearance:none;font-weight:700;font-size:15px;cursor:pointer;min-height:48px;padding:0 18px;border-radius:10px;border:1.5px solid var(--ink);background:var(--sheet)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn[disabled]{opacity:.38;cursor:not-allowed}
+
+/* 규칙 창 */
+[hidden]{display:none!important}
+.overlay{position:fixed;inset:0;background:var(--scrim);display:grid;place-items:center;padding:16px;z-index:10}
+.dialog{background:var(--sheet);border:1.5px solid var(--ink);border-radius:14px;padding:18px 20px;max-width:720px;width:100%;max-height:100%;overflow:auto;display:flex;flex-direction:column;gap:14px}
+.dialog-head{display:flex;justify-content:space-between;align-items:center}
+.dialog-head h2{margin:0;font-size:20px}
+.rules-body{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:18px}
+.rule-col h3{margin:0 0 4px;font-size:16px;display:flex;align-items:center;gap:8px}
+.rule-col p{margin:0 0 10px;font-size:13.5px;color:var(--muted)}
+.rmini{display:grid;grid-template-columns:repeat(4,66px);gap:4px}
+.rmini div.rear{border-style:dashed;color:var(--muted);font-weight:500;line-height:1.2;padding:4px 2px}
+.rmini div.rear small{font-size:11px}
+.rear-note{grid-column:1/-1;margin:0;font-size:13.5px;color:var(--muted);padding:10px 12px;border:1px dashed var(--rule);border-radius:8px}
+.rmini div{border:1px solid var(--ink);border-radius:4px;padding:8px 2px;text-align:center;font-size:12.5px;font-weight:600}
+.rmini div.c{background:var(--ink);color:var(--sheet)}
+.rmini div.x{border:0}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend svg{width:40px;height:10px;vertical-align:middle;margin-right:4px}
+
+/* 휴대폰 등 작은 화면: 한 화면 고정을 풀고 세로로 쌓음 */
+@media (max-width:640px), (max-height:520px){
+  html,body{height:auto} body{overflow:auto}
+  .app{height:auto}
+  .layout{grid-template-columns:minmax(0,1fr);grid-template-rows:none}
+  .model .stage-wrap{height:300px}
+  .viewbtns{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .work-body{container-type:normal;flex-direction:column}
+  .place-body{--s:calc((100vw - 120px) / 5)}
+  .choices{width:100%;max-width:440px;height:auto;aspect-ratio:1}
+  .mini{grid-template-columns:repeat(4,40px);grid-template-rows:repeat(3,40px)}
+  .foot{flex-direction:column;align-items:stretch}
+  .msg{max-height:none}
+  .actions{justify-content:flex-end}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <h1>정투상 도면실</h1>
+      <p class="credit">경기도 기술교사 고태열<br>[공학하는 기술쌤]</p>
+    </div>
+    <div class="group" role="group" aria-label="활동">
+      <span class="group-label">활동</span>
+      <button type="button" class="mode-btn" data-mode="place" aria-pressed="true"><b>배치 퍼즐</b><small>카드 5장을 제자리에</small></button>
+      <button type="button" class="mode-btn" data-mode="choose" aria-pressed="false"><b>투상도 고르기</b><small>보기 4개 중 하나</small></button>
+    </div>
+    <div class="group" role="group" aria-label="각법">
+      <span class="group-label">각법</span>
+      <button type="button" class="meth-btn" data-method="3" aria-pressed="true"></button>
+      <button type="button" class="meth-btn" data-method="1" aria-pressed="false"></button>
+    </div>
+    <span class="spacer"></span>
+    <div class="score" id="score" aria-live="polite"></div>
+    <div class="sound-group" role="group" aria-label="소리">
+      <button type="button" class="snd-btn" id="sfxBtn" aria-pressed="true" title="효과음 켜기/끄기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path class="wave" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="slash" d="M15 9l6 6M21 9l-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>효과음</span></button>
+      <button type="button" class="snd-btn" id="bgmBtn" aria-pressed="false" title="배경음 켜기/끄기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17.5V6l10-2v11.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="6.5" cy="17.5" r="2.5" fill="currentColor"/><circle cx="16.5" cy="15.5" r="2.5" fill="currentColor"/><path class="slash" d="M3 3l18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>배경음</span></button>
+    </div>
+    <button type="button" class="rules-btn reset-btn" id="resetBtn">다시하기</button>
+    <button type="button" class="rules-btn" id="rulesOpen">규칙 보기</button>
+  </header>
+
+  <main class="layout">
+    <section class="panel model" aria-label="3D 모형">
+      <div class="panel-head"><span class="eyebrow">모형대</span><span class="shape-name" id="shapeName"></span></div>
+      <div class="stage-wrap gridpaper" id="stageWrap">
+        <canvas id="stage" aria-label="3D 모형"></canvas>
+        <span class="stage-tag" id="stageTag">기본 보기</span>
+        <span class="stage-note">손가락이나 마우스로 끌어서 돌려 보세요. <em>주황 표시</em> 쪽이 정면입니다.</span>
+        <div class="stage-fallback" id="stageFallback" hidden>3D 모형을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로 고침해 주세요.</div>
+      </div>
+      <div class="viewbtns" id="viewBtns">
+        <button type="button" class="vbtn" data-view="iso">기본<small>비스듬히</small></button>
+        <button type="button" class="vbtn" data-view="front">정면<small>앞</small></button>
+        <button type="button" class="vbtn" data-view="top">평면<small>위</small></button>
+        <button type="button" class="vbtn" data-view="right">우측면<small>오른쪽</small></button>
+        <button type="button" class="vbtn" data-view="left">좌측면<small>왼쪽</small></button>
+        <button type="button" class="vbtn" data-view="bottom">저면<small>아래</small></button>
+        <button type="button" class="vbtn" data-view="rear">후면<small>뒤</small></button>
+      </div>
+    </section>
+
+    <section class="panel work" id="work" aria-live="polite"></section>
+  </main>
+</div>
+
+<div class="overlay" id="rules" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+    <div class="dialog-head"><h2 id="rulesTitle">정투상 규칙</h2><button type="button" class="btn" id="rulesClose">닫기</button></div>
+    <div class="rules-body" id="rulesBody"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+</div>
+
+<script src="three-r128.min.js"></script>
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const ri = n => Math.floor(Math.random() * n);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = ri(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- 물체 정의: 층(아래→위), 각 층의 줄(뒤→앞), 칸(왼→오) ---------- */
+const SHAPES = [
+  { name: '계단 블록', L: [["###","###"],["##.","##."],["#..","#.."]] },
+  { name: 'ㄱ자 브래킷', L: [["###","###","###"],["#..","#..","#.."],["#..","#..","#.."]] },
+  { name: '홈 파인 받침', L: [["####","####"],["####","##.."],["#...","#..."]] },
+  { name: '처마 블록', L: [["#..","#..","#.."],["#..","#..","#.."],["###","###","###"]] },
+  { name: '홈 관통 블록', L: [["###","###","###"],["#.#","#.#","#.#"],["##.","##.","##."]] },
+  { name: '단차 블록', L: [["####","####","####"],["####","####","...."],["#...","#...","...."]] },
+  { name: '모서리 계단', L: [["###","###","###"],["###","##.","#.."],["#..","#..","..."]] },
+  { name: '다리 블록', L: [["#.#","#.#"],["###","###"],["#..","#.."]] },
+  { name: '기둥 받침', L: [["###","###"],["..#","..."],["..#","..."]] },
+  { name: 'T자 블록', L: [[".#.",".#."],["###","###"],["#..","#.."]] },
+];
+
+const VIEWS = ['front','top','right','left','bottom','rear'];
+const VIEW_NAME = { front:'정면도', top:'평면도', right:'우측면도', left:'좌측면도', bottom:'저면도', rear:'후면도' };
+const POS_NAME = { N:'위', S:'아래', W:'왼쪽', E:'오른쪽', B:'오른쪽 끝' };
+const METHOD_NAME = { '3':'제3각법', '1':'제1각법' };
+const RULE = { '3': { N:'top', S:'bottom', W:'left', E:'right', B:'rear' }, '1': { N:'bottom', S:'top', W:'right', E:'left', B:'rear' } };
+const OPP = { right:'left', left:'right', top:'bottom', bottom:'top', front:'rear', rear:'front' };
+const REAR_WHY = '후면도는 측면도 바깥쪽 끝에 놓습니다. 이 게임에서는 맨 오른쪽 끝에 둡니다(맨 왼쪽 끝에 두기도 합니다).';
+const WHY = {
+  '3': { top:'위에서 본 모습은 위쪽에 그립니다.', bottom:'아래에서 본 모습은 아래쪽에 그립니다.', right:'오른쪽에서 본 모습은 오른쪽에 그립니다.', left:'왼쪽에서 본 모습은 왼쪽에 그립니다.', rear: REAR_WHY },
+  '1': { top:'위에서 본 모습이 물체를 지나 아래쪽 면에 비칩니다.', bottom:'아래에서 본 모습이 물체를 지나 위쪽 면에 비칩니다.', right:'오른쪽에서 본 모습이 물체를 지나 왼쪽 면에 비칩니다.', left:'왼쪽에서 본 모습이 물체를 지나 오른쪽 면에 비칩니다.', rear: REAR_WHY }
+};
+const OMIT_NOTE = '실제 도면에서는 모양을 알아보는 데 필요한 투상도만 그립니다. 적은 투상도로 모형을 충분히 떠올릴 수 있으면 나머지는 생략합니다. 보통은 정면도·평면도·우측면도 3개(3면도)로 충분합니다.';
+const TIP = {
+  rear:'후면도는 뒤에서 본 모습이라 정면도와 좌우가 반대로 보입니다. 물체의 오른쪽이 그림의 왼쪽에 옵니다.',
+  front:'정면도는 화살표 방향, 곧 앞에서 본 모습입니다.',
+  top:'평면도는 위에서 내려다본 모습이고, 물체의 앞쪽이 그림의 아래쪽에 옵니다.',
+  bottom:'저면도는 아래에서 올려다본 모습이고, 물체의 앞쪽이 그림의 위쪽에 옵니다.',
+  right:'우측면도는 오른쪽에서 본 모습이고, 물체의 앞쪽이 그림의 왼쪽에 옵니다.',
+  left:'좌측면도는 왼쪽에서 본 모습이고, 물체의 앞쪽이 그림의 오른쪽에 옵니다.'
+};
+
+/* ---------- 복셀 모델 ---------- */
+function makeModel(W, H, D) {
+  const a = new Uint8Array(W * H * D);
+  return { W, H, D, a,
+    get(x, y, z) { if (x < 0 || y < 0 || z < 0 || x >= W || y >= H || z >= D) return 0; return a[(x * H + y) * D + z]; },
+    set(x, y, z, v) { a[(x * H + y) * D + z] = v; } };
+}
+function each(m, f) { for (let x = 0; x < m.W; x++) for (let y = 0; y < m.H; y++) for (let z = 0; z < m.D; z++) if (m.get(x, y, z)) f(x, y, z); }
+function parseShape(def) {
+  const H = def.L.length, D = def.L[0].length, W = def.L[0][0].length, m = makeModel(W, H, D);
+  def.L.forEach((layer, y) => layer.forEach((row, z) => [...row].forEach((ch, x) => { if (ch === '#') m.set(x, y, z, 1); })));
+  return m;
+}
+function rotY(m) { const n = makeModel(m.D, m.H, m.W); each(m, (x, y, z) => n.set(m.D - 1 - z, y, x, 1)); return n; }
+function mirrorX(m) { const n = makeModel(m.W, m.H, m.D); each(m, (x, y, z) => n.set(m.W - 1 - x, y, z, 1)); return n; }
+function cloneModel(m) { const n = makeModel(m.W, m.H, m.D); n.a.set(m.a); return n; }
+function countVox(m) { let c = 0; for (const v of m.a) c += v; return c; }
+
+/* ---------- 투상도 계산: 보이는 모서리(실선)와 숨은 모서리(파선) ---------- */
+function viewData(m, id) {
+  const { W, H, D } = m; let w, h, n, map;
+  switch (id) {
+    case 'front':  w = W; h = H; n = D; map = (u, v, k) => [u, v, D - 1 - k]; break;
+    case 'top':    w = W; h = D; n = H; map = (u, v, k) => [u, H - 1 - k, D - 1 - v]; break;
+    case 'right':  w = D; h = H; n = W; map = (u, v, k) => [W - 1 - k, v, D - 1 - u]; break;
+    case 'left':   w = D; h = H; n = W; map = (u, v, k) => [k, v, u]; break;
+    case 'bottom': w = W; h = D; n = H; map = (u, v, k) => [u, k, v]; break;
+    case 'rear':   w = W; h = H; n = D; map = (u, v, k) => [W - 1 - u, v, k]; break;
+  }
+  const occ = (u, v, k) => { if (u < 0 || v < 0 || u >= w || v >= h) return 0; const p = map(u, v, k); return m.get(p[0], p[1], p[2]); };
+  const first = (u, v) => { for (let k = 0; k < n; k++) if (occ(u, v, k)) return k; return Infinity; };
+  const type = (a, b) => {
+    if (first(a[0], a[1]) !== first(b[0], b[1])) return 'v';
+    for (let k = 0; k < n; k++) if (occ(a[0], a[1], k) !== occ(b[0], b[1], k)) return 'h';
+    return null;
+  };
+  const segs = [];
+  for (let i = 0; i <= w; i++) for (let v = 0; v < h; v++) { const t = type([i - 1, v], [i, v]); if (t) segs.push({ x1:i, y1:v, x2:i, y2:v + 1, t }); }
+  for (let j = 0; j <= h; j++) for (let u = 0; u < w; u++) { const t = type([u, j - 1], [u, j]); if (t) segs.push({ x1:u, y1:j, x2:u + 1, y2:j, t }); }
+  return finalize({ w, h, segs });
+}
+function finalize(view) {
+  view.segs = view.segs.map(s => {
+    const a = [s.x1, s.y1], b = [s.x2, s.y2];
+    const [p, q] = (a[0] < b[0] || (a[0] === b[0] && a[1] < b[1])) ? [a, b] : [b, a];
+    return { x1:p[0], y1:p[1], x2:q[0], y2:q[1], t:s.t };
+  });
+  view.sig = view.w + 'x' + view.h + '|' + view.segs.map(s => `${s.x1},${s.y1},${s.x2},${s.y2},${s.t}`).sort().join(';');
+  return view;
+}
+const flipH = v => finalize({ w:v.w, h:v.h, segs:v.segs.map(s => ({ x1:v.w - s.x1, y1:s.y1, x2:v.w - s.x2, y2:s.y2, t:s.t })) });
+const flipV = v => finalize({ w:v.w, h:v.h, segs:v.segs.map(s => ({ x1:s.x1, y1:v.h - s.y1, x2:s.x2, y2:v.h - s.y2, t:s.t })) });
+const hasHidden = v => v.segs.some(s => s.t === 'h');
+const solidHidden = v => finalize({ w:v.w, h:v.h, segs:v.segs.map(s => ({ ...s, t:'v' })) });
+const dropHidden = v => finalize({ w:v.w, h:v.h, segs:v.segs.filter(s => s.t === 'v').map(s => ({ ...s })) });
+
+function mergedLines(view) {
+  const groups = new Map();
+  for (const s of view.segs) {
+    const vert = s.x1 === s.x2;
+    const key = (vert ? 'V' : 'H') + (vert ? s.x1 : s.y1) + s.t;
+    if (!groups.has(key)) groups.set(key, { vert, at: vert ? s.x1 : s.y1, t: s.t, starts: [] });
+    groups.get(key).starts.push(vert ? s.y1 : s.x1);
+  }
+  const out = [];
+  for (const g of groups.values()) {
+    const st = g.starts.sort((a, b) => a - b);
+    let a = st[0], b = st[0] + 1;
+    for (let i = 1; i <= st.length; i++) {
+      if (i < st.length && st[i] === b) { b++; continue; }
+      out.push(g.vert ? { x1:g.at, y1:a, x2:g.at, y2:b, t:g.t } : { x1:a, y1:g.at, x2:b, y2:g.at, t:g.t });
+      if (i < st.length) { a = st[i]; b = a + 1; }
+    }
+  }
+  return out;
+}
+function viewSVG(view, M) {
+  const ox = (M - view.w) / 2, oy = (M - view.h) / 2;
+  const sw = (M * 0.022).toFixed(3), hw = (M * 0.015).toFixed(3);
+  const da = `${(M * 0.05).toFixed(3)} ${(M * 0.032).toFixed(3)}`;
+  const lines = mergedLines(view).sort((a, b) => (a.t === 'h' ? 0 : 1) - (b.t === 'h' ? 0 : 1));
+  const body = lines.map(l => {
+    const X1 = ox + l.x1, Y1 = oy + view.h - l.y1, X2 = ox + l.x2, Y2 = oy + view.h - l.y2;
+    return l.t === 'v'
+      ? `<line x1="${X1}" y1="${Y1}" x2="${X2}" y2="${Y2}" stroke="currentColor" stroke-width="${sw}" stroke-linecap="square"/>`
+      : `<line x1="${X1}" y1="${Y1}" x2="${X2}" y2="${Y2}" stroke="currentColor" stroke-width="${hw}" stroke-dasharray="${da}"/>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${M} ${M}" class="draw" aria-hidden="true">${body}</svg>`;
+}
+/* 정면 고르기: 모양이 가장 잘 드러나는 방향을 정면으로 잡는다.
+   보이는 윤곽선이 많을수록, 숨은선이 적을수록, 가로가 길수록 점수가 높다. */
+function frontScore(m) {
+  const v = viewData(m, 'front'), lines = mergedLines(v);
+  const vis = lines.filter(l => l.t === 'v').length, hid = lines.filter(l => l.t === 'h').length;
+  return vis - 1.5 * hid + (v.w > v.h ? 0.6 : v.w === v.h ? 0.3 : 0);
+}
+function bestFront(m) {
+  const cands = [m]; for (let i = 1; i < 4; i++) cands.push(rotY(cands[i - 1]));
+  const scored = cands.map(c => ({ c, s: frontScore(c) }));
+  const top = Math.max(...scored.map(x => x.s));
+  const best = scored.filter(x => x.s >= top - 1e-9);
+  return best[ri(best.length)].c;
+}
+function symbolSVG(method) {
+  const trap = x => `<polygon points="${x},4 ${x + 22},9.5 ${x + 22},20.5 ${x},26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>`;
+  const circ = cx => `<circle cx="${cx}" cy="15" r="10.5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="${cx}" cy="15" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/>`;
+  const inner = method === '3' ? trap(3) + circ(46) : circ(13) + trap(32);
+  return `<svg class="sym" viewBox="0 0 60 30" aria-hidden="true">${inner}</svg>`;
+}
+
+/* ---------- 소리: Web Audio로 직접 합성 (파일 없음) ---------- */
+const Sound = (() => {
+  let ctx = null, master, sfxBus, bgmBus, delay, timer = null, nextBar = 0, bar = 0;
+  const pref = { sfx: true, bgm: false };
+  try { const s = JSON.parse(localStorage.getItem('jtsound') || '{}'); if (typeof s.sfx === 'boolean') pref.sfx = s.sfx; } catch (_) {}
+  const save = () => { try { localStorage.setItem('jtsound', JSON.stringify({ sfx: pref.sfx })); } catch (_) {} };
+  const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+
+  function ensure() {
+    if (!ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
+      try { ctx = new AC(); } catch (_) { return null; }
+      master = ctx.createGain(); master.gain.value = 0.9; master.connect(ctx.destination);
+      sfxBus = ctx.createGain(); sfxBus.gain.value = 0.55; sfxBus.connect(master);
+      bgmBus = ctx.createGain(); bgmBus.gain.value = 0; bgmBus.connect(master);
+      delay = ctx.createDelay(1); delay.delayTime.value = 0.42;
+      const fb = ctx.createGain(); fb.gain.value = 0.32;
+      const wet = ctx.createGain(); wet.gain.value = 0.35;
+      delay.connect(fb); fb.connect(delay); delay.connect(wet); wet.connect(bgmBus);
+    }
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  }
+  function tone(o) {
+    const { f, f2, type = 'sine', at = 0, dur = 0.12, vol = 0.2, attack = 0.006, dest = sfxBus, detune = 0 } = o;
+    const t = ctx.currentTime + at, osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(f, t); osc.detune.value = detune;
+    if (f2) osc.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(g); g.connect(dest); osc.start(t); osc.stop(t + dur + 0.05);
+  }
+  const SFX = {
+    click:  () => tone({ f: 1050, dur: 0.035, vol: 0.07 }),
+    select: () => tone({ f: 1320, f2: 1480, dur: 0.07, vol: 0.11 }),
+    place:  () => { tone({ f: 640, f2: 420, type: 'triangle', dur: 0.11, vol: 0.22 }); tone({ f: 1280, dur: 0.04, vol: 0.05 }); },
+    remove: () => tone({ f: 420, f2: 300, type: 'triangle', dur: 0.1, vol: 0.15 }),
+    next:   () => { tone({ f: 523, dur: 0.14, vol: 0.07 }); tone({ f: 784, at: 0.07, dur: 0.18, vol: 0.07 }); },
+    ok:     () => [784, 988, 1175, 1568].forEach((f, i) => { tone({ f, at: i * 0.075, dur: 0.45, vol: 0.13 }); tone({ f: f * 2, at: i * 0.075, dur: 0.2, vol: 0.025 }); }),
+    bad:    () => { tone({ f: 392, f2: 370, type: 'triangle', at: 0, dur: 0.2, vol: 0.15 }); tone({ f: 311, f2: 294, type: 'triangle', at: 0.17, dur: 0.32, vol: 0.15 }); },
+    reset:  () => { tone({ f: 330, f2: 165, type: 'triangle', dur: 0.28, vol: 0.16 }); },
+  };
+  function play(name) { if (!pref.sfx || !SFX[name] || !ensure()) return; SFX[name](); }
+
+  /* 배경음: 느린 화음 패드 + 드문드문 맑은 음 */
+  const BAR = 4.8;
+  const CHORDS = [[48,55,64,71],[45,52,60,67],[41,48,57,64],[43,50,55,62]];
+  const SCALE = [72,74,76,79,81,84,86];
+  function scheduleBar(t0) {
+    const ch = CHORDS[bar % CHORDS.length];
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900; lp.Q.value = 0.3; lp.connect(bgmBus);
+    ch.forEach(m => [-5, 5].forEach(det => {
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.type = 'sine'; osc.frequency.value = mtof(m); osc.detune.value = det;
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.linearRampToValueAtTime(0.022, t0 + 1.6);
+      g.gain.setValueAtTime(0.022, t0 + BAR - 0.4);
+      g.gain.linearRampToValueAtTime(0.0001, t0 + BAR + 1.2);
+      osc.connect(g); g.connect(lp); osc.start(t0); osc.stop(t0 + BAR + 1.3);
+    }));
+    const n = 2 + ri(3), used = new Set();
+    for (let i = 0; i < n; i++) {
+      let slot; do { slot = ri(8); } while (used.has(slot)); used.add(slot);
+      const t = t0 + slot * (BAR / 8), f = mtof(SCALE[ri(SCALE.length)]);
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.type = 'sine'; osc.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.04, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
+      osc.connect(g); g.connect(bgmBus); g.connect(delay); osc.start(t); osc.stop(t + 1.5);
+    }
+    bar++;
+  }
+  function tick() { while (nextBar < ctx.currentTime + 1.2) { scheduleBar(nextBar); nextBar += BAR; } }
+  function setBgm(on) {
+    pref.bgm = on;
+    if (on) {
+      if (!ensure()) { pref.bgm = false; return false; }
+      const t = ctx.currentTime;
+      bgmBus.gain.cancelScheduledValues(t); bgmBus.gain.setValueAtTime(bgmBus.gain.value, t); bgmBus.gain.linearRampToValueAtTime(1, t + 1.5);
+      if (!timer) { nextBar = Math.max(nextBar, t + 0.1); tick(); timer = setInterval(tick, 300); }
+    } else if (ctx) {
+      const t = ctx.currentTime;
+      bgmBus.gain.cancelScheduledValues(t); bgmBus.gain.setValueAtTime(bgmBus.gain.value, t); bgmBus.gain.linearRampToValueAtTime(0, t + 0.8);
+      clearInterval(timer); timer = null;
+    }
+    return pref.bgm;
+  }
+  function setSfx(on) { pref.sfx = on; save(); }
+  document.addEventListener('visibilitychange', () => {
+    if (!ctx) return;
+    if (document.hidden) ctx.suspend(); else if (pref.bgm) ctx.resume();
+  });
+  return { play, setBgm, setSfx, pref };
+})();
+
+/* ---------- 상태 ---------- */
+const state = { mode:'place', method:'3', stats:{ place:{ solved:0, correct:0 }, choose:{ solved:0, correct:0 } }, n:{ place:0, choose:0 }, round:null, lastShape:-1 };
+function record(mode, ok) { const s = state.stats[mode]; s.solved++; if (ok) s.correct++; }
+
+function baseRound() {
+  let si; do { si = ri(SHAPES.length); } while (si === state.lastShape && SHAPES.length > 1);
+  state.lastShape = si;
+  let m = bestFront(parseShape(SHAPES[si]));
+  if (Math.random() < 0.5) m = mirrorX(m);
+  const V = {}; VIEWS.forEach(id => V[id] = viewData(m, id));
+  return { name: SHAPES[si].name, model: m, method: state.method, V, M: Math.max(m.W, m.H, m.D) + 0.5 };
+}
+
+function mutateModel(m) {
+  for (let t = 0; t < 60; t++) {
+    const c = cloneModel(m), x = ri(m.W), y = ri(m.H), z = ri(m.D);
+    if (c.get(x, y, z)) { if (countVox(c) <= 3) continue; c.set(x, y, z, 0); }
+    else { if (!(y === 0 || c.get(x, y - 1, z))) continue; c.set(x, y, z, 1); }
+    return c;
+  }
+  return null;
+}
+
+function newRound() {
+  const r = baseRound();
+  state.n[state.mode]++;
+  r.no = state.n[state.mode];
+  if (state.mode === 'place') {
+    r.cards = shuffle(['top','right','left','bottom','rear']);
+    r.place = { N:null, S:null, W:null, E:null, B:null };
+    r.threeOnly = false;
+    r.sel = null; r.graded = false; r.attempted = false; r.result = null;
+  } else {
+    r.type = Math.random() < 0.5 ? 'view' : 'slot';
+    if (r.type === 'slot') { r.pos = ['N','S','W','E','B'][ri(5)]; r.target = RULE[r.method][r.pos]; }
+    else r.target = VIEWS[ri(6)];
+    const correct = r.V[r.target];
+    const cands = [];
+    const add = (view, label, pri) => { if (view) cands.push({ view, label, pri }); };
+    if (r.type === 'slot') { const o = RULE[r.method === '3' ? '1' : '3'][r.pos]; add(r.V[o], VIEW_NAME[o], 0); }
+    else if (OPP[r.target]) add(r.V[OPP[r.target]], VIEW_NAME[OPP[r.target]], 0);
+    add(flipH(correct), '좌우가 뒤집힌 그림', 1);
+    add(flipV(correct), '위아래가 뒤집힌 그림', 2);
+    if (hasHidden(correct)) { add(solidHidden(correct), '숨은선을 실선으로 그린 그림', 1); add(dropHidden(correct), '숨은선이 빠진 그림', 1); }
+    VIEWS.forEach(id => { if (id !== r.target) add(r.V[id], VIEW_NAME[id], 2); });
+    for (let i = 0; i < 3; i++) { const mm = mutateModel(r.model); if (mm) add(viewData(mm, r.target), '모양이 다른 물체의 그림', 1); }
+    cands.forEach(c => c.score = c.pri === 0 ? -1 : c.pri + ((c.view.w === correct.w && c.view.h === correct.h) ? 0 : 3) + Math.random() * 1.6);
+    cands.sort((a, b) => a.score - b.score);
+    const seen = new Set([correct.sig]), picks = [];
+    for (const c of cands) { if (picks.length >= 3) break; if (seen.has(c.view.sig)) continue; seen.add(c.view.sig); picks.push(c); }
+    r.options = shuffle([{ view: correct, label: VIEW_NAME[r.target], correct: true }, ...picks.map(p => ({ view: p.view, label: p.label, correct: false }))]);
+    r.answered = null;
+  }
+  state.round = r;
+  $('#shapeName').textContent = r.name;
+  build3D(r.model);
+  animateTo('iso');
+  renderWork(); renderScore(); updateViewBtns();
+}
+
+/* ---------- 화면 그리기 ---------- */
+function renderScore() {
+  const block = (mode, label) => {
+    const s = state.stats[mode], rate = s.solved ? Math.round(s.correct / s.solved * 100) + '%' : '–';
+    return `<div class="stat${state.mode === mode ? ' on' : ''}"><span class="stat-label">${label.replace(/^(\S+) (\S+)/, '<span class="lf">$1 </span>$2')}</span><span class="stat-val"><b>${rate}</b>${s.correct}/${s.solved}</span></div>`;
+  };
+  $('#score').innerHTML = block('place', '배치 퍼즐 정답률') + block('choose', '투상도 고르기 정답률');
+}
+function methodBadge(m) { return `<span class="method-badge">${symbolSVG(m)}${METHOD_NAME[m]}</span>`; }
+function posOf(method, view) { return Object.keys(RULE[method]).find(p => RULE[method][p] === view); }
+function renderWork() { state.mode === 'place' ? renderPlace() : renderChoose(); }
+
+function renderPlace() {
+  const r = state.round, M = r.M;
+  const slot = pos => {
+    const cid = r.place[pos];
+    if (r.threeOnly && cid && cid !== 'top' && cid !== 'right')
+      return `<div class="slot omitted"><span class="omit-txt">생략</span><span class="slot-name">${VIEW_NAME[cid]}</span></div>`;
+    const cls = ['slot'];
+    if (r.graded) cls.push(r.result[pos] ? 'ok' : 'bad');
+    else if (r.sel) cls.push('armed');
+    else if (cid) cls.push('filled');
+    const inner = cid
+      ? `<span class="slot-draw">${viewSVG(r.V[cid], M)}</span>${r.graded ? `<span class="slot-name">${VIEW_NAME[cid]}</span>` : ''}`
+      : `<span class="slot-q">?</span>`;
+    return `<button type="button" class="${cls.join(' ')}" data-slot="${pos}" aria-label="정면도 ${POS_NAME[pos]} 자리${cid ? ', 카드 있음' : ', 비어 있음'}">${inner}</button>`;
+  };
+  const front = `<div class="slot fixed"><span class="slot-draw">${viewSVG(r.V.front, M)}</span><span class="slot-name">정면도</span></div>`;
+  const tb = `<div class="titleblock">
+      <div class="tb-row"><span>도명</span><b>${r.name}</b></div>
+      <div class="tb-row"><span>각법</span><b>${symbolSVG(r.method)}${r.method}각법</b></div>
+      <div class="tb-row"><span>척도</span><b>NS</b></div></div>`;
+  const placed = Object.values(r.place);
+  const tray = r.cards.map((id, i) => {
+    const gone = placed.includes(id);
+    return `<button type="button" class="card${gone ? ' gone' : ''}" data-card="${id}" aria-pressed="${r.sel === id}" aria-label="투상도 카드 ${i + 1}" ${gone || r.graded ? 'tabindex="-1"' : ''}>${viewSVG(r.V[id], M)}</button>`;
+  }).join('');
+
+  let msg;
+  if (r.graded) {
+    const all = Object.values(r.result).every(Boolean);
+    if (all && r.threeOnly) {
+      msg = `<div class="msg ok"><p><span class="pill">3면도</span>정면도·평면도·우측면도만 남겼습니다. 이 세 장만 보고 모형을 떠올릴 수 있는지 모형대와 비교해 보세요.</p><p class="omit"><b>세 장으로 모양을 충분히 알 수 있다면, 나머지 투상도는 생략해도 됩니다.</b></p></div>`;
+    } else if (all) {
+      msg = `<div class="msg ok"><p><span class="pill">정답</span>${METHOD_NAME[r.method]} 배치를 모두 맞혔습니다. 평면도는 정면도 ${POS_NAME[posOf(r.method,'top')]}, 우측면도는 정면도 ${POS_NAME[posOf(r.method,'right')]}에 놓입니다.</p><p class="omit"><b>6개를 모두 그렸지만, 실제 도면에서는 적은 투상도로 모양을 알 수 있으면 나머지를 생략합니다.</b> '3면도만 보기'를 눌러 확인해 보세요.</p></div>`;
+    } else {
+      const items = ['N','W','E','B','S'].filter(p => !r.result[p]).map(p => {
+        const c = r.place[p];
+        return `<li>${POS_NAME[p]} 자리에 놓은 카드는 <b>${VIEW_NAME[c]}</b>입니다. ${METHOD_NAME[r.method]}에서는 정면도 <b>${POS_NAME[posOf(r.method, c)]}</b>에 놓습니다. ${WHY[r.method][c]}</li>`;
+      }).join('');
+      msg = `<div class="msg bad"><p><span class="pill">다시 보기</span>틀린 자리를 확인하세요.</p><ul>${items}</ul></div>`;
+    }
+  } else if (r.sel) {
+    msg = `<div class="msg"><p>카드를 골랐습니다. 이 카드를 놓을 <b>빈칸</b>을 누르세요. 같은 카드를 다시 누르면 선택이 풀립니다.</p></div>`;
+  } else {
+    msg = `<div class="msg"><p>정면도와 모형을 비교해 보고 카드가 어느 방향에서 본 모습인지 생각하세요. <b>카드</b>를 누른 다음 <b>빈칸</b>을 누르면 놓입니다. 놓인 카드를 누르면 다시 빠집니다.</p><p class="omit">이 연습은 6면을 모두 놓지만, <b>실제 도면에서는 적은 투상도로 모형을 알 수 있으면 나머지를 생략합니다.</b></p></div>`;
+  }
+  const allPlaced = placed.every(Boolean);
+  const allOk = r.graded && Object.values(r.result).every(Boolean);
+  const actions = r.graded
+    ? (allOk ? `<button type="button" class="btn" data-act="three">${r.threeOnly ? '6면 모두 보기' : '3면도만 보기'}</button>` : `<button type="button" class="btn" data-act="retry">틀린 카드 다시 놓기</button>`) + `<button type="button" class="btn primary" data-act="next">다음 문제</button>`
+    : `<button type="button" class="btn" data-act="next">건너뛰기</button><button type="button" class="btn primary" data-act="grade" ${allPlaced ? '' : 'disabled'}>채점하기</button>`;
+
+  $('#work').innerHTML = `
+    <div class="work-head">
+      <span class="eyebrow">배치 퍼즐 · 문제 ${r.no}</span>
+      <h2>${METHOD_NAME[r.method]}으로 그린 도면입니다. 카드 5장을 정면도 둘레의 알맞은 자리에 놓으세요.</h2>
+    </div>
+    <div class="work-body place-body">
+      <div class="sheet gridpaper">
+        <div></div>${slot('N')}<div></div><div></div>
+        ${slot('W')}${front}${slot('E')}${slot('B')}
+        <div></div>${slot('S')}<div></div>${tb}
+      </div>
+      <div class="tray">${tray}</div>
+    </div>
+    <div class="foot">${msg}<div class="actions">${actions}</div></div>`;
+}
+
+function renderChoose() {
+  const r = state.round, M = r.M, ans = r.answered;
+  const q = r.type === 'slot'
+    ? `${METHOD_NAME[r.method]} 도면에서 정면도 <u>${POS_NAME[r.pos]}</u> 자리에 들어갈 투상도는?`
+    : `이 모형의 <u>${VIEW_NAME[r.target]}</u>로 알맞은 것은?`;
+  let ctx = '';
+  if (r.type === 'slot') {
+    const cell = p => p === 'C' ? `<div class="m front">${viewSVG(r.V.front, M)}</div>` : p === r.pos ? `<div class="m ask">?</div>` : p ? `<div class="m"></div>` : `<div class="m blank"></div>`;
+    ctx = `<div class="ctx"><div class="mini gridpaper">${[null,'N',null,null,'W','C','E','B',null,'S',null,null].map(cell).join('')}</div>${methodBadge(r.method)}</div>`;
+  }
+  const marks = ['①','②','③','④'];
+  const choices = r.options.map((o, i) => {
+    let cls = 'choice gridpaper', cap = '';
+    if (ans !== null) {
+      if (o.correct) { cls += ' ok'; cap = '정답 · ' + o.label; }
+      else if (i === ans) { cls += ' bad'; cap = o.label; }
+      else { cls += ' dim'; cap = o.label; }
+    }
+    return `<button type="button" class="${cls}" data-choice="${i}" ${ans !== null ? 'disabled' : ''} aria-label="보기 ${i + 1}${cap ? ': ' + cap : ''}"><span class="num">${marks[i]}</span><span class="cdraw">${viewSVG(o.view, M)}</span><span class="cap">${cap}</span></button>`;
+  }).join('');
+  let msg;
+  if (ans !== null) {
+    const ok = r.options[ans].correct;
+    const parts = [];
+    parts.push(`<span class="pill">${ok ? '정답' : '오답'}</span>` + (ok ? '' : `고른 그림은 <b>${r.options[ans].label}</b>입니다. `) + (r.type === 'slot' ? `${METHOD_NAME[r.method]}에서 정면도 ${POS_NAME[r.pos]}에는 <b>${VIEW_NAME[r.target]}</b>가 놓입니다. ${WHY[r.method][r.target]}` : TIP[r.target]));
+    if (r.type === 'slot') parts.push(TIP[r.target]);
+    if (['left','bottom','rear'].includes(r.target)) parts.push(`<b>${VIEW_NAME[r.target]}는 다른 투상도만으로 모양을 충분히 알 수 있으면 실제 도면에서 생략할 수 있습니다.</b>`);
+    parts.push((hasHidden(r.V[r.target]) ? '보이지 않는 모서리는 숨은선(파선)으로 그립니다. ' : '') + '모형이 그 방향으로 돌아갔으니 그림과 비교해 보세요.');
+    msg = `<div class="msg ${ok ? 'ok' : 'bad'}">${parts.map(p => `<p>${p}</p>`).join('')}</div>`;
+  } else {
+    msg = `<div class="msg"><p>모형을 끌어서 돌려 보며 생각하세요. 방향 버튼은 답을 고른 뒤 열립니다.</p></div>`;
+  }
+  $('#work').innerHTML = `
+    <div class="work-head">
+      <span class="eyebrow">투상도 고르기 · 문제 ${r.no}</span>
+      <h2>${q}</h2>
+    </div>
+    <div class="work-body${ctx ? ' with-ctx' : ''}">${ctx}<div class="choices">${choices}</div></div>
+    <div class="foot">${msg}<div class="actions">${ans === null ? `<button type="button" class="btn" data-act="next">건너뛰기</button>` : `<button type="button" class="btn primary" data-act="next">다음 문제</button>`}</div></div>`;
+}
+
+function renderStatic() {
+  document.querySelectorAll('.meth-btn').forEach(b => b.innerHTML = symbolSVG(b.dataset.method) + METHOD_NAME[b.dataset.method]);
+  const grid = m => {
+    const R = RULE[m], c = p => p === 'C' ? `<div class="c">정면도</div>` : p ? `<div class="${['top','right'].includes(R[p]) ? '' : 'rear'}">${VIEW_NAME[R[p]]}</div>` : `<div class="x"></div>`;
+    return `<div class="rmini">${[null,'N',null,null,'W','C','E','B',null,'S',null,null].map(c).join('')}</div>`;
+  };
+  $('#rulesBody').innerHTML = `
+    <div class="rule-col"><h3>${symbolSVG('3')}제3각법</h3><p>눈 → 투상면 → 물체. 유리 상자 밖에서 보고, 본 쪽 면에 그립니다. 우리나라 KS 제도에서 주로 씁니다.</p>${grid('3')}</div>
+    <div class="rule-col"><h3>${symbolSVG('1')}제1각법</h3><p>눈 → 물체 → 투상면. 물체 너머 반대쪽 벽에 비친 모습을 그립니다. 그래서 위아래, 좌우 자리가 제3각법과 반대입니다.</p>${grid('1')}</div>`;
+  $('#rulesBody').insertAdjacentHTML('afterbegin', `<div class="omit-callout"><b>필요한 투상도만 그립니다</b><p>${OMIT_NOTE} 위 배치도에서 점선 칸(좌측면도·저면도·후면도)이 흔히 생략되는 투상도입니다.</p></div>`);
+  $('#rulesBody').insertAdjacentHTML('beforeend', `<p class="rear-note"><b>정면도 고르는 법</b>: 정면도는 모든 투상도의 기준입니다. 물체의 모양과 특징이 가장 잘 드러나고, 숨은선이 적고, 가로가 긴 면을 정면으로 잡습니다. 이 게임의 모형도 그 방향에 정면 표시를 붙였습니다.</p>`);
+  $('#rulesBody').insertAdjacentHTML('beforeend', `<p class="rear-note"><b>후면도(배면도)</b>는 뒤에서 본 모습입니다. 정투상도는 정면도·평면도·우측면도·좌측면도·저면도·후면도 6개이고, 후면도는 측면도 바깥쪽 끝에 놓습니다. 이 게임에서는 맨 오른쪽 끝에 둡니다.</p>`);
+  $('#legend').innerHTML = `<span><svg viewBox="0 0 40 10"><line x1="2" y1="5" x2="38" y2="5" stroke="currentColor" stroke-width="2.2"/></svg>외형선(보이는 모서리)</span><span><svg viewBox="0 0 40 10"><line x1="2" y1="5" x2="38" y2="5" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 3.5"/></svg>숨은선(보이지 않는 모서리)</span>`;
+}
+
+/* ---------- 입력 처리 (탭만 사용) ---------- */
+function placeCard(id, pos) { const r = state.round; for (const p in r.place) if (r.place[p] === id) r.place[p] = null; r.place[pos] = id; }
+
+$('#work').addEventListener('click', e => {
+  const r = state.round;
+  const act = e.target.closest('[data-act]');
+  if (act) {
+    const a = act.dataset.act;
+    if (a === 'next') { Sound.play('next'); newRound(); }
+    else if (a === 'grade') grade();
+    else if (a === 'three') { Sound.play('click'); r.threeOnly = !r.threeOnly; renderWork(); }
+    else if (a === 'retry') { Sound.play('remove'); for (const p in r.place) if (!r.result[p]) r.place[p] = null; r.graded = false; r.result = null; r.sel = null; renderWork(); }
+    return;
+  }
+  if (state.mode === 'place') {
+    if (r.graded) return;
+    const card = e.target.closest('.card');
+    if (card && !card.classList.contains('gone')) { r.sel = r.sel === card.dataset.card ? null : card.dataset.card; Sound.play(r.sel ? 'select' : 'click'); renderWork(); return; }
+    const slot = e.target.closest('[data-slot]');
+    if (slot) {
+      const pos = slot.dataset.slot;
+      if (r.sel) { placeCard(r.sel, pos); r.sel = null; Sound.play('place'); }
+      else if (r.place[pos]) { r.place[pos] = null; Sound.play('remove'); }
+      renderWork();
+    }
+  } else {
+    const ch = e.target.closest('[data-choice]');
+    if (ch && r.answered === null) {
+      r.answered = +ch.dataset.choice;
+      const ok = r.options[r.answered].correct;
+      record('choose', ok);
+      Sound.play(ok ? 'ok' : 'bad');
+      renderWork(); renderScore(); updateViewBtns();
+      animateTo(r.target);
+    }
+  }
+});
+
+function grade() {
+  const r = state.round;
+  r.result = {};
+  for (const p of ['N','S','W','E','B']) { const c = r.place[p]; r.result[p] = !!c && r.V[c].sig === r.V[RULE[r.method][p]].sig; }
+  const all = Object.values(r.result).every(Boolean);
+  if (!r.attempted) { r.attempted = true; record('place', all); }
+  Sound.play(all ? 'ok' : 'bad');
+  r.graded = true; r.sel = null;
+  renderWork(); renderScore();
+}
+
+document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => {
+  if (b.dataset.mode === state.mode) return;
+  state.mode = b.dataset.mode;
+  document.querySelectorAll('.mode-btn').forEach(x => x.setAttribute('aria-pressed', x === b));
+  Sound.play('next');
+  renderScore();
+  newRound();
+}));
+document.querySelectorAll('.meth-btn').forEach(b => b.addEventListener('click', () => {
+  if (b.dataset.method === state.method) return;
+  state.method = b.dataset.method;
+  document.querySelectorAll('.meth-btn').forEach(x => x.setAttribute('aria-pressed', x === b));
+  Sound.play('next');
+  newRound();
+}));
+$('#viewBtns').addEventListener('click', e => { const b = e.target.closest('[data-view]'); if (b && !b.disabled) { Sound.play('click'); animateTo(b.dataset.view); } });
+const sfxBtn = $('#sfxBtn'), bgmBtn = $('#bgmBtn');
+sfxBtn.setAttribute('aria-pressed', Sound.pref.sfx);
+sfxBtn.addEventListener('click', () => {
+  Sound.setSfx(!Sound.pref.sfx);
+  sfxBtn.setAttribute('aria-pressed', Sound.pref.sfx);
+  Sound.play('select');
+});
+bgmBtn.addEventListener('click', () => {
+  const on = Sound.setBgm(!Sound.pref.bgm);
+  bgmBtn.setAttribute('aria-pressed', on);
+});
+const resetBtn = $('#resetBtn');
+let resetTimer = null;
+const disarmReset = () => { clearTimeout(resetTimer); resetTimer = null; resetBtn.classList.remove('confirm'); resetBtn.textContent = '다시하기'; };
+resetBtn.addEventListener('click', () => {
+  if (!resetTimer) {
+    Sound.play('click');
+    resetBtn.classList.add('confirm'); resetBtn.textContent = '한 번 더 누르면 초기화';
+    resetTimer = setTimeout(disarmReset, 3000);
+    return;
+  }
+  disarmReset();
+  Sound.play('reset');
+  state.stats = { place:{ solved:0, correct:0 }, choose:{ solved:0, correct:0 } };
+  state.n = { place:0, choose:0 };
+  newRound();
+});
+const rules = $('#rules');
+$('#rulesOpen').addEventListener('click', () => { Sound.play('click'); rules.hidden = false; $('#rulesClose').focus(); });
+$('#rulesClose').addEventListener('click', () => { rules.hidden = true; });
+rules.addEventListener('click', e => { if (e.target === rules) rules.hidden = true; });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') rules.hidden = true; });
+
+function updateViewBtns() {
+  const lock = state.mode === 'choose' && state.round && state.round.answered === null;
+  $('#viewBtns').querySelectorAll('button').forEach(b => {
+    const off = lock && b.dataset.view !== 'iso';
+    b.disabled = off; b.title = off ? '답을 고른 뒤 쓸 수 있어요' : '';
+  });
+}
+
+/* ---------- 3D 모형 ---------- */
+const PRESET = {
+  iso:    { az: 0.62, el: 0.5,  tag: '기본 보기' },
+  front:  { az: 0,    el: 0,    tag: '정면에서 본 모습' },
+  top:    { az: 0,    el: Math.PI / 2, tag: '위에서 본 모습' },
+  right:  { az: Math.PI / 2, el: 0, tag: '오른쪽에서 본 모습' },
+  left:   { az: -Math.PI / 2, el: 0, tag: '왼쪽에서 본 모습' },
+  bottom: { az: 0,    el: -Math.PI / 2, tag: '아래에서 본 모습' },
+  rear:   { az: Math.PI, el: 0, tag: '뒤에서 본 모습' },
+};
+let three = null;
+const cam = { az: PRESET.iso.az, el: PRESET.iso.el, anim: null };
+
+function tokens() {
+  const cs = getComputedStyle(document.documentElement), g = n => cs.getPropertyValue(n).trim();
+  return { ink: g('--ink'), model: g('--model'), accent: g('--accent'), rule: g('--rule') };
+}
+
+function init3D() {
+  if (typeof THREE === 'undefined') { $('#stageFallback').hidden = false; return; }
+  try {
+    const canvas = $('#stage');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setClearColor(0x000000, 0);
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 200);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.58));
+    const d1 = new THREE.DirectionalLight(0xffffff, 0.55); d1.position.set(3, 6, 4); scene.add(d1);
+    const d2 = new THREE.DirectionalLight(0xffffff, 0.22); d2.position.set(-5, 2, -3); scene.add(d2);
+    three = { renderer, scene, camera, group: null, half: 4, needs: true, target: new THREE.Vector3(0, 0, 0.6), grid: null };
+    const wrap = $('#stageWrap');
+    const resize = () => { const w = wrap.clientWidth, h = wrap.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); fitCamera(); };
+    new ResizeObserver(resize).observe(wrap); resize();
+
+    let drag = null;
+    canvas.addEventListener('pointerdown', e => {
+      drag = { x: e.clientX, y: e.clientY, moved: false };
+      try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+      cam.anim = null;
+    });
+    canvas.addEventListener('pointermove', e => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      drag.x = e.clientX; drag.y = e.clientY;
+      if (!drag.moved) { drag.moved = true; setViewTag(null); }
+      cam.az -= dx * 0.009;
+      cam.el = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, cam.el + dy * 0.009));
+      placeCamera();
+    });
+    const endDrag = () => { drag = null; };
+    canvas.addEventListener('pointerup', endDrag);
+    canvas.addEventListener('pointercancel', endDrag);
+
+    const loop = t => { stepAnim(t); if (three.needs) { renderer.render(scene, camera); three.needs = false; } requestAnimationFrame(loop); };
+    requestAnimationFrame(loop);
+
+    const rebuild = () => { if (state.round) build3D(state.round.model); };
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', rebuild);
+    new MutationObserver(rebuild).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(rebuild);
+  } catch (err) {
+    three = null; $('#stageFallback').hidden = false;
+  }
+}
+
+function fitCamera() {
+  if (!three) return;
+  const c = three.renderer.domElement, aspect = (c.width || 1) / (c.height || 1);
+  let h = three.half; if (aspect < 1) h = h / aspect * 0.85;
+  const cam3 = three.camera;
+  cam3.left = -h * aspect; cam3.right = h * aspect; cam3.top = h; cam3.bottom = -h; cam3.updateProjectionMatrix();
+  three.needs = true;
+}
+
+const FACES = [
+  { n: [1,0,0],  c: [[1,0,0],[1,1,0],[1,1,1],[1,0,1]] },
+  { n: [-1,0,0], c: [[0,0,0],[0,0,1],[0,1,1],[0,1,0]] },
+  { n: [0,1,0],  c: [[0,1,0],[0,1,1],[1,1,1],[1,1,0]] },
+  { n: [0,-1,0], c: [[0,0,0],[1,0,0],[1,0,1],[0,0,1]] },
+  { n: [0,0,1],  c: [[0,0,1],[1,0,1],[1,1,1],[0,1,1]] },
+  { n: [0,0,-1], c: [[0,0,0],[0,1,0],[1,1,0],[1,0,0]] },
+];
+
+function build3D(m) {
+  if (!three) return;
+  const T = tokens();
+  if (three.group) {
+    three.scene.remove(three.group);
+    three.group.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) { if (o.material.map) o.material.map.dispose(); o.material.dispose(); } });
+  }
+  const g = new THREE.Group();
+  const ox = -m.W / 2, oy = -m.H / 2, oz = -m.D / 2;
+  const pos = [], nor = [];
+  each(m, (x, y, z) => {
+    for (const f of FACES) {
+      if (m.get(x + f.n[0], y + f.n[1], z + f.n[2])) continue;
+      let q = f.c.map(p => [x + p[0] + ox, y + p[1] + oy, z + p[2] + oz]);
+      const ab = [q[1][0]-q[0][0], q[1][1]-q[0][1], q[1][2]-q[0][2]], ac = [q[2][0]-q[0][0], q[2][1]-q[0][1], q[2][2]-q[0][2]];
+      const cr = [ab[1]*ac[2]-ab[2]*ac[1], ab[2]*ac[0]-ab[0]*ac[2], ab[0]*ac[1]-ab[1]*ac[0]];
+      if (cr[0]*f.n[0] + cr[1]*f.n[1] + cr[2]*f.n[2] < 0) q = [q[0], q[3], q[2], q[1]];
+      for (const i of [0,1,2,0,2,3]) { pos.push(...q[i]); nor.push(...f.n); }
+    }
+  });
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  g.add(new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color: new THREE.Color(T.model), polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 })));
+  g.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 1), new THREE.LineBasicMaterial({ color: new THREE.Color(T.ink) })));
+
+  const gy = oy - 0.002;
+  const S = Math.max(m.W, m.D) + 6 + (Math.max(m.W, m.D) % 2);
+  const grid = new THREE.GridHelper(S, S, new THREE.Color(T.rule), new THREE.Color(T.rule));
+  grid.material.transparent = true; grid.material.opacity = 0.55;
+  grid.position.set(m.W % 2 ? 0.5 : 0, gy, m.D % 2 ? 0.5 : 0);
+  g.add(grid); three.grid = grid;
+
+  const accent = new THREE.MeshBasicMaterial({ color: new THREE.Color(T.accent) });
+  const arrow = new THREE.Group();
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 1.1, 12), accent); shaft.position.y = 0.55; arrow.add(shaft);
+  const head = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.48, 16), accent.clone()); head.position.y = 1.34; arrow.add(head);
+  arrow.rotation.x = -Math.PI / 2;
+  arrow.position.set(0, gy + 0.1, m.D / 2 + 2.35);
+  g.add(arrow);
+
+  const cv = document.createElement('canvas'); cv.width = 256; cv.height = 128;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = T.accent; ctx.font = '700 72px "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('정면', 128, 68);
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), depthTest: false, transparent: true }));
+  sprite.scale.set(1.3, 0.65, 1); sprite.position.set(0, gy + 0.45, m.D / 2 + 3.05);
+  g.add(sprite);
+
+  three.scene.add(g); three.group = g;
+  three.half = (Math.max(m.W, m.H, m.D) + 2.8) * 0.62;
+  three.target.set(0, 0, 0.7);
+  fitCamera(); placeCamera();
+}
+
+function placeCamera() {
+  if (!three) return;
+  const r = 40, { az, el } = cam, t = three.target;
+  const ce = Math.cos(el), se = Math.sin(el), ca = Math.cos(az), sa = Math.sin(az);
+  three.camera.position.set(t.x + r * ce * sa, t.y + r * se, t.z + r * ce * ca);
+  three.camera.up.set(-se * sa, ce, -se * ca);
+  three.camera.lookAt(t);
+  if (three.grid) three.grid.visible = el > -0.05;
+  three.needs = true;
+}
+
+function setViewTag(view) {
+  $('#stageTag').textContent = view ? PRESET[view].tag : '돌려 보는 중';
+  $('#viewBtns').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === view));
+}
+function startAnim(toAz, toEl) {
+  if (reduceMotion || !three) { cam.az = toAz; cam.el = toEl; cam.anim = null; placeCamera(); return; }
+  cam.anim = { from: { az: cam.az, el: cam.el }, to: { az: toAz, el: toEl }, start: null, dur: 600 };
+  three.needs = true;
+}
+function animateTo(view) {
+  const p = PRESET[view]; setViewTag(view);
+  let daz = p.az - cam.az; daz = Math.atan2(Math.sin(daz), Math.cos(daz));
+  startAnim(cam.az + daz, p.el);
+}
+function rotateBy(daz, del) {
+  const base = cam.anim ? cam.anim.to : cam;
+  const toEl = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, base.el + del));
+  setViewTag(null);
+  startAnim(base.az + daz, toEl);
+}
+function stepAnim(t) {
+  const a = cam.anim; if (!a) return;
+  if (a.start === null) a.start = t;
+  const k = Math.min(1, (t - a.start) / a.dur), e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+  cam.az = a.from.az + (a.to.az - a.from.az) * e;
+  cam.el = a.from.el + (a.to.el - a.from.el) * e;
+  placeCamera();
+  if (k >= 1) cam.anim = null;
+}
+
+/* ---------- 시작 ---------- */
+renderStatic();
+init3D();
+newRound();
+})();
+</script>
+</body></html>

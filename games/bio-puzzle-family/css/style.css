@@ -24,3 +24,21 @@ html, body {
 }
 #rotateHint div { padding: 24px; }
 html, body { overscroll-behavior: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+
+/* 전체 화면 버튼 (오른쪽 아래 구석, 게임 버튼을 가리지 않게 작고 반투명) */
+#fsBtn {
+  position: fixed; right: max(6px, env(safe-area-inset-right)); bottom: max(6px, env(safe-area-inset-bottom)); z-index: 15;
+  width: 40px; height: 40px; border-radius: 12px; border: 2px solid rgba(255,255,255,.7);
+  background: rgba(58,42,107,.55); color: #fff; font-size: 22px; line-height: 1; cursor: pointer; padding: 0;
+  opacity: .75; touch-action: manipulation;
+}
+#fsBtn:hover { opacity: 1; }
+#rotateHint .fsGo {
+  margin-top: 18px; font: bold 20px "Malgun Gothic", sans-serif; color: #fff; cursor: pointer;
+  background: #ff5fa0; border: 3px solid #fff; border-radius: 16px; padding: 10px 18px;
+}
+#fsTip {
+  position: fixed; left: 50%; bottom: 56px; transform: translateX(-50%); z-index: 25; display: none;
+  max-width: 86vw; background: rgba(27,22,54,.92); color: #fff; font-size: 15px; line-height: 1.5;
+  padding: 10px 16px; border-radius: 12px; text-align: center;
+}

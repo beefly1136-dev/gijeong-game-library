@@ -11,11 +11,42 @@
 </head>
 <body>
 <div id="wrap">
-  <div id="rotateHint"><div>📱↻<br>휴대폰을 <b>가로</b>로 돌려 주세요</div></div>
+  <div id="rotateHint"><div>📱↻<br>휴대폰을 <b>가로</b>로 돌려 주세요<br><button type="button" class="fsGo">⛶ 전체 화면으로 보기</button></div></div>
+  <button type="button" id="fsBtn" class="fsGo" title="전체 화면" aria-label="전체 화면">⛶</button>
+  <div id="fsTip"></div>
   <canvas id="game" width="1280" height="720" tabindex="0" aria-label="바이오 퍼즐 패밀리 게임 화면"></canvas>
   <input id="nameInput" type="text" maxlength="8" autocomplete="off" spellcheck="false">
   <input id="fileInput" type="file" accept=".json,application/json">
 </div>
+<script>
+/* 전체 화면 버튼: 휴대폰에서 주소창·테두리 없이 크게 보기 (가로 고정 시도) */
+(function () {
+  var de = document.documentElement, btn = document.getElementById('fsBtn'), tip = document.getElementById('fsTip');
+  function isFs() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+  function canFs() { return !!(de.requestFullscreen || de.webkitRequestFullscreen); }
+  function showTip(t) { tip.textContent = t; tip.style.display = 'block'; clearTimeout(showTip.t); showTip.t = setTimeout(function () { tip.style.display = 'none'; }, 3500); }
+  function lockLandscape() { try { var o = screen.orientation; if (o && o.lock) o.lock('landscape').catch(function () { }); } catch (e) { } }
+  function enter() {
+    try {
+      var p = de.requestFullscreen ? de.requestFullscreen({ navigationUI: 'hide' }) : (de.webkitRequestFullscreen && de.webkitRequestFullscreen());
+      if (p && p.then) p.then(lockLandscape, function () { showTip('이 화면에서는 전체 화면이 막혀 있어요. 휴대폰을 가로로 돌려 주세요.'); });
+      else lockLandscape();
+    } catch (e) { showTip('이 화면에서는 전체 화면이 막혀 있어요. 휴대폰을 가로로 돌려 주세요.'); }
+  }
+  function exit() { try { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) { } }
+  function toggle(ev) {
+    ev.preventDefault(); ev.stopPropagation();
+    if (!canFs()) { showTip('이 기기(아이폰 등)는 전체 화면을 지원하지 않아요. 가로로 돌리면 화면에 꽉 차게 보여요.'); return; }
+    if (isFs()) exit(); else enter();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.fsGo'), function (b) {
+    b.addEventListener('click', toggle);
+    b.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
+  });
+  function sync() { btn.textContent = isFs() ? '✕' : '⛶'; btn.title = isFs() ? '전체 화면 끝내기' : '전체 화면'; setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 150); }
+  document.addEventListener('fullscreenchange', sync); document.addEventListener('webkitfullscreenchange', sync);
+})();
+</script>
 <noscript>이 게임은 자바스크립트가 필요합니다.</noscript>
 
 <!-- 데이터 -->

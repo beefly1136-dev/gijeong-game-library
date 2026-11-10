@@ -65,10 +65,21 @@
     if (!src) { status[key] = 'missing'; return; }
     if (window.BPF_HASH && !window.BPF_HASH[src]) { status[key] = 'missing'; return; } // 배포판: 아직 없는 그림은 요청하지 않음
     status[key] = 'loading';
-    const im = new Image();
-    im.onload = () => { imgs[key] = im; status[key] = 'ok'; };
-    im.onerror = () => { status[key] = 'error'; console.warn('이미지 로드 실패', src); };
-    im.src = window.BPF_URL ? window.BPF_URL(src) : src; // 배포판에서는 해시 이름으로 바꿔 빠르게 전달
+    queue.push([key, src]); pump();
+  }
+  // 한꺼번에 수백 개를 요청하면 게임 서버가 밀리므로, 정해진 개수씩 차례로 불러온다
+  const queue = []; let active = 0;
+  const MAX_ACTIVE = window.BPF_HASH ? 6 : 64;
+  function pump() {
+    while (active < MAX_ACTIVE && queue.length) {
+      const [key, src] = queue.shift(); active++;
+      const im = new Image();
+      let fin = false;
+      const done = ok => { if (fin) return; fin = true; active--; if (ok) { imgs[key] = im; status[key] = 'ok'; } else { status[key] = 'error'; console.warn('이미지 로드 실패', src); } pump(); };
+      im.onload = () => done(true);
+      im.onerror = () => done(false);
+      im.src = window.BPF_URL ? window.BPF_URL(src) : src; // 배포판에서는 해시 이름으로 바꿔 빠르게 전달
+    }
   }
 
   BPF.assets = {

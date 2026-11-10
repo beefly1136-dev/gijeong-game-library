@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="screen-orientation" content="landscape">
+<title>바이오 퍼즐 패밀리 — 생명기술 연구마을</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="wrap">
+  <div id="rotateHint"><div>📱↻<br>휴대폰을 <b>가로</b>로 돌려 주세요</div></div>
+  <canvas id="game" width="1280" height="720" tabindex="0" aria-label="바이오 퍼즐 패밀리 게임 화면"></canvas>
+  <input id="nameInput" type="text" maxlength="8" autocomplete="off" spellcheck="false">
+  <input id="fileInput" type="file" accept=".json,application/json">
+</div>
+<noscript>이 게임은 자바스크립트가 필요합니다.</noscript>
+
+<!-- 데이터 -->
+<script src="src/core/hashmap.js"></script>
+<script src="data/lessons/lessons.js"></script>
+<script src="data/traits/pets.js"></script>
+<script src="data/recipes/recipes.js"></script>
+<script src="data/quests/quests.js"></script>
+
+<!-- 공통 엔진 -->
+<script src="src/core/engine.js"></script>
+<script src="src/core/assets.js"></script>
+<script src="src/core/audio.js"></script>
+<script src="src/core/filter.js"></script>
+<script src="src/core/save.js"></script>
+<script src="src/core/ui.js"></script>
+<script src="src/core/avatar.js"></script>
+<script src="src/core/progress.js"></script>
+
+<!-- 미니게임 -->
+<script src="src/games/base.js"></script>
+<script src="src/games/g01_dna.js"></script>
+<script src="src/games/g02_ferment.js"></script>
+<script src="src/games/g03_diagnosis.js"></script>
+<script src="src/games/g04_gmo.js"></script>
+<script src="src/games/g05_recomb.js"></script>
+<script src="src/games/g06_sort.js"></script>
+<script src="src/games/g07_alchemy.js"></script>
+<script src="src/games/g08_cell.js"></script>
+<script src="src/games/g09_clean.js"></script>
+<script src="src/games/g10_ethics.js"></script>
+
+<!-- 육성·마을·화면 -->
+<script src="src/raising/farm.js"></script>
+<script src="src/raising/album.js"></script>
+<script src="src/village/village.js"></script>
+<script src="src/village/lab.js"></script>
+<script src="src/village/shop.js"></script>
+<script src="src/scenes/title.js"></script>
+<script src="src/scenes/select.js"></script>
+<script src="src/scenes/gamecenter.js"></script>
+<script src="src/scenes/result.js"></script>
+<script src="src/scenes/codex.js"></script>
+<script src="src/scenes/settings.js"></script>
+  <script src="src/scenes/admin.js"></script>
+<script src="src/main.js"></script>
+</body>
+</html>

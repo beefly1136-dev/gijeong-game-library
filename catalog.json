@@ -2,6 +2,13 @@
   "updated": "2026-11-10",
   "games": [
     {
+      "number": 23,
+      "title": "기술 탐험실 · 3D 웹앱 모음",
+      "entry": "g/aae0e880-4d68-4017-b810-455f8ed3aa3e/1/index.html",
+      "previousEntry": "g/aae0e880-4d68-4017-b810-455f8ed3aa3e/1/index.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=23"
+    },
+    {
       "number": 22,
       "title": "바이오 퍼즐 패밀리 — 생명기술 연구마을",
       "entry": "games/bio-puzzle-family/index.html",

@@ -1,6 +1,13 @@
 {
-  "updated": "2026-11-10",
+  "updated": "2026-11-13",
   "games": [
+    {
+      "number": 24,
+      "title": "읽지 못한 마음",
+      "entry": "games/unread-heart/index.html",
+      "previousEntry": "games/unread-heart/index.html",
+      "gameUrl": "https://game-center-site.beefly1136.workers.dev/play?n=24"
+    },
     {
       "number": 23,
       "title": "기술 탐험실 · 3D 웹앱 모음",
